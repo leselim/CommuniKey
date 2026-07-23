@@ -26,3 +26,7 @@ The platform enables communities to:
 - Local marketplace
 - Community analytics
 - AI community assistant
+
+## Repository Verification
+
+Verification Code: WTC-59PV9ZVN

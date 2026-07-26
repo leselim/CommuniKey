@@ -2,40 +2,51 @@
 
 **Version:** 2.0
 
----
-
-# Introduction
-
-Community Cloud Platform is a cloud-native web application that enables neighbourhoods and residential communities to communicate, collaborate, and improve public safety through a centralised digital platform.
-
-The platform aims to replace fragmented communication channels with a structured, secure, and scalable solution.
+**Last Updated:** 26 July 2026
 
 ---
 
-# Problem Statement
+# 1. Introduction
 
-Many communities rely on WhatsApp groups for announcements, emergency communication, and neighbourhood updates.
+Community Cloud Platform is a cloud-native web application designed to help residential communities communicate, collaborate, and improve public safety through a centralised digital platform.
 
-These groups often become disorganised, difficult to moderate, and lack important functionality such as incident tracking, community administration, emergency alerts, and searchable information.
+Rather than relying on fragmented messaging applications, the platform provides structured tools for communication, emergency response, incident reporting, events, and community management.
 
 ---
 
-# Proposed Solution
+# 2. Problem Statement
 
-The Community Cloud Platform provides:
+Many communities currently rely on messaging applications such as WhatsApp for announcements and emergency communication.
+
+Although convenient, these platforms have several limitations:
+
+- Information becomes difficult to find.
+- Emergency alerts can be missed.
+- There is no structured incident management.
+- Community administration is limited.
+- Discussions become disorganised.
+- There is no integration between community services.
+
+---
+
+# 3. Proposed Solution
+
+Community Cloud Platform provides a dedicated digital platform that enables communities to communicate efficiently while improving safety and collaboration.
+
+The platform includes:
 
 - Community announcements
-- Community discussions
+- Community discussion feed
 - Incident reporting
 - Emergency SOS alerts
 - Community events
 - User management
-- Community administration
 - Notifications
+- Community administration
 
 ---
 
-# Target Users
+# 4. Target Users
 
 - Residents
 - Community Administrators
@@ -44,17 +55,23 @@ The Community Cloud Platform provides:
 
 ---
 
-# Project Goals
+# 5. Project Objectives
 
-- Improve community communication
-- Increase neighbourhood safety
-- Support emergency response
-- Centralise community information
-- Build a scalable cloud platform
+The primary objectives are to:
+
+- Improve communication between residents.
+- Increase neighbourhood safety.
+- Enable rapid emergency reporting.
+- Provide structured community management.
+- Build a scalable cloud-native application.
 
 ---
 
-# Technology Overview
+# 6. Technology Direction
+
+The project will be developed using modern cloud-native technologies.
+
+Planned technologies include:
 
 Frontend
 
@@ -82,32 +99,33 @@ Version Control
 
 - Git & GitHub
 
----
+CI/CD
 
-# Deployment
-
-The MVP will be deployed using AWS services including:
-
-- Amazon EC2
-- Amazon S3
-- AWS IAM
-- AWS Security Groups
+- GitHub Actions
 
 ---
 
-# Current Phase
+# 7. Deployment Strategy
+
+The MVP will be deployed on Amazon Web Services (AWS), making use of AWS services that are suitable for cloud-native application deployment while remaining mindful of AWS Free Tier eligibility and educational usage.
+
+---
+
+# 8. Current Phase
 
 Planning and System Design
 
 ---
 
-# Future Vision
+# 9. Future Vision
 
 Future releases may introduce:
 
 - AI-powered community assistant
 - Community marketplace
-- Municipality integration
+- Municipality service integration
 - Smart CCTV integration
-- IoT sensors
+- IoT environmental monitoring
 - Mobile applications
+- Digital visitor management
+- Community voting and polling

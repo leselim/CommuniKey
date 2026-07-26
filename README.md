@@ -6,27 +6,21 @@ The platform replaces fragmented communication channels such as WhatsApp groups 
 
 ---
 
-# Project Status
+## Project Status
 
 **Current Phase:** Planning and System Design
 
----
-
-# Vision
+## Vision
 
 To empower communities through a secure digital platform that improves communication, enhances public safety, and strengthens neighbourhood collaboration.
 
----
-
-# Problem Statement
+## Problem Statement
 
 Many residential communities rely on messaging applications such as WhatsApp for communication. While convenient, these platforms become difficult to manage as communities grow and lack dedicated functionality for emergency response, incident management, announcements, and community administration.
 
 Community Cloud Platform addresses these challenges by providing a purpose-built platform designed specifically for modern communities.
 
----
-
-# Core Features
+## Core Features
 
 - Community announcements
 - Incident reporting
@@ -38,9 +32,7 @@ Community Cloud Platform addresses these challenges by providing a purpose-built
 - Community administration
 - Role-based access control
 
----
-
-# Technology Stack
+## Technology Stack
 
 The MVP will be developed using:
 
@@ -53,19 +45,15 @@ The MVP will be developed using:
 - Terraform
 - GitHub Actions
 
----
-
-# Cloud Platform
+## Cloud Platform
 
 The Community Cloud Platform is designed for deployment on **Amazon Web Services (AWS)**.
 
 The MVP will make use of AWS services where appropriate while prioritising services that are suitable for a student project and compatible with AWS Free Tier offerings where available.
 
----
+## Repository Structure
 
-# Repository Structure
-
-```
+```text
 community-cloud-platform/
 │
 ├── backend/
@@ -75,15 +63,11 @@ community-cloud-platform/
 └── README.md
 ```
 
----
-
-# Documentation
+## Documentation
 
 Detailed project documentation is available in the `docs` directory.
 
----
-
-# Project Objectives
+## Project Objectives
 
 - Improve community communication
 - Increase neighbourhood safety
@@ -91,12 +75,10 @@ Detailed project documentation is available in the `docs` directory.
 - Centralise community information
 - Demonstrate cloud-native software engineering principles
 
----
-
-# License
+## License
 
 This project is developed for educational and portfolio purposes.
 
 ## Repository Verification
 
-Verification Code: WTC-59PV9ZVN
+**Verification Code:** `WTC-59PV9ZVN`

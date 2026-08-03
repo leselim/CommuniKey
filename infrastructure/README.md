@@ -2,54 +2,40 @@
 
 ## Overview
 
-The infrastructure folder contains cloud infrastructure definitions, deployment configurations, and Infrastructure as Code (IaC) resources for the Community Cloud Platform.
+The infrastructure directory contains cloud infrastructure definitions, deployment configurations, and Infrastructure as Code (IaC) resources for the Community Cloud Platform targeting **Amazon Web Services (AWS)**.
 
 ---
 
-## Planned Cloud Services
+## Infrastructure as Code (IaC)
 
-- Virtual Compute
-- Managed Database
-- Object Storage
-- Authentication Service
-- Monitoring
-- Logging
-- Backup
-- Notifications
+The cloud architecture is defined using **Terraform** in `infrastructure/terraform/`.
 
----
-
-## Planned Infrastructure
-
-- Development Environment
-- Testing Environment
-- Production Environment
+Provisioned Resources:
+- Custom AWS Virtual Private Cloud (VPC) & Subnets
+- Internet Gateway & Routing Tables
+- Security Groups for Django Backend & PostgreSQL
+- Amazon S3 Bucket for frontend hosting and media uploads
 
 ---
 
-## Infrastructure as Code
+## Terraform Provisioning Steps
 
-The project plans to use Infrastructure as Code to automate cloud deployments.
+1. Navigate to the terraform directory:
+   ```bash
+   cd infrastructure/terraform
+   ```
 
-Potential tools include:
+2. Initialize Terraform and install provider plugins:
+   ```bash
+   terraform init
+   ```
 
-- Terraform
-- Docker
-- Docker Compose
-- GitHub Actions
+3. Review execution plan:
+   ```bash
+   terraform plan
+   ```
 
----
-
-## Future Contents
-
-- Terraform configuration
-- Dockerfiles
-- Deployment scripts
-- CI/CD pipelines
-- Monitoring configuration
-
----
-
-## Status
-
-Planning Phase
+4. Apply configuration to provision AWS resources:
+   ```bash
+   terraform apply
+   ```

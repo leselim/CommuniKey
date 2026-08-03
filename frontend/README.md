@@ -2,46 +2,54 @@
 
 ## Overview
 
-The frontend provides the user interface for the Community Cloud Platform.
+The frontend provides the user interface for the Community Cloud Platform. It is built as a single-page web application using React.
 
-Users will access the platform through a responsive web application and, in future versions, a mobile application.
-
----
-
-## Planned Features
-
-- Login
-- Registration
-- Dashboard
-- Community Feed
-- SOS Button
-- Incident Reporting
-- Announcements
-- Events
-- User Profile
-- Notifications
+Key user capabilities:
+- Interactive dashboard for community alerts
+- Instant Emergency SOS button dispatch
+- Incident reporting with status tracking
+- Community announcement feed & event calendar
+- Profile & notification settings management
 
 ---
 
-## Planned Technology Stack
+## Technology Stack
 
-- React
-- HTML5
-- CSS3
-- JavaScript
-- Tailwind CSS (to be evaluated)
-
----
-
-## Future Enhancements
-
-- Mobile application
-- Dark mode
-- Offline support
-- Multi-language support
+- **Framework:** React 18
+- **HTTP Client:** Axios (configured with JWT auth interceptor)
+- **Icons:** Lucide React
+- **Styling:** Modular CSS3 Design Tokens
+- **Routing:** React Router v6
 
 ---
 
-## Status
+## Directory Structure
 
-Planning Phase
+```text
+frontend/
+├── public/
+│   └── index.html
+├── src/
+│   ├── components/       # Reusable UI components (Navbar, SOSButton)
+│   ├── pages/            # View pages (Dashboard, Incidents)
+│   ├── services/         # API client setup (api.js)
+│   ├── App.jsx           # Root layout component
+│   ├── index.js          # DOM rendering entrypoint
+│   └── index.css         # Modern dark-mode global stylesheet
+└── package.json
+```
+
+---
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start local development server:
+   ```bash
+   npm start
+   ```
+   Access the app at `http://localhost:3000`.

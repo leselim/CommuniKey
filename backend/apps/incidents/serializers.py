@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Incident
 from apps.authentication.serializers import UserSerializer
-from apps.communities.serializers import CommunitySerializer
 
 class IncidentSerializer(serializers.ModelSerializer):
     reporter_detail = UserSerializer(source='reporter', read_only=True)

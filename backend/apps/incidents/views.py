@@ -1,5 +1,4 @@
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
+from rest_framework import generics, permissions
 from django.db.models import Q
 from .models import Incident
 from .serializers import IncidentSerializer

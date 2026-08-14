@@ -39,4 +39,5 @@ class Incident(models.Model):
         ordering = ['-date_reported']
 
     def __str__(self):
-        return f"{self.get_incident_type_display()} - {self.title} ({self.status})"
+        incident_label = dict(self.INCIDENT_TYPES).get(self.incident_type, self.incident_type)
+        return f"{incident_label} - {self.title} ({self.status})"

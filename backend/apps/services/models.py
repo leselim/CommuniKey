@@ -69,4 +69,5 @@ class ServiceProvider(models.Model):
         ordering = ['business_name']
 
     def __str__(self):
-        return f"{self.business_name} ({self.get_service_type_display()})"
+        service_label = dict(self.SERVICE_TYPES).get(self.service_type, self.service_type)
+        return f"{self.business_name} ({service_label})"

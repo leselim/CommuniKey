@@ -22,4 +22,5 @@ class Notification(models.Model):
         ordering = ['-date_sent']
 
     def __str__(self):
-        return f"{self.get_notification_type_display()} for {self.user.email}: {self.title}"
+        notif_label = dict(self.NOTIFICATION_TYPES).get(self.notification_type, self.notification_type)
+        return f"{notif_label} for {self.user.email}: {self.title}"

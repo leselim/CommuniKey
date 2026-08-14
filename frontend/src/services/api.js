@@ -105,4 +105,12 @@ export const notificationService = {
   markAllAsRead: () => api.put('/notifications/read-all/'),
 };
 
+export const servicesService = {
+  getLostAndFound: (params) => api.get('/services/lost-and-found/', { params }),
+  createLostAndFound: (data) => api.post('/services/lost-and-found/', data),
+  updateLostAndFoundStatus: (id, status) => api.patch(`/services/lost-and-found/${id}/`, { status }),
+  getServiceProviders: (params) => api.get('/services/providers/', { params }),
+  createServiceProvider: (data) => api.post('/services/providers/', data),
+};
+
 export default api;

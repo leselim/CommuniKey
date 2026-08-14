@@ -91,6 +91,9 @@ function Navbar() {
             <Link to="/feed" style={{ color: isActive('/feed') ? '#38bdf8' : '#94a3b8', fontSize: '0.875rem', fontWeight: '500' }}>
               Feed
             </Link>
+            <Link to="/services" style={{ color: isActive('/services') ? '#38bdf8' : '#94a3b8', fontSize: '0.875rem', fontWeight: '500' }}>
+              Services & Lost+Found
+            </Link>
 
             <button
               onClick={() => setShowNotifications(!showNotifications)}

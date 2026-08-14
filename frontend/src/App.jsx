@@ -12,6 +12,7 @@ import EmergencyPage from './pages/EmergencyPage';
 import EventsPage from './pages/EventsPage';
 import FeedPage from './pages/FeedPage';
 import Profile from './pages/Profile';
+import ServicesPage from './pages/ServicesPage';
 
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
@@ -81,6 +82,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <FeedPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <ServicesPage />
               </ProtectedRoute>
             }
           />

@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/v1/events/', include('apps.events.urls')),
     path('api/v1/emergency/', include('apps.emergency.urls')),
     path('api/v1/notifications/', include('apps.notifications.urls')),
+    path('api/v1/services/', include('apps.services.urls')),
 ]
 
 if settings.DEBUG:

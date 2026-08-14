@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'apps.events',
     'apps.emergency',
     'apps.notifications',
+    'apps.services',
 ]
 
 AUTH_USER_MODEL = 'authentication.User'

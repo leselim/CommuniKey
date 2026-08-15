@@ -5,14 +5,24 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error('Error parsing stored user:', e);
+      return null;
+    }
   });
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [userCommunities, setUserCommunities] = useState([]);
   const [activeCommunity, setActiveCommunity] = useState(() => {
-    const savedComm = localStorage.getItem('activeCommunity');
-    return savedComm ? JSON.parse(savedComm) : null;
+    try {
+      const savedComm = localStorage.getItem('activeCommunity');
+      return savedComm ? JSON.parse(savedComm) : null;
+    } catch (e) {
+      console.error('Error parsing stored activeCommunity:', e);
+      return null;
+    }
   });
   const [loading, setLoading] = useState(true);
 

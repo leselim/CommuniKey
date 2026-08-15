@@ -111,56 +111,93 @@ function Communities() {
         <input
           type="text"
           className="form-input"
-          placeholder="Search by community name, city, or suburb..."
+          placeholder="Search by community name, city, or suburb (e.g. Pinelands, Rondebosch, Cape Town)..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>Quick Suburb Filter:</span>
+          {['All Areas', 'Pinelands', 'Rondebosch', 'Woodstock', 'Sea Point', 'Century City'].map((area) => (
+            <button
+              key={area}
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{
+                backgroundColor: (search === area || (area === 'All Areas' && !search)) ? '#0284c7' : '#f1f5f9',
+                color: (search === area || (area === 'All Areas' && !search)) ? '#ffffff' : '#475569',
+                border: 'none',
+                padding: '4px 10px',
+                fontSize: '0.75rem',
+                borderRadius: '16px'
+              }}
+              onClick={() => setSearch(area === 'All Areas' ? '' : area)}
+            >
+              {area}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
         <p>Loading communities...</p>
       ) : (
         <div className="grid-2">
-          {communities.map((comm) => (
-            <div key={comm.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span className="badge badge-info">{comm.community_type}</span>
-                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>📍 {comm.city}, {comm.suburb}</span>
-                </div>
+          {communities.map((comm) => {
+            const isActive = activeCommunity?.id === comm.id;
+            return (
+              <div key={comm.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: isActive ? '2px solid #0284c7' : '1px solid #e2e8f0' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span className="badge badge-info">{comm.community_type}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>📍 {comm.city}, {comm.suburb}</span>
+                  </div>
 
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
-                  {comm.name}
-                </h3>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>
+                    {comm.name}
+                  </h3>
 
-                <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '16px' }}>
-                  {comm.description || 'No description provided.'}
-                </p>
-              </div>
-
-              <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  👥 {comm.member_count} active members
-                </span>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => handleOpenMembers(comm)} className="btn btn-secondary btn-sm">
-                    Members
-                  </button>
-
-                  {comm.is_member ? (
-                    <button onClick={() => handleLeave(comm.id)} className="btn btn-secondary btn-sm" style={{ color: '#dc2626' }}>
-                      Leave
-                    </button>
-                  ) : (
-                    <button onClick={() => handleJoin(comm.id)} className="btn btn-primary btn-sm">
-                      Join Community
-                    </button>
+                  {isActive && (
+                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: '600', color: '#0284c7', marginBottom: '8px' }}>
+                      ✓ Active Selected Community
+                    </span>
                   )}
+
+                  <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '16px' }}>
+                    {comm.description || 'No description provided.'}
+                  </p>
+                </div>
+
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    👥 {comm.member_count} active members
+                  </span>
+
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button onClick={() => handleOpenMembers(comm)} className="btn btn-secondary btn-sm">
+                      Members
+                    </button>
+
+                    {comm.is_member ? (
+                      <>
+                        {!isActive && (
+                          <button onClick={() => selectCommunity(comm)} className="btn btn-primary btn-sm" style={{ backgroundColor: '#0284c7' }}>
+                            Set Active
+                          </button>
+                        )}
+                        <button onClick={() => handleLeave(comm.id)} className="btn btn-secondary btn-sm" style={{ color: '#dc2626' }}>
+                          Leave
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleJoin(comm.id)} className="btn btn-primary btn-sm">
+                        Join Community
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

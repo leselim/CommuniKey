@@ -60,9 +60,24 @@ pip install -r backend/requirements.txt
 python backend/manage.py makemigrations
 python backend/manage.py migrate
 
+# Seed Realistic South African Mock Data (Pinelands & Cape Town communities)
+python backend/manage.py seed_data
+
 # Start backend development server (Port 8000)
 python backend/manage.py runserver 0.0.0.0:8000
 ```
+
+### Demo Accounts (South African Mock Profiles)
+
+After running `python backend/manage.py seed_data`, you can sign in with the following seeded demo accounts (Password for all demo accounts: `Password123!`):
+
+| Role | Email | Name | Community Focus |
+|---|---|---|---|
+| Community Admin | `pinelands.admin@communitycloud.co.za` | Sibusiso Dlamini | Pinelands Neighborhood Watch |
+| Safety Volunteer | `thabo.mokoena@communitycloud.co.za` | Thabo Mokoena | Pinelands Neighborhood Watch |
+| Resident | `fatima.patel@communitycloud.co.za` | Fatima Patel | Pinelands Neighborhood Watch |
+| Community Admin | `johan.vandermerwe@communitycloud.co.za` | Johan van der Merwe | Rondebosch Safety Initiative |
+| Resident | `nomvula.khumalo@communitycloud.co.za` | Nomvula Khumalo | Woodstock & Observatory Ratepayers |
 
 ### 4. Frontend Setup
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Calendar, Plus, Search, MapPin, Users, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { eventService } from '../services/api';
 import EventCard from '../components/EventCard';
@@ -66,29 +67,37 @@ function EventsPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Community Events & Calendar</h1>
-          <p className="page-subtitle">Schedule, discover, and RSVP to community gatherings & meetings</p>
+          <h1 className="page-title">Community Events & Meetings</h1>
+          <p className="page-subtitle">Schedule, discover, and RSVP to neighbourhood gatherings, safety meetings, and cleanups</p>
         </div>
 
-        <button onClick={() => setShowModal(true)} className="btn btn-primary">
-          + Schedule Event
+        <button onClick={() => setShowModal(true)} className="btn btn-success">
+          <Plus size={16} /> Schedule Community Event
         </button>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          className="form-input"
-          placeholder="Search events by title, description, or location..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Search events by title, location, or description..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: '44px', height: '46px', fontSize: '0.925rem' }}
+          />
+        </div>
       </div>
 
       {loading ? (
-        <p>Loading events...</p>
+        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading scheduled events...</div>
       ) : events.length === 0 ? (
-        <p style={{ color: '#64748b', fontSize: '0.875rem' }}>No events scheduled.</p>
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
+          <Calendar size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
+          <p style={{ fontSize: '1rem', fontWeight: '600' }}>No events scheduled</p>
+          <span style={{ fontSize: '0.85rem' }}>Be the first to schedule a community gathering!</span>
+        </div>
       ) : (
         <div className="grid-2">
           {events.map((evt) => (
@@ -102,13 +111,15 @@ function EventsPage() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Schedule New Event</h3>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>×</button>
+              <h3 className="modal-title">Schedule Community Event</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
             </div>
 
             <form onSubmit={handleCreateSubmit}>
               <div className="form-group">
-                <label className="form-label">Community *</label>
+                <label className="form-label">Target Community *</label>
                 <select
                   className="form-select"
                   value={formData.community || activeCommunity?.id || ''}
@@ -123,28 +134,30 @@ function EventsPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Event Name *</label>
+                <label className="form-label">Event Name / Title *</label>
                 <input
                   type="text"
                   className="form-input"
                   required
+                  placeholder="e.g. Pinelands Neighborhood Watch AGM & Braai"
                   value={formData.event_name}
                   onChange={(e) => setFormData({ ...formData, event_name: e.target.value })}
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Description *</label>
+                <label className="form-label">Event Agenda & Description *</label>
                 <textarea
                   className="form-textarea"
-                  rows="3"
+                  rows="4"
                   required
+                  placeholder="Describe event agenda, items to bring, and expectations..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 ></textarea>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="form-group">
                   <label className="form-label">Date & Time *</label>
                   <input
@@ -156,7 +169,7 @@ function EventsPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Max Attendees</label>
+                  <label className="form-label">Max Attendees Capacity</label>
                   <input
                     type="number"
                     className="form-input"
@@ -168,23 +181,23 @@ function EventsPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Event Location *</label>
+                <label className="form-label">Venue / Meeting Location *</label>
                 <input
                   type="text"
                   className="form-input"
                   required
-                  placeholder="e.g. Community Clubhouse Hall"
+                  placeholder="e.g. Pinelands Civic Centre Hall"
                   value={formData.event_location}
                   onChange={(e) => setFormData({ ...formData, event_location: e.target.value })}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Create Event
+                <button type="submit" className="btn btn-success">
+                  Publish Event
                 </button>
               </div>
             </form>

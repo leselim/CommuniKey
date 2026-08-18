@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, Users, CheckCircle2, Plus, Search, ShieldCheck, UserCheck, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { communityService } from '../services/api';
 
@@ -98,93 +99,115 @@ function Communities() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Community Hub</h1>
-          <p className="page-subtitle">Discover, join, or manage residential & local communities</p>
+          <h1 className="page-title">Community Directory & Networks</h1>
+          <p className="page-subtitle">Discover, join, or manage residential neighborhoods and local safety initiatives</p>
         </div>
 
         <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
-          + Create New Community
+          <Plus size={16} /> Create Community Network
         </button>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          className="form-input"
-          placeholder="Search by community name, city, or suburb (e.g. Pinelands, Rondebosch, Cape Town)..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>Quick Suburb Filter:</span>
-          {['All Areas', 'Pinelands', 'Rondebosch', 'Woodstock', 'Sea Point', 'Century City'].map((area) => (
-            <button
-              key={area}
-              type="button"
-              className="btn btn-secondary btn-sm"
-              style={{
-                backgroundColor: (search === area || (area === 'All Areas' && !search)) ? '#0284c7' : '#f1f5f9',
-                color: (search === area || (area === 'All Areas' && !search)) ? '#ffffff' : '#475569',
-                border: 'none',
-                padding: '4px 10px',
-                fontSize: '0.75rem',
-                borderRadius: '16px'
-              }}
-              onClick={() => setSearch(area === 'All Areas' ? '' : area)}
-            >
-              {area}
-            </button>
-          ))}
+      {/* Search & Suburb Filter */}
+      <div style={{ marginBottom: '28px' }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Search by community name, city, or suburb (e.g. Pinelands, Rondebosch, Cape Town)..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: '44px', paddingRight: '14px', height: '48px', fontSize: '0.95rem' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.825rem', color: '#64748b', fontWeight: '600' }}>Quick Area Filter:</span>
+          {['All Areas', 'Pinelands', 'Rondebosch', 'Woodstock', 'Sea Point', 'Century City'].map((area) => {
+            const isSelected = search === area || (area === 'All Areas' && !search);
+            return (
+              <button
+                key={area}
+                type="button"
+                className="btn btn-sm"
+                style={{
+                  backgroundColor: isSelected ? '#0284c7' : '#f1f5f9',
+                  color: isSelected ? '#ffffff' : '#475569',
+                  border: isSelected ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                  padding: '5px 14px',
+                  fontSize: '0.775rem',
+                  borderRadius: '20px',
+                  fontWeight: isSelected ? '600' : '500'
+                }}
+                onClick={() => setSearch(area === 'All Areas' ? '' : area)}
+              >
+                {area}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {loading ? (
-        <p>Loading communities...</p>
+        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading community directory...</div>
       ) : (
         <div className="grid-2">
           {communities.map((comm) => {
             const isActive = activeCommunity?.id === comm.id;
             return (
-              <div key={comm.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: isActive ? '2px solid #0284c7' : '1px solid #e2e8f0' }}>
+              <div
+                key={comm.id}
+                className="card card-interactive"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justify: 'space-between',
+                  border: isActive ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                  boxShadow: isActive ? '0 0 16px rgba(2, 132, 199, 0.2)' : 'var(--shadow-sm)'
+                }}
+              >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <span className="badge badge-info">{comm.community_type}</span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>📍 {comm.city}, {comm.suburb}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
+                      <MapPin size={14} color="#0284c7" /> {comm.city}, {comm.suburb}
+                    </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>
                     {comm.name}
                   </h3>
 
                   {isActive && (
-                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: '600', color: '#0284c7', marginBottom: '8px' }}>
-                      ✓ Active Selected Community
-                    </span>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: '700', color: '#0284c7', background: '#e0f2fe', padding: '4px 10px', borderRadius: '6px', marginBottom: '10px' }}>
+                      <CheckCircle2 size={14} /> Selected Active Community
+                    </div>
                   )}
 
-                  <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: '1.5', marginBottom: '18px' }}>
                     {comm.description || 'No description provided.'}
                   </p>
                 </div>
 
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                    👥 {comm.member_count} active members
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ fontSize: '0.825rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: '600' }}>
+                    <Users size={14} color="#0284c7" /> {comm.member_count} Members
                   </span>
 
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button onClick={() => handleOpenMembers(comm)} className="btn btn-secondary btn-sm">
-                      Members
+                      <UserCheck size={14} /> Members
                     </button>
 
                     {comm.is_member ? (
                       <>
                         {!isActive && (
-                          <button onClick={() => selectCommunity(comm)} className="btn btn-primary btn-sm" style={{ backgroundColor: '#0284c7' }}>
+                          <button onClick={() => selectCommunity(comm)} className="btn btn-primary btn-sm">
                             Set Active
                           </button>
                         )}
-                        <button onClick={() => handleLeave(comm.id)} className="btn btn-secondary btn-sm" style={{ color: '#dc2626' }}>
+                        <button onClick={() => handleLeave(comm.id)} className="btn btn-secondary btn-sm" style={{ color: '#e11d48', borderColor: '#fecdd3' }}>
                           Leave
                         </button>
                       </>
@@ -206,8 +229,10 @@ function Communities() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Create Community</h3>
-              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>×</button>
+              <h3 className="modal-title">Create Community Network</h3>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
             </div>
 
             <form onSubmit={handleCreateSubmit}>
@@ -217,23 +242,24 @@ function Communities() {
                   type="text"
                   className="form-input"
                   required
+                  placeholder="e.g. Pinelands Neighborhood Watch"
                   value={newCommunity.name}
                   onChange={(e) => setNewCommunity({ ...newCommunity, name: e.target.value })}
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Community Type</label>
+                <label className="form-label">Community Category</label>
                 <select
                   className="form-select"
                   value={newCommunity.community_type}
                   onChange={(e) => setNewCommunity({ ...newCommunity, community_type: e.target.value })}
                 >
-                  <option value="RESIDENTIAL">Residential Neighborhood</option>
-                  <option value="APARTMENT">Apartment Complex / Estate</option>
-                  <option value="CAMPUS">University / Campus</option>
-                  <option value="VILLAGE">Village / Rural Area</option>
-                  <option value="BUSINESS">Business Park / District</option>
+                  <option value="RESIDENTIAL">Residential Neighborhood Watch</option>
+                  <option value="APARTMENT">Apartment Complex / Gated Estate</option>
+                  <option value="CAMPUS">University / Student Campus</option>
+                  <option value="VILLAGE">Village / Rural District</option>
+                  <option value="BUSINESS">Business Improvement District</option>
                 </select>
               </div>
 
@@ -242,18 +268,20 @@ function Communities() {
                 <textarea
                   className="form-textarea"
                   rows="3"
+                  placeholder="Describe your community's purpose and neighborhood boundaries..."
                   value={newCommunity.description}
                   onChange={(e) => setNewCommunity({ ...newCommunity, description: e.target.value })}
                 ></textarea>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="form-group">
                   <label className="form-label">City *</label>
                   <input
                     type="text"
                     className="form-input"
                     required
+                    placeholder="Cape Town"
                     value={newCommunity.city}
                     onChange={(e) => setNewCommunity({ ...newCommunity, city: e.target.value })}
                   />
@@ -263,13 +291,14 @@ function Communities() {
                   <input
                     type="text"
                     className="form-input"
+                    placeholder="Pinelands"
                     value={newCommunity.suburb}
                     onChange={(e) => setNewCommunity({ ...newCommunity, suburb: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </button>
@@ -288,26 +317,28 @@ function Communities() {
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title">Members - {showMembersModal.name}</h3>
-              <button onClick={() => setShowMembersModal(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>×</button>
+              <button onClick={() => setShowMembersModal(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: '380px', overflowY: 'auto', paddingRight: '4px' }}>
               {members.length === 0 ? (
-                <p style={{ color: '#64748b', fontSize: '0.875rem' }}>No members registered yet.</p>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', textAlign: 'center', padding: '20px' }}>No members registered yet.</p>
               ) : (
                 members.map((m) => (
-                  <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', borderBottom: '1px solid #e2e8f0' }}>
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderRadius: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
                     <div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>
                         {m.user_detail?.first_name ? `${m.user_detail.first_name} ${m.user_detail.last_name || ''}` : m.user_detail?.email}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        Role: {m.role} | Status: <strong style={{ color: m.status === 'APPROVED' ? '#16a34a' : '#d97706' }}>{m.status}</strong>
+                      <div style={{ fontSize: '0.775rem', color: '#64748b', marginTop: '2px' }}>
+                        Role: <strong>{m.role}</strong> | Status: <strong style={{ color: m.status === 'APPROVED' ? '#059669' : '#d97706' }}>{m.status}</strong>
                       </div>
                     </div>
 
                     {user?.id === showMembersModal.created_by && m.status === 'PENDING' && (
-                      <div style={{ display: 'flex', gap: '4px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
                         <button onClick={() => handleApproveMember(showMembersModal.id, m.id, 'approve')} className="btn btn-primary btn-sm">
                           Approve
                         </button>

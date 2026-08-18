@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Wrench, Search, Plus, MapPin, Phone, Mail, CheckCircle2, Package, User, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { servicesService, communityService } from '../services/api';
+import { servicesService } from '../services/api';
 
 function ServicesPage() {
   const { activeCommunity, userCommunities } = useAuth();
@@ -106,124 +107,107 @@ function ServicesPage() {
   });
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+    <div>
+      <div className="page-header">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
-            Community Services & Marketplace
-          </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
-            Lost & found notices and trusted local service providers
-          </p>
+          <h1 className="page-title">Community Directory & Marketplace</h1>
+          <p className="page-subtitle">Lost & found listings and verified neighbourhood service providers</p>
         </div>
 
-        <button
-          onClick={() => setShowModal(true)}
-          style={{
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '10px 18px',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}
-        >
-          {activeTab === 'lost_found' ? '+ Report Item' : '+ Register Provider'}
+        <button onClick={() => setShowModal(true)} className="btn btn-primary">
+          <Plus size={16} /> {activeTab === 'lost_found' ? 'Report Lost/Found Item' : 'Register Service Provider'}
         </button>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '12px', borderBottom: '2px solid #e2e8f0', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '16px', borderBottom: '2px solid var(--color-border)', marginBottom: '28px' }}>
         <button
           onClick={() => setActiveTab('lost_found')}
           style={{
-            padding: '10px 16px',
+            padding: '12px 20px',
             fontSize: '0.95rem',
-            fontWeight: '600',
+            fontWeight: '700',
             background: 'none',
             border: 'none',
-            borderBottom: activeTab === 'lost_found' ? '3px solid #2563eb' : '3px solid transparent',
-            color: activeTab === 'lost_found' ? '#2563eb' : '#64748b',
-            cursor: 'pointer'
+            borderBottom: activeTab === 'lost_found' ? '3px solid var(--color-accent)' : '3px solid transparent',
+            color: activeTab === 'lost_found' ? 'var(--color-accent)' : '#64748b',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease'
           }}
         >
-          Lost & Found
+          <Package size={18} /> Lost & Found Board
         </button>
         <button
           onClick={() => setActiveTab('providers')}
           style={{
-            padding: '10px 16px',
+            padding: '12px 20px',
             fontSize: '0.95rem',
-            fontWeight: '600',
+            fontWeight: '700',
             background: 'none',
             border: 'none',
-            borderBottom: activeTab === 'providers' ? '3px solid #2563eb' : '3px solid transparent',
-            color: activeTab === 'providers' ? '#2563eb' : '#64748b',
-            cursor: 'pointer'
+            borderBottom: activeTab === 'providers' ? '3px solid var(--color-accent)' : '3px solid transparent',
+            color: activeTab === 'providers' ? 'var(--color-accent)' : '#64748b',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease'
           }}
         >
-          Service Providers Directory
+          <Wrench size={18} /> Service Providers Directory
         </button>
       </div>
 
       {/* Tab 1: Lost & Found */}
       {activeTab === 'lost_found' && (
         <div>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
             {['ALL', 'LOST', 'FOUND'].map(type => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '0.85rem',
-                  borderRadius: '16px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: filterType === type ? '#2563eb' : '#f8fafc',
-                  color: filterType === type ? '#ffffff' : '#334155',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
+                className={`btn btn-sm ${filterType === type ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '6px 16px', borderRadius: '20px' }}
               >
-                {type === 'ALL' ? 'All Items' : type === 'LOST' ? 'Lost Items' : 'Found Items'}
+                {type === 'ALL' ? 'All Items' : type === 'LOST' ? '🔍 Lost Items' : '💡 Found Items'}
               </button>
             ))}
           </div>
 
           {loading ? (
-            <p>Loading items...</p>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading items...</div>
           ) : filteredItems.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <p style={{ color: '#64748b', fontSize: '1.1rem' }}>No lost or found items reported yet.</p>
+            <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
+              <Package size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
+              <p style={{ fontSize: '1rem', fontWeight: '600' }}>No lost or found items reported</p>
+              <span style={{ fontSize: '0.85rem' }}>Report missing keys, pets, or electronics to your neighborhood.</span>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div className="grid-3">
               {filteredItems.map(item => (
-                <div key={item.id} style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{
-                      backgroundColor: item.item_type === 'LOST' ? '#fee2e2' : '#dcfce7',
-                      color: item.item_type === 'LOST' ? '#991b1b' : '#166534',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: '700'
-                    }}>
+                <div key={item.id} className="card card-interactive" style={{ borderLeft: item.item_type === 'LOST' ? '4px solid #e11d48' : '4px solid #059669' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span className={`badge badge-${item.item_type === 'LOST' ? 'danger' : 'success'}`}>
                       {item.item_type}
                     </span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    <span style={{ fontSize: '0.775rem', color: '#94a3b8' }}>
                       {new Date(item.date_reported).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e293b', margin: '0 0 6px 0' }}>{item.title}</h3>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', margin: '0 0 12px 0' }}>{item.description}</p>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>{item.title}</h3>
+                  <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: '1.5', marginBottom: '14px' }}>{item.description}</p>
                   {item.location_description && (
-                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 6px 0' }}>📍 Location: {item.location_description}</p>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={13} color="#0284c7" /> Location: <strong>{item.location_description}</strong>
+                    </div>
                   )}
                   {item.contact_info && (
-                    <p style={{ fontSize: '0.85rem', color: '#2563eb', fontWeight: '500', margin: 0 }}>📞 Contact: {item.contact_info}</p>
+                    <div style={{ fontSize: '0.825rem', color: '#0284c7', fontWeight: '600', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Phone size={13} /> Contact: {item.contact_info}
+                    </div>
                   )}
                 </div>
               ))}
@@ -236,26 +220,45 @@ function ServicesPage() {
       {activeTab === 'providers' && (
         <div>
           {loading ? (
-            <p>Loading directory...</p>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading service directory...</div>
           ) : providers.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <p style={{ color: '#64748b', fontSize: '1.1rem' }}>No local service providers registered yet.</p>
+            <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
+              <Wrench size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
+              <p style={{ fontSize: '1rem', fontWeight: '600' }}>No service providers registered</p>
+              <span style={{ fontSize: '0.85rem' }}>Be the first to list your local plumbing, electrical, or security business!</span>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div className="grid-3">
               {providers.map(p => (
-                <div key={p.id} style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '700' }}>
+                <div key={p.id} className="card card-interactive" style={{ borderLeft: '4px solid #0284c7' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span className="badge badge-info">
                       {p.service_type}
                     </span>
-                    {p.verified && <span style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: '600' }}>✓ Verified</span>}
+                    {p.verified && (
+                      <span className="badge badge-success" style={{ gap: '3px' }}>
+                        <CheckCircle2 size={12} /> Verified
+                      </span>
+                    )}
                   </div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e293b', margin: '0 0 4px 0' }}>{p.business_name}</h3>
-                  {p.contact_person && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 8px 0' }}>Contact: {p.contact_person}</p>}
-                  <p style={{ fontSize: '0.9rem', color: '#475569', margin: '0 0 12px 0' }}>{p.description || 'Local community service provider.'}</p>
-                  <p style={{ fontSize: '0.85rem', color: '#2563eb', fontWeight: '600', margin: '0 0 4px 0' }}>📞 {p.phone_number}</p>
-                  {p.email && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>✉️ {p.email}</p>}
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>{p.business_name}</h3>
+                  {p.contact_person && (
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <User size={13} /> {p.contact_person}
+                    </div>
+                  )}
+                  <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: '1.5', marginBottom: '14px' }}>{p.description || 'Local community service provider.'}</p>
+                  
+                  <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#0284c7', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Phone size={14} /> {p.phone_number}
+                    </div>
+                    {p.email && (
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Mail size={14} /> {p.email}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -265,45 +268,50 @@ function ServicesPage() {
 
       {/* Modal Dialog */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', maxWidth: '500px', width: '100%', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: '0 0 16px 0' }}>
-              {activeTab === 'lost_found' ? 'Report Lost or Found Item' : 'Register Service Provider'}
-            </h2>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {activeTab === 'lost_found' ? 'Report Lost or Found Item' : 'Register Service Provider'}
+              </h3>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
 
             {activeTab === 'lost_found' ? (
               <form onSubmit={handleCreateLostFound}>
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Community</label>
+                <div className="form-group">
+                  <label className="form-label">Community *</label>
                   <select
+                    className="form-select"
                     value={lostFoundForm.community}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, community: e.target.value })}
                     required
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                   >
                     <option value="">Select Community</option>
                     {userCommunities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Type</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Item Status</label>
                     <select
+                      className="form-select"
                       value={lostFoundForm.item_type}
                       onChange={(e) => setLostFoundForm({ ...lostFoundForm, item_type: e.target.value })}
-                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                     >
-                      <option value="LOST">Lost</option>
-                      <option value="FOUND">Found</option>
+                      <option value="LOST">Lost Item</option>
+                      <option value="FOUND">Found Item</option>
                     </select>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Category</label>
+                  <div className="form-group">
+                    <label className="form-label">Category</label>
                     <select
+                      className="form-select"
                       value={lostFoundForm.category}
                       onChange={(e) => setLostFoundForm({ ...lostFoundForm, category: e.target.value })}
-                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                     >
                       <option value="PETS">Pets</option>
                       <option value="ELECTRONICS">Electronics</option>
@@ -315,78 +323,78 @@ function ServicesPage() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Title</label>
+                <div className="form-group">
+                  <label className="form-label">Item Headline / Title *</label>
                   <input
                     type="text"
+                    className="form-input"
                     required
                     value={lostFoundForm.title}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, title: e.target.value })}
-                    placeholder="e.g. Lost Silver Keyring"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="e.g. Lost Golden Retriever with Red Collar"
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Description</label>
+                <div className="form-group">
+                  <label className="form-label">Item Description *</label>
                   <textarea
+                    className="form-textarea"
                     required
                     rows="3"
                     value={lostFoundForm.description}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, description: e.target.value })}
-                    placeholder="Provide details about the item..."
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="Provide detailed description..."
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Location Details</label>
+                <div className="form-group">
+                  <label className="form-label">Location Details</label>
                   <input
                     type="text"
+                    className="form-input"
                     value={lostFoundForm.location_description}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, location_description: e.target.value })}
-                    placeholder="e.g. Near Community Park Entrance"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="e.g. Near Pinelands Central Park"
                   />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Contact Details</label>
+                <div className="form-group">
+                  <label className="form-label">Contact Details</label>
                   <input
                     type="text"
+                    className="form-input"
                     value={lostFoundForm.contact_info}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, contact_info: e.target.value })}
-                    placeholder="Phone number or email"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="Phone number or contact email"
                   />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                  <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f1f5f9', cursor: 'pointer' }}>Cancel</button>
-                  <button type="submit" style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#2563eb', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>Submit</button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Submit Notice</button>
                 </div>
               </form>
             ) : (
               <form onSubmit={handleCreateProvider}>
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Community</label>
+                <div className="form-group">
+                  <label className="form-label">Community *</label>
                   <select
+                    className="form-select"
                     value={providerForm.community}
                     onChange={(e) => setProviderForm({ ...providerForm, community: e.target.value })}
                     required
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                   >
                     <option value="">Select Community</option>
                     {userCommunities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Service Type</label>
+                <div className="form-group">
+                  <label className="form-label">Service Category</label>
                   <select
+                    className="form-select"
                     value={providerForm.service_type}
                     onChange={(e) => setProviderForm({ ...providerForm, service_type: e.target.value })}
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                   >
                     <option value="PLUMBING">Plumbing</option>
                     <option value="ELECTRICAL">Electrical Services</option>
@@ -399,44 +407,44 @@ function ServicesPage() {
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Business Name</label>
+                <div className="form-group">
+                  <label className="form-label">Business Name *</label>
                   <input
                     type="text"
+                    className="form-input"
                     required
                     value={providerForm.business_name}
                     onChange={(e) => setProviderForm({ ...providerForm, business_name: e.target.value })}
-                    placeholder="e.g. Apex Electrical Repairs"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="e.g. Apex Plumbing & Drainage"
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Phone Number</label>
+                <div className="form-group">
+                  <label className="form-label">Phone Number *</label>
                   <input
                     type="text"
+                    className="form-input"
                     required
                     value={providerForm.phone_number}
                     onChange={(e) => setProviderForm({ ...providerForm, phone_number: e.target.value })}
                     placeholder="e.g. 082 345 6789"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>Description</label>
+                <div className="form-group">
+                  <label className="form-label">Business Description</label>
                   <textarea
+                    className="form-textarea"
                     rows="3"
                     value={providerForm.description}
                     onChange={(e) => setProviderForm({ ...providerForm, description: e.target.value })}
-                    placeholder="Describe services offered..."
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                    placeholder="Describe services offered, pricing, or emergency response availability..."
                   />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                  <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f1f5f9', cursor: 'pointer' }}>Cancel</button>
-                  <button type="submit" style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#2563eb', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>Register Provider</button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Register Listing</button>
                 </div>
               </form>
             )}

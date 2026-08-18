@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Users,
+  AlertTriangle,
+  Calendar,
+  Megaphone,
+  Plus,
+  ChevronRight,
+  ShieldAlert,
+  CheckCircle2,
+  Sparkles,
+  MapPin
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   announcementService,
   incidentService,
   emergencyService,
-  eventService,
-  communityService
+  eventService
 } from '../services/api';
 import AnnouncementCard from '../components/AnnouncementCard';
 import IncidentCard from '../components/IncidentCard';
@@ -59,114 +70,175 @@ function Dashboard() {
 
   return (
     <div>
-      {/* Active Emergency Alert Banner */}
-      {sosAlerts.length > 0 && (
-        <div style={{ backgroundColor: '#fef2f2', border: '2px solid #dc2626', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ color: '#dc2626', fontWeight: '700', fontSize: '1.1rem', margin: 0 }}>
-              🚨 CRITICAL SOS EMERGENCY ALERTS ACTIVE ({sosAlerts.length})
-            </h3>
-            <Link to="/emergency" className="btn btn-danger btn-sm" style={{ textDecoration: 'none' }}>
-              View All Emergency Alerts
+      {/* Hero Welcome Banner */}
+      <div className="hero-banner">
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600', marginBottom: '12px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+              <Sparkles size={14} /> Community Hub Live
+            </div>
+            <h1 style={{ fontSize: '2.1rem', fontWeight: '800', color: '#ffffff', margin: 0, lineHeight: '1.2' }}>
+              Welcome back, {user?.first_name || user?.email?.split('@')[0] || 'Resident'}! 👋
+            </h1>
+            <p style={{ color: '#cbd5e1', fontSize: '0.975rem', marginTop: '6px', maxWidth: '600px' }}>
+              {activeCommunity
+                ? `Viewing live safety alerts, announcements, and events for ${activeCommunity.name}`
+                : 'Real-time neighborhood updates across all your subscribed community networks.'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Link to="/incidents" className="btn btn-secondary" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', borderColor: 'rgba(255, 255, 255, 0.25)' }}>
+              <Plus size={16} /> Report Incident
+            </Link>
+            <Link to="/communities" className="btn btn-primary">
+              <Users size={16} /> Explore Communities
             </Link>
           </div>
-          {sosAlerts.slice(0, 2).map((sos) => (
-            <div key={sos.id} style={{ marginTop: '12px', padding: '12px', background: '#ffffff', borderRadius: '6px', border: '1px solid #fecaca' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span><strong>User:</strong> {sos.user_detail?.first_name || sos.user_detail?.email}</span>
-                <span><strong>Category:</strong> {sos.alert_type}</span>
-                <span><strong>Time:</strong> {new Date(sos.time_activated).toLocaleTimeString()}</span>
+        </div>
+      </div>
+
+      {/* Active Emergency Alert Warning Banner */}
+      {sosAlerts.length > 0 && (
+        <div style={{ backgroundColor: '#fff1f2', border: '2px solid #fecdd3', borderRadius: '16px', padding: '20px', marginBottom: '32px', boxShadow: '0 8px 24px rgba(225, 29, 72, 0.15)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ background: '#e11d48', padding: '10px', borderRadius: '12px', color: '#fff', display: 'flex' }} className="pulse-emergency">
+                <ShieldAlert size={24} />
               </div>
-              {sos.note && <p style={{ fontSize: '0.875rem', marginTop: '6px', color: '#1e293b' }}>Note: {sos.note}</p>}
-              <button
-                onClick={() => handleResolveSOS(sos.id)}
-                className="btn btn-secondary btn-sm"
-                style={{ marginTop: '8px', color: '#16a34a', borderColor: '#bbf7d0' }}
-              >
-                Mark Resolved
-              </button>
+              <div>
+                <h3 style={{ color: '#be123c', fontWeight: '800', fontSize: '1.1rem', margin: 0 }}>
+                  Active Emergency SOS Alerts ({sosAlerts.length})
+                </h3>
+                <span style={{ fontSize: '0.85rem', color: '#881337' }}>Urgent responder action required</span>
+              </div>
             </div>
-          ))}
+            <Link to="/emergency" className="btn btn-danger btn-sm">
+              Review Dispatch Log
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginTop: '16px' }}>
+            {sosAlerts.map((sos) => (
+              <div key={sos.id} style={{ padding: '14px', background: '#ffffff', borderRadius: '12px', border: '1px solid #fecdd3' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', color: '#334155', fontWeight: '600' }}>
+                  <span>🚨 {sos.user_detail?.first_name ? `${sos.user_detail.first_name} ${sos.user_detail.last_name || ''}` : sos.user_detail?.email}</span>
+                  <span className="badge badge-danger">{sos.alert_type}</span>
+                </div>
+                {sos.note && <p style={{ fontSize: '0.85rem', marginTop: '6px', color: '#475569' }}>{sos.note}</p>}
+                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(sos.time_activated).toLocaleTimeString()}</span>
+                  <button
+                    onClick={() => handleResolveSOS(sos.id)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ color: '#059669', borderColor: '#a7f3d0' }}
+                  >
+                    <CheckCircle2 size={14} /> Resolve SOS
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">
-            Welcome, {user?.first_name || user?.email || 'Resident'}
-          </h1>
-          <p className="page-subtitle">
-            {activeCommunity
-              ? `Overview for ${activeCommunity.name}`
-              : 'Showing aggregated community updates'}
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Link to="/incidents" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-            Report Incident
-          </Link>
-          <Link to="/communities" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-            Discover Communities
-          </Link>
-        </div>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid-3" style={{ marginBottom: '24px' }}>
-        <div className="card" style={{ marginBottom: 0 }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>YOUR COMMUNITIES</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#0f172a', marginTop: '4px' }}>
+      {/* Metrics Stat Cards */}
+      <div className="grid-3" style={{ marginBottom: '32px' }}>
+        <div className="card card-interactive" style={{ borderTop: '4px solid #0284c7' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Your Communities</span>
+            <div style={{ background: '#e0f2fe', padding: '10px', borderRadius: '10px', display: 'flex' }}>
+              <Users size={20} color="#0284c7" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginTop: '8px' }}>
             {userCommunities.length}
           </div>
-          <Link to="/communities" style={{ fontSize: '0.8rem', display: 'inline-block', marginTop: '8px' }}>Manage membership →</Link>
+          <Link to="/communities" style={{ fontSize: '0.825rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '10px', textDecoration: 'none', fontWeight: '600' }}>
+            Manage memberships <ChevronRight size={15} />
+          </Link>
         </div>
 
-        <div className="card" style={{ marginBottom: 0 }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>OPEN INCIDENTS</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#dc2626', marginTop: '4px' }}>
+        <div className="card card-interactive" style={{ borderTop: '4px solid #e11d48' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Open Incidents</span>
+            <div style={{ background: '#fff1f2', padding: '10px', borderRadius: '10px', display: 'flex' }}>
+              <AlertTriangle size={20} color="#e11d48" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginTop: '8px' }}>
             {incidents.length}
           </div>
-          <Link to="/incidents" style={{ fontSize: '0.8rem', display: 'inline-block', marginTop: '8px' }}>Review reports →</Link>
+          <Link to="/incidents" style={{ fontSize: '0.825rem', color: '#e11d48', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '10px', textDecoration: 'none', fontWeight: '600' }}>
+            Review incident reports <ChevronRight size={15} />
+          </Link>
         </div>
 
-        <div className="card" style={{ marginBottom: 0 }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>UPCOMING EVENTS</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#2563eb', marginTop: '4px' }}>
+        <div className="card card-interactive" style={{ borderTop: '4px solid #059669' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Upcoming Events</span>
+            <div style={{ background: '#ecfdf5', padding: '10px', borderRadius: '10px', display: 'flex' }}>
+              <Calendar size={20} color="#059669" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginTop: '8px' }}>
             {events.length}
           </div>
-          <Link to="/events" style={{ fontSize: '0.8rem', display: 'inline-block', marginTop: '8px' }}>View schedule →</Link>
+          <Link to="/events" style={{ fontSize: '0.825rem', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '10px', textDecoration: 'none', fontWeight: '600' }}>
+            View event calendar <ChevronRight size={15} />
+          </Link>
         </div>
       </div>
 
-      {/* Content Layout Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      {/* Grid Panels */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px' }}>
         <div>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '12px' }}>
-            Pinned & Verified Announcements
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ background: '#e0f2fe', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+              <Megaphone size={18} color="#0284c7" />
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+              Pinned & Priority Announcements
+            </h2>
+          </div>
           {pinnedAnnouncements.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '20px' }}>No pinned announcements at this time.</p>
+            <div className="card" style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '24px' }}>
+              No priority announcements pinned at this time.
+            </div>
           ) : (
             pinnedAnnouncements.map(a => <AnnouncementCard key={a.id} announcement={a} />)
           )}
 
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: '24px 0 12px' }}>
-            Active Incident Reports
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '32px 0 16px' }}>
+            <div style={{ background: '#fff1f2', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+              <AlertTriangle size={18} color="#e11d48" />
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+              Recent Active Incidents
+            </h2>
+          </div>
           {incidents.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>No open incidents reported.</p>
+            <div className="card" style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '24px' }}>
+              No active incident reports in your community.
+            </div>
           ) : (
             incidents.slice(0, 3).map(i => <IncidentCard key={i.id} incident={i} />)
           )}
         </div>
 
         <div>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '12px' }}>
-            Upcoming Events
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ background: '#ecfdf5', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+              <Calendar size={18} color="#059669" />
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+              Community Events
+            </h2>
+          </div>
           {events.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>No upcoming events scheduled.</p>
+            <div className="card" style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '24px' }}>
+              No upcoming events scheduled.
+            </div>
           ) : (
             events.slice(0, 3).map(e => <EventCard key={e.id} event={e} />)
           )}

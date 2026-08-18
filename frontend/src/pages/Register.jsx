@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ShieldAlert, UserPlus, Mail, Lock, User, Phone, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Register() {
@@ -57,17 +58,32 @@ function Register() {
   };
 
   return (
-    <div style={{ maxWidth: '480px', margin: '40px auto', padding: '0 16px' }}>
-      <div className="card" style={{ padding: '32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '8px', textAlign: 'center' }}>
-          Create Account
-        </h2>
-        <p style={{ fontSize: '0.875rem', color: '#64748b', textAlign: 'center', marginBottom: '24px' }}>
-          Join the Community Cloud Platform
-        </p>
+    <div style={{ maxWidth: '520px', margin: '40px auto', padding: '0 20px' }}>
+      <div className="card" style={{ padding: '36px', boxShadow: 'var(--shadow-lg)', borderTop: '4px solid #0284c7' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto',
+            boxShadow: '0 0 16px rgba(2, 132, 199, 0.35)'
+          }}>
+            <ShieldAlert size={26} color="#ffffff" />
+          </div>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+            Create Resident Account
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '4px' }}>
+            Join your local community safety & communication network
+          </p>
+        </div>
 
         {error && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '10px', marginBottom: '16px', textTransform: 'none' }}>
+          <div className="badge badge-danger" style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', textTransform: 'none', fontSize: '0.85rem', display: 'block' }}>
             {error}
           </div>
         )}
@@ -75,18 +91,22 @@ function Register() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Email Address *</label>
-            <input
-              type="email"
-              name="email"
-              className="form-input"
-              required
-              placeholder="user@example.com"
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="email"
+                name="email"
+                className="form-input"
+                required
+                placeholder="resident@communitycloud.co.za"
+                value={formData.email}
+                onChange={handleChange}
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div className="form-group">
               <label className="form-label">First Name *</label>
               <input
@@ -94,6 +114,7 @@ function Register() {
                 name="first_name"
                 className="form-input"
                 required
+                placeholder="Thabo"
                 value={formData.first_name}
                 onChange={handleChange}
               />
@@ -105,6 +126,7 @@ function Register() {
                 name="last_name"
                 className="form-input"
                 required
+                placeholder="Mokoena"
                 value={formData.last_name}
                 onChange={handleChange}
               />
@@ -113,18 +135,22 @@ function Register() {
 
           <div className="form-group">
             <label className="form-label">Phone Number</label>
-            <input
-              type="text"
-              name="phone_number"
-              className="form-input"
-              placeholder="+27 82 123 4567"
-              value={formData.phone_number}
-              onChange={handleChange}
-            />
+            <div style={{ position: 'relative' }}>
+              <Phone size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="text"
+                name="phone_number"
+                className="form-input"
+                placeholder="+27 82 123 4567"
+                value={formData.phone_number}
+                onChange={handleChange}
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Account Role</label>
+            <label className="form-label">Account Community Role</label>
             <select
               name="role"
               className="form-select"
@@ -137,7 +163,7 @@ function Register() {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div className="form-group">
               <label className="form-label">Password *</label>
               <input
@@ -164,13 +190,13 @@ function Register() {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
-            {loading ? 'Creating Account...' : 'Register'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px', padding: '12px', gap: '8px' }} disabled={loading}>
+            <UserPlus size={18} /> {loading ? 'Creating Account...' : 'Register Account'}
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
-          Already registered? <Link to="/login">Sign In</Link>
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
+          Already have an account? <Link to="/login" style={{ fontWeight: '600', color: '#0284c7' }}>Sign In Here</Link>
         </div>
       </div>
     </div>

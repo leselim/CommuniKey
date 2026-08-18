@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ShieldAlert, LogIn, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
@@ -18,24 +19,39 @@ function Login() {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid email or password.');
+      setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid email address or password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '420px', margin: '40px auto', padding: '0 16px' }}>
-      <div className="card" style={{ padding: '32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '8px', textAlign: 'center' }}>
-          Sign In
-        </h2>
-        <p style={{ fontSize: '0.875rem', color: '#64748b', textAlign: 'center', marginBottom: '24px' }}>
-          Access your Community Cloud Platform account
-        </p>
+    <div style={{ maxWidth: '440px', margin: '48px auto', padding: '0 20px' }}>
+      <div className="card" style={{ padding: '36px', boxShadow: 'var(--shadow-lg)', borderTop: '4px solid #0284c7' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto',
+            boxShadow: '0 0 16px rgba(2, 132, 199, 0.35)'
+          }}>
+            <ShieldAlert size={26} color="#ffffff" />
+          </div>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+            Sign In to Community Cloud
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '4px' }}>
+            Access neighborhood alerts, safety network & emergency services
+          </p>
+        </div>
 
         {error && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '10px', marginBottom: '16px', textTransform: 'none' }}>
+          <div className="badge badge-danger" style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', textTransform: 'none', fontSize: '0.85rem', display: 'block' }}>
             {error}
           </div>
         )}
@@ -43,35 +59,43 @@ function Login() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Email Address</label>
-            <input
-              type="email"
-              className="form-input"
-              required
-              placeholder="user@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="email"
+                className="form-input"
+                required
+                placeholder="user@communitycloud.co.za"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
           </div>
 
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-input"
-              required
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="password"
+                className="form-input"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px', padding: '12px', gap: '8px' }} disabled={loading}>
+            <LogIn size={18} /> {loading ? 'Signing in...' : 'Sign In to Account'}
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
-          Don't have an account? <Link to="/register">Create Account</Link>
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
+          Don't have an account? <Link to="/register" style={{ fontWeight: '600', color: '#0284c7' }}>Create New Account</Link>
         </div>
       </div>
     </div>

@@ -12,7 +12,8 @@ import {
   Bell,
   User,
   LogOut,
-  ChevronDown
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { notificationService } from '../services/api';
@@ -25,12 +26,18 @@ function Navbar() {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Close mobile menu on route change
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const fetchNotifications = async () => {
     try {
@@ -54,225 +61,231 @@ function Navbar() {
     const active = isActive(path);
     if (isEmergency) {
       return {
-        color: active ? '#ffffff' : '#f43f5e',
-        backgroundColor: active ? '#e11d48' : 'rgba(225, 29, 72, 0.1)',
-        border: '1px solid rgba(225, 29, 72, 0.3)',
+        color: active ? '#ffffff' : '#dc2626',
+        backgroundColor: active ? '#dc2626' : 'rgba(220, 38, 38, 0.08)',
+        border: '1px solid rgba(220, 38, 38, 0.2)',
         padding: '6px 12px',
-        borderRadius: '8px',
-        fontSize: '0.85rem',
+        borderRadius: '6px',
+        fontSize: '0.825rem',
         fontWeight: '600',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '6px',
-        textDecoration: 'none',
-        transition: 'all 0.2s ease'
+        textDecoration: 'none'
       };
     }
     return {
-      color: active ? '#38bdf8' : '#94a3b8',
-      backgroundColor: active ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
-      border: active ? '1px solid rgba(56, 189, 248, 0.2)' : '1px solid transparent',
+      color: active ? '#0f172a' : '#475569',
+      backgroundColor: active ? '#f1f5f9' : 'transparent',
+      border: '1px solid transparent',
       padding: '6px 12px',
-      borderRadius: '8px',
-      fontSize: '0.85rem',
+      borderRadius: '6px',
+      fontSize: '0.825rem',
       fontWeight: active ? '600' : '500',
       display: 'inline-flex',
       alignItems: 'center',
       gap: '6px',
-      textDecoration: 'none',
-      transition: 'all 0.2s ease'
+      textDecoration: 'none'
     };
   };
 
   return (
     <header style={{
-      background: '#0b0f19',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+      background: '#ffffff',
+      borderBottom: '1px solid #e2e8f0',
       position: 'sticky',
       top: 0,
-      zIndex: 900,
-      backdropFilter: 'blur(12px)',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)'
+      zIndex: 900
     }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         
         {/* Brand & Community Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <Link to="/" style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: '800', textDecoration: 'none', letterSpacing: '-0.03em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-              padding: '8px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 12px rgba(2, 132, 199, 0.4)'
-            }}>
-              <ShieldAlert size={20} color="#ffffff" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Link to="/" style={{ color: '#0f172a', fontSize: '1.15rem', fontWeight: '700', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ background: '#0f172a', color: '#ffffff', padding: '6px', borderRadius: '6px', display: 'flex' }}>
+              <ShieldAlert size={18} />
             </div>
-            <span>Community<span style={{ color: '#38bdf8' }}>Cloud</span></span>
+            <span>Pinelands Community</span>
           </Link>
 
           {user && userCommunities.length > 0 && (
-            <div style={{ position: 'relative' }}>
-              <select
-                value={activeCommunity?.id || ''}
-                onChange={(e) => {
-                  const comm = userCommunities.find(c => c.id === parseInt(e.target.value));
-                  selectCommunity(comm || null);
-                }}
-                style={{
-                  backgroundColor: '#151d2a',
-                  color: '#e2e8f0',
-                  border: '1px solid #2a3649',
-                  borderRadius: '8px',
-                  padding: '7px 14px',
-                  fontSize: '0.825rem',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-              >
-                <option value="">🌐 All Communities</option>
-                {userCommunities.map(c => (
-                  <option key={c.id} value={c.id}>📍 {c.name}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={activeCommunity?.id || ''}
+              onChange={(e) => {
+                const comm = userCommunities.find(c => c.id === parseInt(e.target.value));
+                selectCommunity(comm || null);
+              }}
+              style={{
+                backgroundColor: '#f8fafc',
+                color: '#0f172a',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                padding: '5px 10px',
+                fontSize: '0.8rem',
+                fontWeight: '500',
+                outline: 'none',
+                maxWidth: '180px'
+              }}
+            >
+              <option value="">Pinelands Focus</option>
+              {userCommunities.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           )}
         </div>
 
-        {/* Navigation Items */}
+        {/* Desktop Navigation */}
         {user ? (
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <Link to="/" style={navItemStyle('/')}>
-              <Home size={15} /> Dashboard
-            </Link>
-            <Link to="/communities" style={navItemStyle('/communities')}>
-              <Users size={15} /> Communities
-            </Link>
-            <Link to="/announcements" style={navItemStyle('/announcements')}>
-              <Megaphone size={15} /> Announcements
-            </Link>
-            <Link to="/incidents" style={navItemStyle('/incidents')}>
-              <AlertTriangle size={15} /> Incidents
-            </Link>
-            <Link to="/emergency" style={navItemStyle('/emergency', true)}>
-              <ShieldAlert size={15} /> SOS Emergency
-            </Link>
-            <Link to="/events" style={navItemStyle('/events')}>
-              <Calendar size={15} /> Events
-            </Link>
-            <Link to="/feed" style={navItemStyle('/feed')}>
-              <MessageSquare size={15} /> Feed
-            </Link>
-            <Link to="/services" style={navItemStyle('/services')}>
-              <Wrench size={15} /> Directory
-            </Link>
-
-            {/* Notification Bell */}
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              style={{
-                background: showNotifications ? '#1e293b' : 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#e2e8f0',
-                borderRadius: '8px',
-                padding: '7px 12px',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                marginLeft: '4px',
-                transition: 'all 0.2s ease'
-              }}
-              title="Notifications"
-            >
-              <Bell size={16} />
-              {unreadCount > 0 && (
-                <span style={{
-                  background: '#e11d48',
-                  color: '#fff',
-                  padding: '2px 7px',
-                  borderRadius: '10px',
-                  fontSize: '0.725rem',
-                  fontWeight: '700',
-                  boxShadow: '0 0 8px rgba(225, 29, 72, 0.5)'
-                }}>
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* SOS Panic Trigger Modal Button */}
-            <SOSButton />
-
-            {/* User Profile Pill */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '6px', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', paddingLeft: '12px' }}>
-              <Link to="/profile" style={{
-                color: '#ffffff',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                textDecoration: 'none',
-                background: '#151d2a',
-                padding: '5px 12px',
-                borderRadius: '20px',
-                border: '1px solid #2a3649'
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: '#0284c7',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: '700'
-                }}>
-                  {(user.first_name ? user.first_name[0] : user.email[0]).toUpperCase()}
-                </div>
-                <span>{user.first_name || user.email.split('@')[0]}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="desktop-nav">
+              <Link to="/" style={navItemStyle('/')}>
+                <Home size={15} /> Dashboard
               </Link>
+              <Link to="/communities" style={navItemStyle('/communities')}>
+                <Users size={15} /> Communities
+              </Link>
+              <Link to="/announcements" style={navItemStyle('/announcements')}>
+                <Megaphone size={15} /> Notices
+              </Link>
+              <Link to="/incidents" style={navItemStyle('/incidents')}>
+                <AlertTriangle size={15} /> Incidents
+              </Link>
+              <Link to="/emergency" style={navItemStyle('/emergency', true)}>
+                <ShieldAlert size={15} /> SOS
+              </Link>
+              <Link to="/events" style={navItemStyle('/events')}>
+                <Calendar size={15} /> Events
+              </Link>
+              <Link to="/feed" style={navItemStyle('/feed')}>
+                <MessageSquare size={15} /> Feed
+              </Link>
+              <Link to="/services" style={navItemStyle('/services')}>
+                <Wrench size={15} /> Directory
+              </Link>
+            </nav>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
-                onClick={handleLogout}
+                onClick={() => setShowNotifications(!showNotifications)}
                 style={{
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  padding: '7px 10px',
+                  background: showNotifications ? '#f1f5f9' : 'transparent',
+                  border: '1px solid #cbd5e1',
+                  color: '#475569',
+                  borderRadius: '6px',
+                  padding: '6px 10px',
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  transition: 'all 0.2s ease'
+                  gap: '4px'
                 }}
-                title="Log out"
+                title="Notifications"
               >
-                <LogOut size={14} />
+                <Bell size={16} />
+                {unreadCount > 0 && (
+                  <span style={{ background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '700' }}>
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <SOSButton />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
+                <Link to="/profile" style={{
+                  color: '#0f172a',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none',
+                  background: '#f8fafc',
+                  padding: '4px 10px',
+                  borderRadius: '16px',
+                  border: '1px solid #cbd5e1'
+                }}>
+                  <User size={14} />
+                  <span>{user.first_name || user.email.split('@')[0]}</span>
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    background: 'transparent',
+                    color: '#64748b',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    padding: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex'
+                  }}
+                  title="Log out"
+                >
+                  <LogOut size={14} />
+                </button>
+              </div>
+
+              {/* Mobile Menu Toggle Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #cbd5e1',
+                  color: '#0f172a',
+                  padding: '6px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'none'
+                }}
+                className="mobile-toggle"
+              >
+                {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
-          </nav>
+          </div>
         ) : (
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <Link to="/login" className="btn btn-secondary btn-sm" style={{ backgroundColor: 'transparent', color: '#ffffff', borderColor: 'rgba(255,255,255,0.2)' }}>
-              Log In
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Link to="/login" className="btn btn-secondary btn-sm">
+              Sign In
             </Link>
             <Link to="/register" className="btn btn-primary btn-sm">
-              Get Started
+              Register
             </Link>
           </div>
         )}
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {user && mobileMenuOpen && (
+        <div style={{ borderTop: '1px solid #e2e8f0', padding: '12px 20px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Link to="/" style={navItemStyle('/')}>
+            <Home size={15} /> Dashboard
+          </Link>
+          <Link to="/communities" style={navItemStyle('/communities')}>
+            <Users size={15} /> Communities
+          </Link>
+          <Link to="/announcements" style={navItemStyle('/announcements')}>
+            <Megaphone size={15} /> Notices
+          </Link>
+          <Link to="/incidents" style={navItemStyle('/incidents')}>
+            <AlertTriangle size={15} /> Incidents
+          </Link>
+          <Link to="/emergency" style={navItemStyle('/emergency', true)}>
+            <ShieldAlert size={15} /> Emergency SOS
+          </Link>
+          <Link to="/events" style={navItemStyle('/events')}>
+            <Calendar size={15} /> Events
+          </Link>
+          <Link to="/feed" style={navItemStyle('/feed')}>
+            <MessageSquare size={15} /> Feed
+          </Link>
+          <Link to="/services" style={navItemStyle('/services')}>
+            <Wrench size={15} /> Directory
+          </Link>
+        </div>
+      )}
 
       {showNotifications && (
         <NotificationDrawer
@@ -282,6 +295,13 @@ function Navbar() {
           }}
         />
       )}
+
+      <style>{`
+        @media (max-width: 860px) {
+          .desktop-nav { display: none !important; }
+          .mobile-toggle { display: inline-flex !important; }
+        }
+      `}</style>
     </header>
   );
 }

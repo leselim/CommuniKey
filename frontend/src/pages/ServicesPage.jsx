@@ -110,103 +110,101 @@ function ServicesPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Community Directory & Marketplace</h1>
-          <p className="page-subtitle">Lost & found listings and verified neighbourhood service providers</p>
+          <h1 className="page-title">Pinelands Services & Directory</h1>
+          <p className="page-subtitle">Lost & found notices and trusted local Pinelands service providers</p>
         </div>
 
         <button onClick={() => setShowModal(true)} className="btn btn-primary">
-          <Plus size={16} /> {activeTab === 'lost_found' ? 'Report Lost/Found Item' : 'Register Service Provider'}
+          <Plus size={15} /> {activeTab === 'lost_found' ? 'Report Item' : 'Register Provider'}
         </button>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '16px', borderBottom: '2px solid var(--color-border)', marginBottom: '28px' }}>
+      <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--color-border)', marginBottom: '20px' }}>
         <button
           onClick={() => setActiveTab('lost_found')}
           style={{
-            padding: '12px 20px',
+            padding: '10px 16px',
             fontSize: '0.95rem',
-            fontWeight: '700',
+            fontWeight: '600',
             background: 'none',
             border: 'none',
-            borderBottom: activeTab === 'lost_found' ? '3px solid var(--color-accent)' : '3px solid transparent',
-            color: activeTab === 'lost_found' ? 'var(--color-accent)' : '#64748b',
+            borderBottom: activeTab === 'lost_found' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            color: activeTab === 'lost_found' ? 'var(--color-primary)' : '#64748b',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease'
+            gap: '6px'
           }}
         >
-          <Package size={18} /> Lost & Found Board
+          <Package size={16} /> Lost & Found Board
         </button>
         <button
           onClick={() => setActiveTab('providers')}
           style={{
-            padding: '12px 20px',
+            padding: '10px 16px',
             fontSize: '0.95rem',
-            fontWeight: '700',
+            fontWeight: '600',
             background: 'none',
             border: 'none',
-            borderBottom: activeTab === 'providers' ? '3px solid var(--color-accent)' : '3px solid transparent',
-            color: activeTab === 'providers' ? 'var(--color-accent)' : '#64748b',
+            borderBottom: activeTab === 'providers' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            color: activeTab === 'providers' ? 'var(--color-primary)' : '#64748b',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease'
+            gap: '6px'
           }}
         >
-          <Wrench size={18} /> Service Providers Directory
+          <Wrench size={16} /> Local Service Directory
         </button>
       </div>
 
       {/* Tab 1: Lost & Found */}
       {activeTab === 'lost_found' && (
         <div>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
             {['ALL', 'LOST', 'FOUND'].map(type => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
                 className={`btn btn-sm ${filterType === type ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '6px 16px', borderRadius: '20px' }}
+                style={{ padding: '4px 14px', borderRadius: '16px' }}
               >
-                {type === 'ALL' ? 'All Items' : type === 'LOST' ? '🔍 Lost Items' : '💡 Found Items'}
+                {type === 'ALL' ? 'All Items' : type === 'LOST' ? 'Lost Items' : 'Found Items'}
               </button>
             ))}
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading items...</div>
+            <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>Loading items...</div>
           ) : filteredItems.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-              <Package size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
-              <p style={{ fontSize: '1rem', fontWeight: '600' }}>No lost or found items reported</p>
-              <span style={{ fontSize: '0.85rem' }}>Report missing keys, pets, or electronics to your neighborhood.</span>
+            <div className="card" style={{ textAlign: 'center', padding: '36px 20px', color: '#64748b' }}>
+              <Package size={32} color="#cbd5e1" style={{ marginBottom: '8px' }} />
+              <p style={{ fontSize: '0.95rem', fontWeight: '600' }}>No lost or found items reported</p>
+              <span style={{ fontSize: '0.825rem' }}>Report missing keys, pets, or items in the Pinelands area.</span>
             </div>
           ) : (
             <div className="grid-3">
               {filteredItems.map(item => (
-                <div key={item.id} className="card card-interactive" style={{ borderLeft: item.item_type === 'LOST' ? '4px solid #e11d48' : '4px solid #059669' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div key={item.id} className="card" style={{ borderLeft: item.item_type === 'LOST' ? '4px solid #dc2626' : '4px solid #16a34a' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span className={`badge badge-${item.item_type === 'LOST' ? 'danger' : 'success'}`}>
                       {item.item_type}
                     </span>
-                    <span style={{ fontSize: '0.775rem', color: '#94a3b8' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                       {new Date(item.date_reported).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>{item.title}</h3>
-                  <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: '1.5', marginBottom: '14px' }}>{item.description}</p>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>{item.title}</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#334155', lineHeight: '1.4', marginBottom: '12px' }}>{item.description}</p>
                   {item.location_description && (
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <MapPin size={13} color="#0284c7" /> Location: <strong>{item.location_description}</strong>
+                    <div style={{ fontSize: '0.775rem', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={12} color="#1e40af" /> Location: <strong>{item.location_description}</strong>
                     </div>
                   )}
                   {item.contact_info && (
-                    <div style={{ fontSize: '0.825rem', color: '#0284c7', fontWeight: '600', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Phone size={13} /> Contact: {item.contact_info}
+                    <div style={{ fontSize: '0.8rem', color: '#1e40af', fontWeight: '600', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Phone size={12} /> Contact: {item.contact_info}
                     </div>
                   )}
                 </div>
@@ -220,42 +218,42 @@ function ServicesPage() {
       {activeTab === 'providers' && (
         <div>
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading service directory...</div>
+            <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>Loading directory...</div>
           ) : providers.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-              <Wrench size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
-              <p style={{ fontSize: '1rem', fontWeight: '600' }}>No service providers registered</p>
-              <span style={{ fontSize: '0.85rem' }}>Be the first to list your local plumbing, electrical, or security business!</span>
+            <div className="card" style={{ textAlign: 'center', padding: '36px 20px', color: '#64748b' }}>
+              <Wrench size={32} color="#cbd5e1" style={{ marginBottom: '8px' }} />
+              <p style={{ fontSize: '0.95rem', fontWeight: '600' }}>No service providers registered</p>
+              <span style={{ fontSize: '0.825rem' }}>List your local Pinelands plumbing, electrical, or garden service!</span>
             </div>
           ) : (
             <div className="grid-3">
               {providers.map(p => (
-                <div key={p.id} className="card card-interactive" style={{ borderLeft: '4px solid #0284c7' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div key={p.id} className="card" style={{ borderLeft: '4px solid #0f172a' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span className="badge badge-info">
                       {p.service_type}
                     </span>
                     {p.verified && (
-                      <span className="badge badge-success" style={{ gap: '3px' }}>
-                        <CheckCircle2 size={12} /> Verified
+                      <span className="badge badge-success" style={{ gap: '2px' }}>
+                        <CheckCircle2 size={11} /> Verified
                       </span>
                     )}
                   </div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>{p.business_name}</h3>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0f172a', marginBottom: '2px' }}>{p.business_name}</h3>
                   {p.contact_person && (
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <User size={13} /> {p.contact_person}
+                    <div style={{ fontSize: '0.775rem', color: '#64748b', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <User size={12} /> Contact: {p.contact_person}
                     </div>
                   )}
-                  <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: '1.5', marginBottom: '14px' }}>{p.description || 'Local community service provider.'}</p>
+                  <p style={{ fontSize: '0.85rem', color: '#334155', lineHeight: '1.4', marginBottom: '12px' }}>{p.description || 'Local Pinelands service provider.'}</p>
                   
-                  <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#0284c7', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Phone size={14} /> {p.phone_number}
+                  <div style={{ paddingTop: '8px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontSize: '0.825rem', color: '#1e40af', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Phone size={13} /> {p.phone_number}
                     </div>
                     {p.email && (
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Mail size={14} /> {p.email}
+                      <div style={{ fontSize: '0.775rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Mail size={13} /> {p.email}
                       </div>
                     )}
                   </div>
@@ -272,10 +270,10 @@ function ServicesPage() {
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title">
-                {activeTab === 'lost_found' ? 'Report Lost or Found Item' : 'Register Service Provider'}
+                {activeTab === 'lost_found' ? 'Report Item' : 'Register Service Provider'}
               </h3>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                <X size={20} />
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                <X size={18} />
               </button>
             </div>
 
@@ -294,9 +292,9 @@ function ServicesPage() {
                   </select>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div className="form-group">
-                    <label className="form-label">Item Status</label>
+                    <label className="form-label">Status</label>
                     <select
                       className="form-select"
                       value={lostFoundForm.item_type}
@@ -324,26 +322,26 @@ function ServicesPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Item Headline / Title *</label>
+                  <label className="form-label">Title *</label>
                   <input
                     type="text"
                     className="form-input"
                     required
                     value={lostFoundForm.title}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, title: e.target.value })}
-                    placeholder="e.g. Lost Golden Retriever with Red Collar"
+                    placeholder="e.g. Lost Silver Keyring at Howard Centre"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Item Description *</label>
+                  <label className="form-label">Description *</label>
                   <textarea
                     className="form-textarea"
                     required
                     rows="3"
                     value={lostFoundForm.description}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, description: e.target.value })}
-                    placeholder="Provide detailed description..."
+                    placeholder="Provide details..."
                   />
                 </div>
 
@@ -354,24 +352,24 @@ function ServicesPage() {
                     className="form-input"
                     value={lostFoundForm.location_description}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, location_description: e.target.value })}
-                    placeholder="e.g. Near Pinelands Central Park"
+                    placeholder="e.g. Forest Drive, Pinelands"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Contact Details</label>
+                  <label className="form-label">Contact Phone / Email</label>
                   <input
                     type="text"
                     className="form-input"
                     value={lostFoundForm.contact_info}
                     onChange={(e) => setLostFoundForm({ ...lostFoundForm, contact_info: e.target.value })}
-                    placeholder="Phone number or contact email"
+                    placeholder="082 123 4567 or email"
                   />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary">Submit Notice</button>
+                  <button type="submit" className="btn btn-primary">Submit Listing</button>
                 </div>
               </form>
             ) : (
@@ -415,7 +413,18 @@ function ServicesPage() {
                     required
                     value={providerForm.business_name}
                     onChange={(e) => setProviderForm({ ...providerForm, business_name: e.target.value })}
-                    placeholder="e.g. Apex Plumbing & Drainage"
+                    placeholder="e.g. Pinelands Plumbing Services"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Contact Person</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={providerForm.contact_person}
+                    onChange={(e) => setProviderForm({ ...providerForm, contact_person: e.target.value })}
+                    placeholder="e.g. Johan van der Merwe"
                   />
                 </div>
 
@@ -427,7 +436,7 @@ function ServicesPage() {
                     required
                     value={providerForm.phone_number}
                     onChange={(e) => setProviderForm({ ...providerForm, phone_number: e.target.value })}
-                    placeholder="e.g. 082 345 6789"
+                    placeholder="021 531 1234"
                   />
                 </div>
 
@@ -438,11 +447,11 @@ function ServicesPage() {
                     rows="3"
                     value={providerForm.description}
                     onChange={(e) => setProviderForm({ ...providerForm, description: e.target.value })}
-                    placeholder="Describe services offered, pricing, or emergency response availability..."
+                    placeholder="Describe services offered..."
                   />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
                   <button type="submit" className="btn btn-primary">Register Listing</button>
                 </div>

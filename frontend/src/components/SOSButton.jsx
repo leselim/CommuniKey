@@ -18,17 +18,17 @@ function SOSButton() {
     setIsOpen(true);
     setMessage({ type: '', text: '' });
     if (navigator.geolocation) {
-      setLocationStatus('Acquiring GPS location coordinates...');
+      setLocationStatus('Acquiring GPS coordinates...');
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setCoords({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude
           });
-          setLocationStatus('GPS coordinates acquired successfully.');
+          setLocationStatus('GPS location acquired.');
         },
         () => {
-          setLocationStatus('Location unavailable or permission denied.');
+          setLocationStatus('Location unavailable.');
         }
       );
     }
@@ -38,7 +38,7 @@ function SOSButton() {
     e.preventDefault();
     const commId = selectedCommunityId || activeCommunity?.id || (userCommunities[0]?.id);
     if (!commId) {
-      setMessage({ type: 'error', text: 'Please select a community to alert.' });
+      setMessage({ type: 'error', text: 'Please select a community.' });
       return;
     }
 
@@ -51,7 +51,7 @@ function SOSButton() {
         latitude: coords?.lat ? coords.lat.toFixed(6) : null,
         longitude: coords?.lng ? coords.lng.toFixed(6) : null,
       });
-      setMessage({ type: 'success', text: 'EMERGENCY SOS ALERT ACTIVATED! Security dispatch & community members notified.' });
+      setMessage({ type: 'success', text: 'EMERGENCY SOS ACTIVATED. Responders & Pinelands Neighborhood Watch notified.' });
       setTimeout(() => {
         setIsOpen(false);
         setNote('');
@@ -67,69 +67,52 @@ function SOSButton() {
     <>
       <button
         onClick={handleOpen}
-        className="pulse-emergency"
+        className="btn btn-danger btn-sm"
         style={{
-          background: 'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)',
-          color: '#ffffff',
           fontWeight: '700',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '7px 16px',
-          fontSize: '0.825rem',
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          letterSpacing: '0.04em',
+          letterSpacing: '0.03em',
           textTransform: 'uppercase',
-          fontFamily: 'Inter, sans-serif',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 0 15px rgba(225, 29, 72, 0.4)'
+          fontSize: '0.775rem'
         }}
       >
-        <ShieldAlert size={16} />
+        <ShieldAlert size={15} />
         <span>SOS Panic</span>
       </button>
 
       {isOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ borderTop: '6px solid #e11d48' }}>
+          <div className="modal-content" style={{ borderTop: '4px solid #dc2626' }}>
             <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: '#fff1f2', padding: '8px', borderRadius: '10px', display: 'flex' }}>
-                  <AlertTriangle size={24} color="#e11d48" />
-                </div>
-                <div>
-                  <h3 className="modal-title" style={{ color: '#e11d48', margin: 0 }}>
-                    Emergency SOS Trigger
-                  </h3>
-                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Instant security alert dispatch</span>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={20} color="#dc2626" />
+                <h3 className="modal-title" style={{ color: '#dc2626', margin: 0 }}>
+                  Emergency SOS Broadcast
+                </h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             {message.text && (
-              <div className={`badge badge-${message.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '8px', display: 'block', textTransform: 'none', fontSize: '0.85rem' }}>
+              <div className={`badge badge-${message.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '10px', marginBottom: '14px', borderRadius: '6px', display: 'block', textTransform: 'none', fontSize: '0.825rem' }}>
                 {message.text}
               </div>
             )}
 
             <form onSubmit={handleTrigger}>
               <div className="form-group">
-                <label className="form-label">Target Community Network</label>
+                <label className="form-label">Community Network</label>
                 <select
                   className="form-select"
                   value={selectedCommunityId || activeCommunity?.id || ''}
                   onChange={(e) => setSelectedCommunityId(e.target.value)}
                   required
                 >
-                  <option value="">Select Target Community</option>
+                  <option value="">Select Community</option>
                   {userCommunities.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
@@ -143,37 +126,37 @@ function SOSButton() {
                   value={alertType}
                   onChange={(e) => setAlertType(e.target.value)}
                 >
-                  <option value="GENERAL">🚨 General Danger / Armed Threat</option>
-                  <option value="CRIME">🥷 Crime in Progress / Intruder</option>
-                  <option value="MEDICAL">🚑 Urgent Medical Emergency</option>
-                  <option value="FIRE">🔥 Fire & Hazard Outbreak</option>
+                  <option value="GENERAL">General Threat / Intruder</option>
+                  <option value="CRIME">Crime in Progress</option>
+                  <option value="MEDICAL">Medical Emergency</option>
+                  <option value="FIRE">Fire & Outbreak</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Address or Urgent Notes</label>
+                <label className="form-label">Pinelands Address or Details</label>
                 <textarea
                   className="form-textarea"
                   rows="3"
-                  placeholder="e.g. Unit 4B, 12 Oak Street - Suspect on premises..."
+                  placeholder="e.g. 14 Forest Drive, Pinelands - Suspect in driveway..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                 ></textarea>
               </div>
 
               {locationStatus && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b', marginBottom: '16px', background: '#f8fafc', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <MapPin size={14} color="#0284c7" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.775rem', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <MapPin size={13} color="#1e40af" />
                   <span>{locationStatus} {coords && `(${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`}</span>
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsOpen(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-danger" disabled={loading}>
-                  {loading ? 'Transmitting Alert...' : 'BROADCAST SOS ALERT NOW'}
+                  {loading ? 'Transmitting...' : 'Broadcast SOS Now'}
                 </button>
               </div>
             </form>

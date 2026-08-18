@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Shield, Key, Save, Lock, Mail, MapPin, Phone } from 'lucide-react';
+import { User, Shield, Key, Save, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 
@@ -26,9 +26,9 @@ function Profile() {
     try {
       await authService.updateProfile(profileData);
       await fetchUserProfile();
-      setMsg({ type: 'success', text: 'Profile information updated successfully.' });
+      setMsg({ type: 'success', text: 'Profile updated successfully.' });
     } catch (err) {
-      setMsg({ type: 'error', text: 'Failed to update profile details.' });
+      setMsg({ type: 'error', text: 'Failed to update profile.' });
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ function Profile() {
     setPassMsg({ type: '', text: '' });
     try {
       await authService.changePassword(passwords);
-      setPassMsg({ type: 'success', text: 'Security password changed successfully.' });
+      setPassMsg({ type: 'success', text: 'Password changed successfully.' });
       setPasswords({ old_password: '', new_password: '' });
     } catch (err) {
       setPassMsg({ type: 'error', text: err.response?.data?.message || 'Incorrect current password.' });
@@ -49,59 +49,58 @@ function Profile() {
   const userInit = (user?.first_name || user?.email || 'U')[0].toUpperCase();
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-      {/* Profile Header Hero Card */}
-      <div className="card" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', border: 'none', marginBottom: '28px', padding: '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+      {/* Profile Header Card */}
+      <div className="card" style={{ backgroundColor: '#ffffff', borderLeft: '4px solid #0f172a', marginBottom: '20px', padding: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{
-            width: '64px',
-            height: '64px',
+            width: '52px',
+            height: '52px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+            backgroundColor: '#0f172a',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: '800',
-            fontSize: '1.75rem',
-            boxShadow: '0 0 20px rgba(2, 132, 199, 0.4)'
+            fontWeight: '700',
+            fontSize: '1.4rem'
           }}>
             {userInit}
           </div>
           <div>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: '#ffffff' }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, color: '#0f172a' }}>
               {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email?.split('@')[0]}
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-              <span className="badge badge-info" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                <Shield size={12} /> {user?.role || 'RESIDENT'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+              <span className="badge badge-info">
+                <Shield size={11} /> {user?.role || 'RESIDENT'}
               </span>
-              <span style={{ fontSize: '0.825rem', color: '#94a3b8' }}>{user?.email}</span>
+              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{user?.email}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Personal Info Card */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-          <User size={20} color="#0284c7" />
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Personal Information</h2>
+      <div className="card" style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+          <User size={18} color="#0f172a" />
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Personal Details</h2>
         </div>
 
         {msg.text && (
-          <div className={`badge badge-${msg.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '12px', marginBottom: '18px', borderRadius: '8px', display: 'block', textTransform: 'none', fontSize: '0.85rem' }}>
+          <div className={`badge badge-${msg.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '10px', marginBottom: '16px', borderRadius: '6px', display: 'block', textTransform: 'none', fontSize: '0.825rem' }}>
             {msg.text}
           </div>
         )}
 
         <form onSubmit={handleProfileSubmit}>
           <div className="form-group">
-            <label className="form-label">Email Address (Account Identifier)</label>
+            <label className="form-label">Email Address (Read-Only)</label>
             <input type="email" className="form-input" value={user?.email || ''} disabled style={{ backgroundColor: '#f1f5f9', color: '#64748b' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="form-group">
               <label className="form-label">First Name</label>
               <input
@@ -129,34 +128,36 @@ function Profile() {
               className="form-input"
               value={profileData.phone_number}
               onChange={(e) => setProfileData({ ...profileData, phone_number: e.target.value })}
+              placeholder="e.g. 082 123 4567"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Residential Address / Unit Number</label>
+            <label className="form-label">Pinelands Residential Address / Street</label>
             <input
               type="text"
               className="form-input"
               value={profileData.address}
               onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+              placeholder="e.g. 14 Forest Drive, Pinelands"
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ gap: '6px' }}>
-            <Save size={16} /> {loading ? 'Saving Changes...' : 'Save Profile Changes'}
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ gap: '4px' }}>
+            <Save size={15} /> {loading ? 'Saving...' : 'Save Profile Changes'}
           </button>
         </form>
       </div>
 
       {/* Change Password Card */}
       <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-          <Key size={20} color="#0284c7" />
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Account Security & Password</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+          <Key size={18} color="#0f172a" />
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Security Settings</h2>
         </div>
 
         {passMsg.text && (
-          <div className={`badge badge-${passMsg.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '12px', marginBottom: '18px', borderRadius: '8px', display: 'block', textTransform: 'none', fontSize: '0.85rem' }}>
+          <div className={`badge badge-${passMsg.type === 'error' ? 'danger' : 'success'}`} style={{ width: '100%', padding: '10px', marginBottom: '16px', borderRadius: '6px', display: 'block', textTransform: 'none', fontSize: '0.825rem' }}>
             {passMsg.text}
           </div>
         )}
@@ -185,8 +186,8 @@ function Profile() {
             />
           </div>
 
-          <button type="submit" className="btn btn-secondary" style={{ gap: '6px' }}>
-            <Lock size={16} /> Update Password
+          <button type="submit" className="btn btn-secondary" style={{ gap: '4px' }}>
+            <Lock size={15} /> Update Password
           </button>
         </form>
       </div>

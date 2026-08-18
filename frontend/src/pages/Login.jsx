@@ -26,32 +26,32 @@ function Login() {
   };
 
   return (
-    <div style={{ maxWidth: '440px', margin: '48px auto', padding: '0 20px' }}>
-      <div className="card" style={{ padding: '36px', boxShadow: 'var(--shadow-lg)', borderTop: '4px solid #0284c7' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+    <div style={{ maxWidth: '420px', margin: '40px auto', padding: '0 16px' }}>
+      <div className="card" style={{ padding: '28px', borderTop: '4px solid #0f172a' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
+            background: '#0f172a',
+            color: '#ffffff',
+            width: '42px',
+            height: '42px',
+            borderRadius: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 12px auto',
-            boxShadow: '0 0 16px rgba(2, 132, 199, 0.35)'
+            margin: '0 auto 10px auto'
           }}>
-            <ShieldAlert size={26} color="#ffffff" />
+            <ShieldAlert size={22} />
           </div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
-            Sign In to Community Cloud
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+            Pinelands Community Sign In
           </h2>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '4px' }}>
-            Access neighborhood alerts, safety network & emergency services
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+            Access safety alerts, notices & local directory
           </p>
         </div>
 
         {error && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', textTransform: 'none', fontSize: '0.85rem', display: 'block' }}>
+          <div className="badge badge-danger" style={{ width: '100%', padding: '10px', marginBottom: '16px', borderRadius: '6px', textTransform: 'none', fontSize: '0.825rem', display: 'block' }}>
             {error}
           </div>
         )}
@@ -60,15 +60,15 @@ function Login() {
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Mail size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 className="form-input"
                 required
-                placeholder="user@communitycloud.co.za"
+                placeholder="sibusiso.dlamini@communitycloud.co.za"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ paddingLeft: '40px' }}
+                style={{ paddingLeft: '38px' }}
               />
             </div>
           </div>
@@ -76,26 +76,26 @@ function Login() {
           <div className="form-group">
             <label className="form-label">Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 className="form-input"
                 required
-                placeholder="••••••••"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingLeft: '40px' }}
+                style={{ paddingLeft: '38px' }}
               />
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px', padding: '12px', gap: '8px' }} disabled={loading}>
-            <LogIn size={18} /> {loading ? 'Signing in...' : 'Sign In to Account'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px', padding: '10px', gap: '6px' }} disabled={loading}>
+            <LogIn size={16} /> {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
-          Don't have an account? <Link to="/register" style={{ fontWeight: '600', color: '#0284c7' }}>Create New Account</Link>
+        <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid #f1f5f9', textAlign: 'center', fontSize: '0.85rem', color: '#64748b' }}>
+          Don't have an account? <Link to="/register" style={{ fontWeight: '600', color: '#1e40af' }}>Register New Account</Link>
         </div>
       </div>
     </div>

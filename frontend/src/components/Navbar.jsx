@@ -18,7 +18,7 @@ function Navbar() {
     <header className="topbar">
       <div className="shell topbar-inner">
         <NavLink to="/" className="wordmark-link" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
-          <Logo size={28} />
+          <Logo />
         </NavLink>
 
         <nav className={`nav${open ? ' open' : ''}`} id="site-nav">

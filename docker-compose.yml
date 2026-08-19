@@ -23,14 +23,13 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: ccp_backend
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
     ports:
       - "8000:8000"
     environment:
       - DEBUG=1
-      - USE_POSTGRES=1
       - DB_HOST=db
       - DB_NAME=community_cloud_db
       - DB_USER=ccp_user

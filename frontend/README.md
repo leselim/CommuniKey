@@ -65,13 +65,12 @@ so the theme can be adjusted from a single place.
 
 | Token | Value | Meaning |
 |-------|-------|---------|
-| `--signal` | `#d1462c` | Emergency and priority: SOS, urgent announcements |
-| `--affirm` | `#7f9c86` | Settled state: resolved, verified, attending |
-| `--ink` / `--panel` | `#0d0f0f` / `#121514` | Graphite grounds with a faint green bias |
+| `--signal` | `#3b6a9c` | Soft matte navy blue for priority, SOS, and active highlights |
+| `--affirm` | `#3b6a9c` | Soft matte navy blue for settled state: resolved, verified, attending |
+| `--ink` / `--panel` | `#0d0f0f` / `#121514` | Graphite grounds |
 | `--paper` / `--dim` / `--faint` | `#e9ecea` / `#929894` / `#666c68` | Three-step text scale |
 
-Because the palette is otherwise neutral, a red marker on screen always means an
-emergency, which matters on a safety platform.
+Because the palette is otherwise neutral, the soft matte navy blue signal carries priority and focus.
 
 **Type.** IBM Plex Sans for interface text and IBM Plex Mono for anything measured:
 times, dates, coordinates and counts. Figures use tabular numerals so columns align.

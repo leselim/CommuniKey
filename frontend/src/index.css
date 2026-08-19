@@ -3,11 +3,10 @@
    Global stylesheet - design tokens and component styles.
 
    Principles
-   - Two signals only. Vermilion means emergency or priority; sage means
-     settled, verified or confirmed. Everything else stays neutral, so a
+   - Soft matte navy blue signal used throughout for priority, focus, settled,
+     verified or confirmed states. Everything else stays neutral, so a
      colour on screen always carries meaning.
-   - Graphite neutrals with a faint green bias, chosen to sit under the two
-     signals without competing with them.
+   - Graphite neutrals, chosen to sit under signals without competing.
    - Rules and whitespace instead of boxes and shadows.
    - IBM Plex Sans for text, IBM Plex Mono for anything measured: times,
      dates, coordinates, counts.
@@ -26,14 +25,14 @@
   --dim: #929894;
   --faint: #666c68;
 
-  /* Signal - emergency and priority */
-  --signal: #d1462c;
-  --signal-hi: #e2573c;
-  --signal-wash: rgba(209, 70, 44, 0.08);
+  /* Signal - priority, focus, and highlight (soft matte navy blue) */
+  --signal: #3b6a9c;
+  --signal-hi: #4a7bb0;
+  --signal-wash: rgba(59, 106, 156, 0.12);
 
-  /* Affirm - verified, resolved, confirmed */
-  --affirm: #7f9c86;
-  --affirm-hi: #93b09a;
+  /* Affirm - verified, resolved, confirmed (soft matte navy blue) */
+  --affirm: #3b6a9c;
+  --affirm-hi: #4a7bb0;
 
   /* Type */
   --sans: "IBM Plex Sans", "Segoe UI", -apple-system, BlinkMacSystemFont,

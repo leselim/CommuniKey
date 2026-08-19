@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import Notifications from './Notifications';
+import Logo from './Logo';
 
 const NAV = [
   { to: '/', label: 'Dashboard' },
@@ -16,9 +17,8 @@ function Navbar() {
   return (
     <header className="topbar">
       <div className="shell topbar-inner">
-        <NavLink to="/" className="wordmark" onClick={() => setOpen(false)}>
-          <span className="wordmark-mark" aria-hidden="true" />
-          CommuniKey
+        <NavLink to="/" className="wordmark-link" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+          <Logo size={28} />
         </NavLink>
 
         <nav className={`nav${open ? ' open' : ''}`} id="site-nav">

@@ -225,25 +225,22 @@ textarea {
   height: var(--bar-h);
 }
 
-.wordmark {
+.wordmark-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.wordmark-link:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.wordmark-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--s3);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  color: #ffffff;
-}
-
-.wordmark-mark {
-  width: 9px;
-  height: 9px;
-  background-color: var(--signal);
-}
-
-.wordmark-sub {
-  color: var(--faint);
 }
 
 .nav {

@@ -1,0 +1,32 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ck-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2573c" />
+      <stop offset="100%" stop-color="#d1462c" />
+    </linearGradient>
+    <linearGradient id="ck-key-ring" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e9ecea" />
+    </linearGradient>
+  </defs>
+
+  <rect width="32" height="32" rx="8" fill="#0d0f0f" />
+
+  <path
+    d="M16 4L6 8V14C6 20.2 10.3 25.9 16 27.6C21.7 25.9 26 20.2 26 14V8L16 4Z"
+    fill="url(#ck-logo-grad)"
+    opacity="0.2"
+  />
+
+  <path
+    d="M16 4L6 8V14C6 20.2 10.3 25.9 16 27.6C21.7 25.9 26 20.2 26 14V8L16 4Z"
+    stroke="url(#ck-logo-grad)"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+
+  <circle cx="16" cy="11.5" r="3.2" stroke="url(#ck-key-ring)" stroke-width="2" fill="none" />
+  <path d="M16 14.7V22" stroke="url(#ck-key-ring)" stroke-width="2" stroke-linecap="round" />
+  <path d="M16 18H18.8" stroke="url(#ck-key-ring)" stroke-width="2" stroke-linecap="round" />
+  <path d="M16 20.6H18.3" stroke="url(#ck-key-ring)" stroke-width="2" stroke-linecap="round" />
+</svg>

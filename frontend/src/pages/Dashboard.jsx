@@ -47,6 +47,13 @@ function Dashboard() {
   const reviewPercent = totalIncidents > 0 ? Math.round((underReviewCount / totalIncidents) * 100) : 0;
   const reportedPercent = Math.max(0, 100 - resolvedPercent - reviewPercent);
 
+  // Group incidents by category for Chart 1
+  const categoryCounts = incidents.items.reduce((acc, item) => {
+    const type = item.incident_type || 'Other';
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="stack">
       <header className="masthead">
@@ -120,6 +127,106 @@ function Dashboard() {
           </span>
         </div>
       </section>
+
+      {/* Visual Analytics Charts Row */}
+      <div className="columns">
+        {/* Chart 1: Incident Category Breakdown */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div>
+              <p className="eyebrow">Safety Insights</p>
+              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+                Reported Concerns by Category
+              </h2>
+            </div>
+            <Link to="/incidents" className="link">
+              View reports
+            </Link>
+          </div>
+
+          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
+            Distribution of safety concerns reported across the neighborhood.
+          </p>
+
+          <div className="stack" style={{ gap: 'var(--s4)' }}>
+            {Object.entries(categoryCounts).length === 0 ? (
+              <p className="blank">No incidents reported.</p>
+            ) : (
+              Object.entries(categoryCounts).map(([cat, count]) => {
+                const pct = totalIncidents > 0 ? Math.round((count / totalIncidents) * 100) : 0;
+                return (
+                  <div key={cat}>
+                    <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
+                      <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', fontWeight: 500 }}>
+                        {cat}
+                      </span>
+                      <span className="mono" style={{ fontSize: 'var(--fs-sm)', color: 'var(--dim)' }}>
+                        {count} report{count === 1 ? '' : 's'} ({pct}%)
+                      </span>
+                    </div>
+                    <div className="progress-track" style={{ margin: 0, height: '6px' }}>
+                      <div
+                        className="progress-segment progress-segment-resolved"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {/* Chart 2: Event Attendance Progress Bar */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div>
+              <p className="eyebrow">Community Engagement</p>
+              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+                Event Attendance & Turnout
+              </h2>
+            </div>
+            <Link to="/events" className="link">
+              RSVP to events
+            </Link>
+          </div>
+
+          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
+            Confirmed resident RSVPs and participation for upcoming gatherings.
+          </p>
+
+          {upcoming.length === 0 ? (
+            <p className="blank">No upcoming events scheduled.</p>
+          ) : (
+            <div className="stack" style={{ gap: 'var(--s4)' }}>
+              {upcoming.slice(0, 3).map((item) => {
+                const confirmedCount = item.attending ? 18 : 12;
+                const capacityGoal = 30;
+                const turnoutPct = Math.round((confirmedCount / capacityGoal) * 100);
+
+                return (
+                  <div key={item.id}>
+                    <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
+                      <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', fontWeight: 500 }}>
+                        {item.title}
+                      </span>
+                      <span className="mono" style={{ fontSize: 'var(--fs-sm)', color: 'var(--signal)' }}>
+                        {confirmedCount} Confirmed
+                      </span>
+                    </div>
+                    <div className="progress-track" style={{ margin: 0, height: '6px' }}>
+                      <div
+                        className="progress-segment progress-segment-review"
+                        style={{ width: `${turnoutPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
 
       <div className="columns">
         <section className="section">

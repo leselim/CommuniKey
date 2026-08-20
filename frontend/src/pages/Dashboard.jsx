@@ -57,22 +57,18 @@ function Dashboard() {
   // Detailed resident insights per category
   const INSIGHTS = {
     'Suspicious activity': {
-      icon: '🚗',
       location: 'Riverside Drive & Main Gate',
       advice: 'Most common concern. Unrecognized vehicles parked for over 30 mins are checked by gate patrol.',
     },
     'Streetlight fault': {
-      icon: '💡',
       location: 'Mill Road',
       advice: 'Occurs after municipal power surges. Reported to city infrastructure team within 24 hours.',
     },
     'Attempted break-in': {
-      icon: '🔒',
       location: 'Section C Perimeter',
-      advice: 'Occasional overnight gate latch damage. Security patrols conduct extra night rounds here.',
+      advice: 'Occasional overnight gate latch damage. Security patrol conducts extra night rounds here.',
     },
     'Noise disturbance': {
-      icon: '🔊',
       location: 'Section B & Clubhouse',
       advice: 'Loud music or late gatherings past quiet hours (22:00). Resolved promptly by patrol.',
     },
@@ -106,7 +102,7 @@ function Dashboard() {
           <div>
             <p className="eyebrow">Safety Progress Overview</p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Neighborhood Resolution Rate
+              Neighborhood Incident Status
             </h2>
           </div>
           <span className="mono" style={{ fontSize: 'var(--fs-lg)', color: 'var(--signal)', fontWeight: 600 }}>
@@ -175,13 +171,13 @@ function Dashboard() {
           <div className="stack" style={{ gap: 'var(--s5)' }}>
             {Object.entries(categoryCounts).map(([cat, count]) => {
               const pct = totalIncidents > 0 ? Math.round((count / totalIncidents) * 100) : 0;
-              const info = INSIGHTS[cat] || { icon: '📌', location: 'General Area', advice: 'Reported concern being tracked.' };
+              const info = INSIGHTS[cat] || { location: 'General Area', advice: 'Reported concern being tracked.' };
 
               return (
                 <div key={cat} style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
                   <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
                     <span style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', fontWeight: 500 }}>
-                      {info.icon} {cat}
+                      {cat}
                     </span>
                     <span className="mono" style={{ fontSize: 'var(--fs-sm)', color: 'var(--signal)', fontWeight: 600 }}>
                       {pct}% of all reports ({count})
@@ -197,7 +193,7 @@ function Dashboard() {
 
                   <div className="entry-meta" style={{ marginTop: 'var(--s2)' }}>
                     <span className="faint" style={{ color: 'var(--dim)', fontSize: '0.8rem' }}>
-                      📍 Hotspot: <strong>{info.location}</strong>
+                      Hotspot: <strong>{info.location}</strong>
                     </span>
                     <p className="sm faint" style={{ marginTop: '2px', color: 'var(--dim)' }}>
                       {info.advice}

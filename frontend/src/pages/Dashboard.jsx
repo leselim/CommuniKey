@@ -73,9 +73,9 @@ function Dashboard() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s2)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
-            <p className="eyebrow">Data Analytics • Real-time Triage</p>
+            <p className="eyebrow">Community Safety Progress</p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Incident Resolution Pipeline
+              Neighborhood Incident Status
             </h2>
           </div>
           <span className="mono" style={{ fontSize: 'var(--fs-lg)', color: 'var(--signal)', fontWeight: 600 }}>
@@ -84,7 +84,7 @@ function Dashboard() {
         </div>
 
         <p className="sm faint">
-          Real-time metric aggregation computed across community safety report database records.
+          A live overview showing reported safety concerns and how quickly they are being addressed.
         </p>
 
         <div className="progress-track">
@@ -116,7 +116,7 @@ function Dashboard() {
           </span>
           <span className="cluster" style={{ gap: 'var(--s2)' }}>
             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--line-hi)' }} />
-            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{reportedCount}</strong> Pending Triage ({reportedPercent}%)
+            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{reportedCount}</strong> Awaiting Review ({reportedPercent}%)
           </span>
         </div>
       </section>

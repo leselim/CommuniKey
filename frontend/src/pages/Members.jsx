@@ -14,14 +14,14 @@ function playPingChime() {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 tone
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.25);
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.22);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.25);
+    osc.stop(ctx.currentTime + 0.22);
   } catch (e) {}
 }
 
@@ -39,13 +39,14 @@ const INITIAL_CONVERSATIONS = [
     role: 'Community Administrator',
     address: '1 Clubhouse Way',
     online: true,
-    unread: 1,
+    lastSeen: 'Online • Active in Estate',
+    type: 'direct',
     messages: [
       {
         id: 'm1',
         sender: 'Marcus Vance',
         role: 'Community Administrator',
-        text: 'Welcome to Riverside Estate communications hub. How can administration assist you today?',
+        text: 'Hey! Just following up on your message regarding the water leak on Riverside Drive.',
         time: new Date(Date.now() - 3600000).toISOString(),
         isMe: false,
       },
@@ -53,7 +54,7 @@ const INITIAL_CONVERSATIONS = [
         id: 'm2',
         sender: 'Resident Member',
         role: 'Resident',
-        text: 'Water leak reported near main gate on Riverside Drive.',
+        text: 'Thanks Marcus! Is the gate entrance going to be blocked during rush hour?',
         time: new Date(Date.now() - 1800000).toISOString(),
         isMe: true,
       },
@@ -61,26 +62,43 @@ const INITIAL_CONVERSATIONS = [
         id: 'm3',
         sender: 'Marcus Vance',
         role: 'Community Administrator',
-        text: 'Maintenance dispatch confirmed. Repair team is on site.',
-        time: new Date(Date.now() - 900000).toISOString(),
+        text: 'Spoke to the supervisor 5 mins ago—they are keeping one lane open and gate security will direct traffic. Let me know if you run into any delays!',
+        time: new Date(Date.now() - 600000).toISOString(),
         isMe: false,
       },
     ],
   },
   {
     id: 2,
-    name: 'David Chen',
-    role: 'System Administrator',
-    address: 'CommuniKey HQ',
+    name: 'Thabo Mokoena',
+    role: 'Resident & Neighbor',
+    address: '22 Riverside Drive',
     online: true,
-    unread: 0,
+    lastSeen: 'Last seen today at 21:40',
+    type: 'direct',
     messages: [
       {
-        id: 'c1',
-        sender: 'David Chen',
-        role: 'System Administrator',
-        text: 'System Admin hotline active. Report platform issues or severe misconduct here.',
+        id: 't1',
+        sender: 'Thabo Mokoena',
+        role: 'Resident',
+        text: 'Hey neighbor! Did you see that silver Polo parked near house 18? Just checking if it belongs to your visitors.',
         time: new Date(Date.now() - 7200000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 't2',
+        sender: 'Resident Member',
+        role: 'Resident',
+        text: 'Hi Thabo! No, not ours. Was it parked there long?',
+        time: new Date(Date.now() - 3600000).toISOString(),
+        isMe: true,
+      },
+      {
+        id: 't3',
+        sender: 'Thabo Mokoena',
+        role: 'Resident',
+        text: 'Yeah about 45 mins. I asked gate security to do a quick drive-by. Everything looks fine now though!',
+        time: new Date(Date.now() - 1200000).toISOString(),
         isMe: false,
       },
     ],
@@ -91,32 +109,101 @@ const INITIAL_CONVERSATIONS = [
     role: 'Safety Volunteer',
     address: '8 Mill Road',
     online: false,
-    unread: 0,
+    lastSeen: 'Last seen 12m ago',
+    type: 'direct',
     messages: [
       {
         id: 's1',
         sender: 'Sarah Jenkins',
         role: 'Safety Volunteer',
-        text: 'Night patrol active on Section C. Let me know if you spot anything suspicious.',
+        text: 'Evening! Starting night patrol rounds on Mill Road and Section C now.',
         time: new Date(Date.now() - 14400000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 's2',
+        sender: 'Resident Member',
+        role: 'Resident',
+        text: 'Thanks Sarah! Could you double check the back gate latch near the park?',
+        time: new Date(Date.now() - 10800000).toISOString(),
+        isMe: true,
+      },
+      {
+        id: 's3',
+        sender: 'Sarah Jenkins',
+        role: 'Safety Volunteer',
+        text: 'Just checked it—latch is secure and gate lock is holding fine.',
+        time: new Date(Date.now() - 9000000).toISOString(),
         isMe: false,
       },
     ],
   },
   {
     id: 4,
-    name: 'Estate Emergency Broadcast',
-    role: 'Community Dispatch',
-    address: 'All Sections',
+    name: 'David Chen',
+    role: 'System Administrator',
+    address: 'CommuniKey HQ',
     online: true,
-    unread: 0,
+    lastSeen: 'Online • HQ Desk',
+    type: 'direct',
     messages: [
       {
-        id: 'e1',
-        sender: 'Estate Emergency Dispatch',
-        role: 'System Dispatch',
-        text: 'Emergency channel active. All pings are routed to safety volunteers and gate security.',
+        id: 'd1',
+        sender: 'David Chen',
+        role: 'System Administrator',
+        text: 'Hi there! Saw your query regarding address verification documents.',
         time: new Date(Date.now() - 86400000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'd2',
+        sender: 'Resident Member',
+        role: 'Resident',
+        text: 'Hi David! Yes, uploaded my municipal bill yesterday, wanted to confirm if it was received.',
+        time: new Date(Date.now() - 43200000).toISOString(),
+        isMe: true,
+      },
+      {
+        id: 'd3',
+        sender: 'David Chen',
+        role: 'System Administrator',
+        text: 'Just reviewed it—everything looks spot on! Your verified resident badge is now active on your profile.',
+        time: new Date(Date.now() - 21600000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
+  {
+    id: 5,
+    name: 'Estate Safety Watch Group',
+    role: 'Community Channel',
+    address: 'All Estate Sections',
+    online: true,
+    lastSeen: 'Active Group • 14 Members',
+    type: 'group',
+    messages: [
+      {
+        id: 'g1',
+        sender: 'Thabo Mokoena',
+        role: 'Resident',
+        text: 'Streetlight on corner of Mill Road is flickering on and off again tonight.',
+        time: new Date(Date.now() - 28800000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'g2',
+        sender: 'Sarah Jenkins',
+        role: 'Safety Volunteer',
+        text: 'Logged on municipal portal! Ticket reference #4092.',
+        time: new Date(Date.now() - 14400000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'g3',
+        sender: 'Marcus Vance',
+        role: 'Community Administrator',
+        text: 'Thanks Sarah, admin team will track it tomorrow morning.',
+        time: new Date(Date.now() - 7200000).toISOString(),
         isMe: false,
       },
     ],
@@ -138,9 +225,8 @@ function Members() {
   const [isTyping, setIsTyping] = useState(false);
   const [receipt, setReceipt] = useState('');
 
-  // Compose Modal State
+  // Ticket Modal
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [recipientRole, setRecipientRole] = useState('Community Administrator');
   const [recipientName, setRecipientName] = useState('Marcus Vance');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -151,6 +237,15 @@ function Members() {
   const activeConv = useMemo(
     () => conversations.find((c) => c.id === activeConvId) || conversations[0],
     [conversations, activeConvId]
+  );
+
+  const directConvs = useMemo(
+    () => conversations.filter((c) => c.type === 'direct'),
+    [conversations]
+  );
+  const groupConvs = useMemo(
+    () => conversations.filter((c) => c.type === 'group'),
+    [conversations]
   );
 
   const visibleMembers = useMemo(() => {
@@ -189,19 +284,23 @@ function Members() {
     );
     setInputMessage('');
 
-    // Trigger simulated real-time response from Administrator or Neighbor
+    // Trigger genuine human response based on contact persona
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
       playPingChime();
 
-      let replyText = `Received your message regarding "${userMsgText.slice(0, 30)}...". Security patrol has been notified.`;
-      if (activeConv.role === 'Community Administrator') {
-        replyText = `Thank you for reaching out. Community Administration has logged this request and dispatched personnel to ${activeConv.address || 'location'}.`;
-      } else if (activeConv.role === 'System Administrator') {
-        replyText = `System Administrator reviewing reported issue. Action escalated and logged under official review.`;
-      } else if (activeConv.role === 'Safety Volunteer') {
-        replyText = `Understood! I am in the area near Mill Road and will check this out right now.`;
+      let replyText = '';
+      if (activeConv.name.includes('Marcus')) {
+        replyText = `Thanks for letting me know! I am following up on this right away with the estate team.`;
+      } else if (activeConv.name.includes('Thabo')) {
+        replyText = `Got your message neighbor! Appreciate you checking in, let's keep an eye on it.`;
+      } else if (activeConv.name.includes('Sarah')) {
+        replyText = `Thanks for the heads up! Adding this location to our night patrol checklist now.`;
+      } else if (activeConv.name.includes('David')) {
+        replyText = `Hi! Received your message. Updating your request details right now.`;
+      } else {
+        replyText = `Message noted by estate watch team! Thanks for updating the channel.`;
       }
 
       const autoReplyMsg = {
@@ -218,7 +317,7 @@ function Members() {
           c.id === activeConvId ? { ...c, messages: [...c.messages, autoReplyMsg] } : c
         )
       );
-    }, 2400);
+    }, 2200);
   };
 
   const handleStartChatWithMember = (member) => {
@@ -231,13 +330,14 @@ function Members() {
         role: member.role,
         address: member.address,
         online: true,
-        unread: 0,
+        lastSeen: 'Online • Just started chat',
+        type: 'direct',
         messages: [
           {
             id: `init_${Date.now()}`,
             sender: fullName,
             role: member.role,
-            text: `Direct chat channel initialized with ${fullName}.`,
+            text: `Hey! Starting a private chat channel here on CommuniKey.`,
             time: new Date().toISOString(),
             isMe: false,
           },
@@ -257,7 +357,7 @@ function Members() {
       id: `ping_${Date.now()}`,
       sender: 'Resident Member',
       role: 'Resident',
-      text: 'EMERGENCY LOCATION PING: Resident activated urgent assistance request at 14 Riverside Drive.',
+      text: 'EMERGENCY LOCATION PING: Priority assistance requested at 14 Riverside Drive.',
       time: new Date().toISOString(),
       isMe: true,
     };
@@ -273,7 +373,7 @@ function Members() {
         id: `r_ping_${Date.now()}`,
         sender: activeConv.name,
         role: activeConv.role,
-        text: `PRIORITY ACKNOWLEDGMENT: Emergency ping received. Gate patrol and safety volunteers dispatched to 14 Riverside Drive immediately.`,
+        text: `Emergency ping received loud and clear! Dispatched nearest security patrol to 14 Riverside Drive right now.`,
         time: new Date().toISOString(),
         isMe: false,
       };
@@ -282,7 +382,7 @@ function Members() {
           c.id === activeConvId ? { ...c, messages: [...c.messages, emergencyReply] } : c
         )
       );
-    }, 1800);
+    }, 1600);
   };
 
   const handleCreateTicket = async (e) => {
@@ -303,23 +403,24 @@ function Members() {
 
     setTicketBody('');
     setModalOpen(false);
-    setReceipt(`Report ticket dispatched to ${recipientName} (${recipientRole}).`);
+    setReceipt(`Admin ticket created and dispatched to ${recipientName}.`);
     setTimeout(() => setReceipt(''), 5000);
   };
 
   return (
     <div className="stack">
+      {/* PAGE HEADER */}
       <header className="masthead">
         <div>
-          <p className="eyebrow">Real-Time Communications</p>
-          <h1>Members & Live Chat</h1>
+          <p className="eyebrow">CommuniKey Chat & Member Network</p>
+          <h1>Real-Time Resident Messaging & Hotline</h1>
           <p className="masthead-meta">
-            Instant real-time neighbor messaging, emergency audio pings, and direct administrator hotline.
+            WhatsApp-style estate chatting, neighbor communications, and direct administrator hotline.
           </p>
         </div>
         <div className="cluster">
           <button type="button" className="btn btn-solid" onClick={() => setModalOpen(true)}>
-            Report Issue / Admin Ticket
+            Submit Admin Ticket
           </button>
           <p className="mono">{memberList.length} verified members</p>
         </div>
@@ -327,7 +428,7 @@ function Members() {
 
       {receipt ? <p className="notice">{receipt}</p> : null}
 
-      {/* Tab Controls */}
+      {/* TAB CONTROLS */}
       <div className="cluster" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
         <button
           type="button"
@@ -339,7 +440,7 @@ function Members() {
           }}
           onClick={() => setActiveTab('chat')}
         >
-          Live Real-Time Chat ({conversations.length})
+          Live Estate Chat ({conversations.length})
         </button>
         <button
           type="button"
@@ -363,79 +464,122 @@ function Members() {
           }}
           onClick={() => setActiveTab('tickets')}
         >
-          Admin Hotline Tickets ({messageList.length})
+          Support & Admin Tickets ({messageList.length})
         </button>
       </div>
 
       {activeTab === 'chat' ? (
         <section className="panel" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--line-hi)' }}>
           <div className="columns" style={{ margin: 0, gap: 0 }}>
-            {/* Conversations Sidebar */}
+            {/* CONVERSATIONS SIDEBAR */}
             <div
               style={{
                 width: '320px',
                 borderRight: '1px solid var(--line)',
                 backgroundColor: 'var(--panel)',
                 padding: 'var(--s4)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--s4)',
               }}
             >
-              <p className="eyebrow" style={{ marginBottom: 'var(--s3)' }}>
-                Active Conversations
-              </p>
-              <div className="stack" style={{ gap: 'var(--s2)' }}>
-                {conversations.map((conv) => {
-                  const isActive = conv.id === activeConvId;
-                  const lastMsg = conv.messages[conv.messages.length - 1];
+              {/* Direct Messages Sub-Heading */}
+              <div>
+                <p className="eyebrow" style={{ marginBottom: 'var(--s2)' }}>
+                  Direct Messages
+                </p>
+                <div className="stack" style={{ gap: 'var(--s2)' }}>
+                  {directConvs.map((conv) => {
+                    const isActive = conv.id === activeConvId;
+                    const lastMsg = conv.messages[conv.messages.length - 1];
 
-                  return (
-                    <button
-                      key={conv.id}
-                      type="button"
-                      onClick={() => setActiveConvId(conv.id)}
-                      style={{
-                        textAlign: 'left',
-                        padding: 'var(--s3)',
-                        borderRadius: '4px',
-                        backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
-                        border: isActive ? '1px solid var(--line-hi)' : '1px solid transparent',
-                        cursor: 'pointer',
-                        display: 'block',
-                        width: '100%',
-                      }}
-                    >
-                      <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
-                        <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
-                          {conv.name}
-                        </strong>
-                        {conv.online ? (
-                          <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.7rem' }}>
-                            Online
+                    return (
+                      <button
+                        key={conv.id}
+                        type="button"
+                        onClick={() => setActiveConvId(conv.id)}
+                        style={{
+                          textAlign: 'left',
+                          padding: 'var(--s3)',
+                          borderRadius: '4px',
+                          backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
+                          border: isActive ? '1px solid var(--line-hi)' : '1px solid transparent',
+                          cursor: 'pointer',
+                          display: 'block',
+                          width: '100%',
+                        }}
+                      >
+                        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
+                          <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                            {conv.name}
+                          </strong>
+                          <span className="mono sm" style={{ color: conv.online ? 'var(--signal)' : 'var(--dim)', fontSize: '0.65rem' }}>
+                            {conv.online ? 'Online' : 'Offline'}
                           </span>
-                        ) : (
-                          <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
-                            Offline
+                        </div>
+                        <p className="eyebrow" style={{ fontSize: '0.65rem', marginBottom: '4px' }}>
+                          {conv.role}
+                        </p>
+                        <p className="sm faint" style={{ color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                          {lastMsg ? lastMsg.text : 'No messages'}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Community Groups Sub-Heading */}
+              <div>
+                <p className="eyebrow" style={{ marginBottom: 'var(--s2)' }}>
+                  Community Channels
+                </p>
+                <div className="stack" style={{ gap: 'var(--s2)' }}>
+                  {groupConvs.map((conv) => {
+                    const isActive = conv.id === activeConvId;
+                    const lastMsg = conv.messages[conv.messages.length - 1];
+
+                    return (
+                      <button
+                        key={conv.id}
+                        type="button"
+                        onClick={() => setActiveConvId(conv.id)}
+                        style={{
+                          textAlign: 'left',
+                          padding: 'var(--s3)',
+                          borderRadius: '4px',
+                          backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
+                          border: isActive ? '1px solid var(--line-hi)' : '1px solid transparent',
+                          cursor: 'pointer',
+                          display: 'block',
+                          width: '100%',
+                        }}
+                      >
+                        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
+                          <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                            {conv.name}
+                          </strong>
+                          <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.65rem' }}>
+                            Active
                           </span>
-                        )}
-                      </div>
-                      <p className="eyebrow" style={{ fontSize: '0.65rem', marginBottom: '4px' }}>
-                        {conv.role}
-                      </p>
-                      <p className="sm faint" style={{ color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {lastMsg ? lastMsg.text : 'No messages'}
-                      </p>
-                    </button>
-                  );
-                })}
+                        </div>
+                        <p className="sm faint" style={{ color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                          {lastMsg ? lastMsg.text : 'No messages'}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Active Live Chat Thread */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '520px', backgroundColor: 'var(--ink)' }}>
+            {/* ACTIVE CHAT THREAD WINDOW */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '540px', backgroundColor: 'var(--ink)' }}>
               {/* Chat Thread Header */}
               <div
                 className="cluster"
                 style={{
-                  justify: 'space-between',
+                  justifyContent: 'space-between',
                   padding: 'var(--s3) var(--s4)',
                   borderBottom: '1px solid var(--line)',
                   backgroundColor: 'var(--panel)',
@@ -445,15 +589,20 @@ function Members() {
                   <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 500, color: 'var(--paper)' }}>
                     {activeConv.name}
                   </h3>
-                  <p className="eyebrow" style={{ fontSize: '0.7rem', marginTop: '2px' }}>
-                    {activeConv.role} • {activeConv.address}
-                  </p>
+                  <div className="cluster" style={{ gap: 'var(--s3)', marginTop: '2px' }}>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>
+                      {activeConv.role}
+                    </span>
+                    <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
+                      {activeConv.lastSeen}
+                    </span>
+                  </div>
                 </div>
                 <div className="cluster">
                   <button
                     type="button"
                     className="btn"
-                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: 'var(--signal)' }}
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', borderColor: 'var(--signal)' }}
                     onClick={handleSendEmergencyPing}
                   >
                     Send Emergency Ping
@@ -486,7 +635,7 @@ function Members() {
                   >
                     <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px', gap: 'var(--s3)' }}>
                       <span className="eyebrow" style={{ color: msg.isMe ? 'var(--paper)' : 'var(--dim)', fontSize: '0.65rem' }}>
-                        {msg.sender} ({msg.role})
+                        {msg.sender}
                       </span>
                       <span className="mono sm" style={{ color: msg.isMe ? 'var(--paper)' : 'var(--faint)', fontSize: '0.65rem' }}>
                         {formatRelative(msg.time)}
@@ -517,7 +666,7 @@ function Members() {
                 <div ref={chatEndRef} />
               </div>
 
-              {/* Live Chat Input Bar */}
+              {/* Live Input Bar */}
               <form
                 onSubmit={handleSendChatMessage}
                 style={{
@@ -530,7 +679,7 @@ function Members() {
               >
                 <input
                   className="control"
-                  placeholder={`Type a live real-time message to ${activeConv.name}...`}
+                  placeholder={`Write a message to ${activeConv.name}...`}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   style={{ flex: 1 }}
@@ -574,7 +723,7 @@ function Members() {
                     style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
                     onClick={() => handleStartChatWithMember(m)}
                   >
-                    Start Live Chat
+                    Start Chat Thread
                   </button>
                 </span>
               </li>
@@ -584,11 +733,11 @@ function Members() {
       ) : (
         <section className="section">
           <div className="section-head">
-            <p className="eyebrow">Administrator Ticket Inbox</p>
+            <p className="eyebrow">Administrator Support Tickets</p>
           </div>
 
           <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-            Logged reports, complaints, and escalated tickets submitted to Community or System Administrators.
+            Logged complaints, gate issues, and administrator support tickets.
           </p>
 
           <ul className="ledger">
@@ -621,7 +770,7 @@ function Members() {
       {/* Ticket Modal */}
       {modalOpen ? (
         <Modal
-          title="Submit Report / Administrator Ticket"
+          title="Submit Report / Admin Ticket"
           onClose={() => setModalOpen(false)}
           footer={
             <>

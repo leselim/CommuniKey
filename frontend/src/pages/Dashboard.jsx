@@ -81,7 +81,9 @@ function Dashboard() {
             {community.suburb}, {community.city}, {community.province}
           </p>
         </div>
-        <p className="mono">{community.member_count} verified members</p>
+        <Link to="/messages" className="mono link" title="Open Members Directory & Messaging Hub">
+          {community.member_count} verified members
+        </Link>
       </header>
 
       {/* Emergency SOS Bar */}
@@ -92,7 +94,9 @@ function Dashboard() {
         <Figure label="Open incidents" value={open.length} />
         <Figure label="Announcements" value={announcements.items.length} />
         <Figure label="Upcoming events" value={upcoming.length} />
-        <Figure label="Members" value={community.member_count} />
+        <Link to="/messages" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+          <Figure label="Verified members" value={community.member_count} />
+        </Link>
       </div>
 
       {/* SECTION 3: Community Safety Resolution Progress */}

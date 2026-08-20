@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Incidents from './pages/Incidents';
 import Announcements from './pages/Announcements';
 import Events from './pages/Events';
+import Members from './pages/Members';
 import Profile from './pages/Profile';
 
 function NotFound() {
@@ -36,6 +37,7 @@ function App() {
               <Route path="/incidents" element={<Incidents />} />
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/messages" element={<Members />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

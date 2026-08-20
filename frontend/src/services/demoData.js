@@ -34,6 +34,79 @@ export const profile = {
   share_location: true,
 };
 
+export const members = [
+  {
+    id: 1,
+    first_name: 'Marcus',
+    last_name: 'Vance',
+    role: 'Community Administrator',
+    email: 'admin@example.com',
+    address: '1 Clubhouse Way',
+    status: 'Verified',
+  },
+  {
+    id: 2,
+    first_name: 'David',
+    last_name: 'Chen',
+    role: 'System Administrator',
+    email: 'sysadmin@example.com',
+    address: 'CommuniKey HQ',
+    status: 'Verified',
+  },
+  {
+    id: 3,
+    first_name: 'Sarah',
+    last_name: 'Jenkins',
+    role: 'Safety Volunteer',
+    email: 'volunteer@example.com',
+    address: '8 Mill Road',
+    status: 'Verified',
+  },
+  {
+    id: 4,
+    first_name: 'Thabo',
+    last_name: 'Mokoena',
+    role: 'Resident',
+    email: 'thabo@example.com',
+    address: '22 Riverside Drive',
+    status: 'Verified',
+  },
+  {
+    id: 5,
+    first_name: 'Elena',
+    last_name: 'Rostova',
+    role: 'Resident',
+    email: 'elena@example.com',
+    address: '16 Mill Road',
+    status: 'Verified',
+  },
+];
+
+export const directMessages = [
+  {
+    id: 1,
+    sender_name: 'Thabo Mokoena',
+    recipient_role: 'Community Administrator',
+    recipient_name: 'Marcus Vance',
+    category: 'Urgent Neighbor Emergency',
+    message: 'Water leak from property gate onto main road. Please notify maintenance.',
+    status: 'In Progress',
+    date_sent: isoDaysFromNow(-0.1),
+    response: 'Maintenance team dispatched. Issue under control.',
+  },
+  {
+    id: 2,
+    sender_name: 'Elena Rostova',
+    recipient_role: 'System Administrator',
+    recipient_name: 'David Chen',
+    category: 'Report Misconduct / Complaint',
+    message: 'Persistent late night disturbance near section boundary. Requesting admin review.',
+    status: 'Awaiting Response',
+    date_sent: isoDaysFromNow(-0.5),
+    response: '',
+  },
+];
+
 export const announcements = [
   {
     id: 1,

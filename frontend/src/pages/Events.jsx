@@ -1,6 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import Modal from '../components/Modal';
-import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import { events as demoEvents } from '../services/demoData';
 import { formatRelative, formatStamp, isSameDay } from '../utils/format';
@@ -68,26 +66,12 @@ function Calendar({ month, events, onStep }) {
   );
 }
 
-const EMPTY_EVENT_DRAFT = {
-  title: '',
-  description: '',
-  event_date: new Date().toISOString().split('T')[0],
-  location: 'Community Clubhouse',
-};
-
 function Events() {
-  const { user } = useAuth();
-  const { items, loading, update, create } = useCollection('/events', demoEvents);
+  const { items, loading, update } = useCollection('/events', demoEvents);
   const [month, setMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [draft, setDraft] = useState(EMPTY_EVENT_DRAFT);
-  const [notice, setNotice] = useState('');
-
-  const isAdmin =
-    user && (user.role === 'Community Administrator' || user.role === 'System Administrator');
 
   const upcoming = useMemo(
     () =>
@@ -102,22 +86,6 @@ function Events() {
   const step = (offset) =>
     setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
 
-  const handleCreateEvent = async (e) => {
-    e.preventDefault();
-    if (!draft.title.trim()) return;
-
-    await create({
-      ...draft,
-      title: draft.title.trim(),
-      attending: true,
-    });
-
-    setDraft(EMPTY_EVENT_DRAFT);
-    setModalOpen(false);
-    setNotice('Community event created and added to the calendar.');
-    setTimeout(() => setNotice(''), 5000);
-  };
-
   return (
     <div className="stack">
       <header className="masthead">
@@ -128,136 +96,53 @@ function Events() {
             Upcoming gatherings, meetings and workshops. RSVP so organisers can plan.
           </p>
         </div>
-        <div className="cluster">
-          {isAdmin ? (
-            <button type="button" className="btn btn-solid" onClick={() => setModalOpen(true)}>
-              Create event
-            </button>
-          ) : null}
-          <p className="mono">
-            {upcoming.length} upcoming / {attending} attending
-          </p>
-        </div>
+        <p className="mono">
+          {upcoming.length} upcoming / {attending} attending
+        </p>
       </header>
 
-      {notice ? <p className="notice">{notice}</p> : null}
+      <Calendar month={month} events={items} onStep={step} />
 
-      <div className="columns">
-        <Calendar month={month} events={items} onStep={step} />
+      <section className="section">
+        <div className="section-head">
+          <p className="eyebrow">Schedule</p>
+          <span className="mono">Next {upcoming.length}</span>
+        </div>
 
-        <section className="section">
-          <div className="section-head">
-            <p className="eyebrow">Upcoming</p>
+        {loading && items.length === 0 ? (
+          <div>
+            <div className="bar" />
+            <div className="bar" />
           </div>
-
-          {loading && items.length === 0 ? (
-            <div>
-              <div className="bar" />
-              <div className="bar" />
-            </div>
-          ) : upcoming.length === 0 ? (
-            <p className="blank">No upcoming events scheduled.</p>
-          ) : (
-            <ul className="ledger">
-              {upcoming.map((item) => (
-                <li className="entry" key={item.id}>
-                  <h3 className="entry-title">{item.title}</h3>
-                  <span className="entry-aside">
-                    <button
-                      type="button"
-                      className={`btn${item.attending ? ' btn-affirm' : ' btn-solid'}`}
-                      onClick={() => update(item.id, { attending: !item.attending })}
-                    >
-                      {item.attending ? 'Attending' : 'RSVP'}
-                    </button>
-                  </span>
-                  <p className="entry-body">{item.description}</p>
-                  <div className="entry-meta">
-                    <span title={formatStamp(item.event_date)}>{formatRelative(item.event_date)}</span>
-                    {item.location ? <span>{item.location}</span> : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-
-      {modalOpen ? (
-        <Modal
-          title="Create Community Event"
-          onClose={() => setModalOpen(false)}
-          footer={
-            <>
-              <button type="button" className="btn" onClick={() => setModalOpen(false)}>
-                Cancel
-              </button>
-              <button type="submit" form="event-form" className="btn btn-solid">
-                Create Event
-              </button>
-            </>
-          }
-        >
-          <form id="event-form" onSubmit={handleCreateEvent} className="stack" style={{ gap: 'var(--s4)' }}>
-            <div className="field">
-              <label className="eyebrow" htmlFor="event-title">
-                Event Title
-              </label>
-              <input
-                id="event-title"
-                className="control"
-                placeholder="Title of event"
-                value={draft.title}
-                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="fields">
-              <div className="field">
-                <label className="eyebrow" htmlFor="event-date">
-                  Event Date
-                </label>
-                <input
-                  id="event-date"
-                  type="date"
-                  className="control"
-                  value={draft.event_date}
-                  onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="field">
-                <label className="eyebrow" htmlFor="event-loc">
-                  Location
-                </label>
-                <input
-                  id="event-loc"
-                  className="control"
-                  placeholder="Location / Venue"
-                  value={draft.location}
-                  onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="field">
-              <label className="eyebrow" htmlFor="event-desc">
-                Description
-              </label>
-              <textarea
-                id="event-desc"
-                className="control"
-                rows={3}
-                placeholder="Details of the event..."
-                value={draft.description}
-                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-              />
-            </div>
-          </form>
-        </Modal>
-      ) : null}
+        ) : upcoming.length === 0 ? (
+          <p className="blank">No events scheduled.</p>
+        ) : (
+          <ul className="ledger">
+            {upcoming.map((item) => (
+              <li className="entry" key={item.id}>
+                <h3 className="entry-title">{item.event_name}</h3>
+                <span className="entry-aside">
+                  <button
+                    type="button"
+                    className={`btn${item.attending ? ' btn-affirm' : ' btn-solid'}`}
+                    aria-pressed={Boolean(item.attending)}
+                    onClick={() => update(item.id, { attending: !item.attending })}
+                  >
+                    {item.attending ? 'Attending' : 'RSVP'}
+                  </button>
+                </span>
+                <p className="entry-body">{item.description}</p>
+                <div className="entry-meta">
+                  <span>{formatStamp(item.event_date)}</span>
+                  {item.event_location ? <span>{item.event_location}</span> : null}
+                  {item.max_attendees ? <span>{item.max_attendees} places</span> : null}
+                  <span>{formatRelative(item.event_date)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

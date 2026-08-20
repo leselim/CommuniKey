@@ -94,6 +94,42 @@ export const incidents = [
     reported_by: 'Safety Volunteer',
     location: 'Section C',
   },
+  {
+    id: 4,
+    incident_type: 'Suspicious activity',
+    description: 'Tailgating incident reported at main security gate entry.',
+    status: 'Resolved',
+    date_reported: isoDaysFromNow(-14),
+    reported_by: 'Gate Security',
+    location: 'Riverside Drive Gate',
+  },
+  {
+    id: 5,
+    incident_type: 'Suspicious activity',
+    description: 'Person looking over boundary wall near north perimeter.',
+    status: 'Resolved',
+    date_reported: isoDaysFromNow(-28),
+    reported_by: 'Resident Member',
+    location: 'Riverside Drive',
+  },
+  {
+    id: 6,
+    incident_type: 'Streetlight fault',
+    description: 'Power surge blew streetlight transformer on Mill Road.',
+    status: 'Resolved',
+    date_reported: isoDaysFromNow(-42),
+    reported_by: 'Maintenance Team',
+    location: 'Mill Road',
+  },
+  {
+    id: 7,
+    incident_type: 'Noise disturbance',
+    description: 'Loud music past 23:00 near clubhouse area.',
+    status: 'Resolved',
+    date_reported: isoDaysFromNow(-55),
+    reported_by: 'Resident Member',
+    location: 'Section B',
+  },
 ];
 
 export const events = [

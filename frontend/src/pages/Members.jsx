@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Modal from '../components/Modal';
+import ResidentProfileModal from '../components/ResidentProfileModal';
 import StatusBadge from '../components/StatusBadge';
 import useCollection from '../hooks/useCollection';
 import {
@@ -225,8 +226,9 @@ function Members() {
   const [isTyping, setIsTyping] = useState(false);
   const [receipt, setReceipt] = useState('');
 
-  // Ticket Modal
+  // Ticket & Profile Modals
   const [modalOpen, setModalOpen] = useState(false);
+  const [profileModalMember, setProfileModalMember] = useState(null);
   const [recipientRole, setRecipientRole] = useState('Community Administrator');
   const [recipientName, setRecipientName] = useState('Marcus Vance');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -586,9 +588,30 @@ function Members() {
                 }}
               >
                 <div>
-                  <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 500, color: 'var(--paper)' }}>
+                  <button
+                    type="button"
+                    className="link"
+                    style={{
+                      fontSize: 'var(--fs-base)',
+                      fontWeight: 600,
+                      color: 'var(--paper)',
+                      textDecoration: 'none',
+                      padding: 0,
+                      textAlign: 'left',
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      const target = memberList.find(
+                        (m) => `${m.first_name} ${m.last_name}` === activeConv.name
+                      );
+                      setProfileModalMember(target || memberList[0]);
+                    }}
+                    title="Click to view verified profile"
+                  >
                     {activeConv.name}
-                  </h3>
+                  </button>
                   <div className="cluster" style={{ gap: 'var(--s3)', marginTop: '2px' }}>
                     <span className="eyebrow" style={{ fontSize: '0.7rem' }}>
                       {activeConv.role}
@@ -599,6 +622,19 @@ function Members() {
                   </div>
                 </div>
                 <div className="cluster">
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                    onClick={() => {
+                      const target = memberList.find(
+                        (m) => `${m.first_name} ${m.last_name}` === activeConv.name
+                      );
+                      setProfileModalMember(target || memberList[0]);
+                    }}
+                  >
+                    View Profile
+                  </button>
                   <button
                     type="button"
                     className="btn"
@@ -717,6 +753,14 @@ function Members() {
                 </div>
                 <span className="entry-aside cluster" style={{ gap: 'var(--s3)' }}>
                   <span className="status status-closed">Verified</span>
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
+                    onClick={() => setProfileModalMember(m)}
+                  >
+                    View Verified Profile
+                  </button>
                   <button
                     type="button"
                     className="btn btn-solid"
@@ -839,6 +883,16 @@ function Members() {
             </div>
           </form>
         </Modal>
+      ) : null}
+
+      {/* Resident Profile Modal */}
+      {profileModalMember ? (
+        <ResidentProfileModal
+          member={profileModalMember}
+          onClose={() => setProfileModalMember(null)}
+          onStartChat={(m) => handleStartChatWithMember(m)}
+          onSendPing={() => handleSendEmergencyPing()}
+        />
       ) : null}
     </div>
   );

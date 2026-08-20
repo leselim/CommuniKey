@@ -1169,6 +1169,35 @@ button.tray-item:hover .tray-title {
   width: 54%;
 }
 
+/* ------------------------------------------------------------- Progress -- */
+
+.progress-track {
+  height: 8px;
+  background-color: var(--line-hi);
+  border-radius: var(--radius);
+  display: flex;
+  overflow: hidden;
+  margin: var(--s3) 0;
+}
+
+.progress-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-segment-resolved {
+  background-color: var(--signal);
+}
+
+.progress-segment-review {
+  background-color: var(--signal-hi);
+}
+
+.progress-segment-reported {
+  background-color: var(--line-hi);
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

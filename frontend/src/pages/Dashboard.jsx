@@ -38,6 +38,15 @@ function Dashboard() {
     .sort((a, b) => new Date(b.date_reported) - new Date(a.date_reported))
     .slice(0, 3);
 
+  const totalIncidents = incidents.items.length;
+  const resolvedCount = incidents.items.filter((i) => i.status === 'Resolved').length;
+  const underReviewCount = incidents.items.filter((i) => i.status === 'Under review').length;
+  const reportedCount = incidents.items.filter((i) => i.status === 'Reported').length;
+
+  const resolvedPercent = totalIncidents > 0 ? Math.round((resolvedCount / totalIncidents) * 100) : 0;
+  const reviewPercent = totalIncidents > 0 ? Math.round((underReviewCount / totalIncidents) * 100) : 0;
+  const reportedPercent = Math.max(0, 100 - resolvedPercent - reviewPercent);
+
   return (
     <div className="stack">
       <header className="masthead">
@@ -59,6 +68,58 @@ function Dashboard() {
         <Figure label="Upcoming events" value={upcoming.length} />
         <Figure label="Members" value={community.member_count} />
       </div>
+
+      {/* Data Engineering Analytics: Incident Resolution Progress */}
+      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        <div className="panel-head" style={{ marginBottom: 'var(--s2)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div>
+            <p className="eyebrow">Data Analytics • Real-time Triage</p>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+              Incident Resolution Pipeline
+            </h2>
+          </div>
+          <span className="mono" style={{ fontSize: 'var(--fs-lg)', color: 'var(--signal)', fontWeight: 600 }}>
+            {resolvedPercent}% Resolved
+          </span>
+        </div>
+
+        <p className="sm faint">
+          Real-time metric aggregation computed across community safety report database records.
+        </p>
+
+        <div className="progress-track">
+          <div
+            className="progress-segment progress-segment-resolved"
+            style={{ width: `${resolvedPercent}%` }}
+            title={`Resolved: ${resolvedPercent}%`}
+          />
+          <div
+            className="progress-segment progress-segment-review"
+            style={{ width: `${reviewPercent}%` }}
+            title={`Under Review: ${reviewPercent}%`}
+          />
+          <div
+            className="progress-segment progress-segment-reported"
+            style={{ width: `${reportedPercent}%` }}
+            title={`Reported: ${reportedPercent}%`}
+          />
+        </div>
+
+        <div className="entry-meta" style={{ marginTop: 'var(--s3)', gap: 'var(--s5)', display: 'flex', flexWrap: 'wrap' }}>
+          <span className="cluster" style={{ gap: 'var(--s2)' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--signal)' }} />
+            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{resolvedCount}</strong> Resolved ({resolvedPercent}%)
+          </span>
+          <span className="cluster" style={{ gap: 'var(--s2)' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--signal-hi)' }} />
+            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{underReviewCount}</strong> Under Review ({reviewPercent}%)
+          </span>
+          <span className="cluster" style={{ gap: 'var(--s2)' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--line-hi)' }} />
+            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{reportedCount}</strong> Pending Triage ({reportedPercent}%)
+          </span>
+        </div>
+      </section>
 
       <div className="columns">
         <section className="section">

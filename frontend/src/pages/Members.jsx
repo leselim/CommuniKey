@@ -414,10 +414,10 @@ function Members() {
       {/* PAGE HEADER */}
       <header className="masthead">
         <div>
-          <p className="eyebrow">CommuniKey Chat & Member Network</p>
-          <h1>Real-Time Resident Messaging & Hotline</h1>
+          <p className="eyebrow">Community Directory & Messaging</p>
+          <h1>Resident Communications & Hotline</h1>
           <p className="masthead-meta">
-            WhatsApp-style estate chatting, neighbor communications, and direct administrator hotline.
+            Direct neighbor messaging, emergency location pings, and administrator support.
           </p>
         </div>
         <div className="cluster">

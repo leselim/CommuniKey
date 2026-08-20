@@ -8,8 +8,7 @@
      colour on screen always carries meaning.
    - Graphite neutrals, chosen to sit under signals without competing.
    - Rules and whitespace instead of boxes and shadows.
-   - IBM Plex Sans for text, IBM Plex Mono for anything measured: times,
-     dates, coordinates, counts.
+   - Poppins font family used throughout for clean, modern, and high-readability typography.
    ========================================================================== */
 
 :root {
@@ -35,10 +34,10 @@
   --affirm-hi: #4a7bb0;
 
   /* Type */
-  --sans: "IBM Plex Sans", "Segoe UI", -apple-system, BlinkMacSystemFont,
+  --sans: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont,
     Helvetica, Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo,
-    Consolas, monospace;
+  --mono: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont,
+    Helvetica, Arial, sans-serif;
 
   --fs-micro: 0.6875rem;
   --fs-sm: 0.8125rem;

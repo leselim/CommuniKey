@@ -72,8 +72,7 @@ so the theme can be adjusted from a single place.
 
 Because the palette is otherwise neutral, the soft matte navy blue signal carries priority and focus.
 
-**Type.** IBM Plex Sans for interface text and IBM Plex Mono for anything measured:
-times, dates, coordinates and counts. Figures use tabular numerals so columns align.
+**Type.** Poppins for interface text, statistics, dates, and measured metrics. Figures use tabular numerals so columns align.
 
 **Layout.** Hairline rules and whitespace instead of boxes and drop shadows. A single
 1120px column, a sticky top bar, and two-column splits that collapse below 880px.

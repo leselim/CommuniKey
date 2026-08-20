@@ -34,10 +34,6 @@ function Dashboard() {
     .sort((a, b) => new Date(b.date_published) - new Date(a.date_published))
     .slice(0, 3);
 
-  const latestIncidents = [...incidents.items]
-    .sort((a, b) => new Date(b.date_reported) - new Date(a.date_reported))
-    .slice(0, 3);
-
   const totalIncidents = incidents.items.length;
   const resolvedCount = incidents.items.filter((i) => i.status === 'Resolved').length;
   const underReviewCount = incidents.items.filter((i) => i.status === 'Under review').length;
@@ -76,6 +72,7 @@ function Dashboard() {
 
   return (
     <div className="stack">
+      {/* SECTION 1: Masthead & Overview */}
       <header className="masthead">
         <div>
           <p className="eyebrow">Community Overview</p>
@@ -87,8 +84,10 @@ function Dashboard() {
         <p className="mono">{community.member_count} verified members</p>
       </header>
 
+      {/* Emergency SOS Bar */}
       <SOSButton />
 
+      {/* SECTION 2: Key Metric Figures Bar */}
       <div className="figures">
         <Figure label="Open incidents" value={open.length} />
         <Figure label="Announcements" value={announcements.items.length} />
@@ -96,7 +95,7 @@ function Dashboard() {
         <Figure label="Members" value={community.member_count} />
       </div>
 
-      {/* Community Safety Resolution Progress */}
+      {/* SECTION 3: Community Safety Resolution Progress */}
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s2)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
@@ -148,9 +147,9 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Story Section: New Resident Guide & Monthly Trends */}
+      {/* SECTION 4: Safety Patterns & Monthly Trends */}
       <div className="columns">
-        {/* Story Part 1: What happens most in Riverside Estate? */}
+        {/* Most Common Incidents in Your Area */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
           <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <div>
@@ -205,7 +204,7 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Story Part 2: Monthly Trends & Dominant Activity */}
+        {/* Monthly Activity Trends & Dominant Incidents */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
           <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <div>
@@ -282,7 +281,9 @@ function Dashboard() {
         </section>
       </div>
 
+      {/* SECTION 5: Active Community Digest (Announcements & Upcoming Events Side-by-Side) */}
       <div className="columns">
+        {/* Latest Announcements */}
         <section className="section">
           <div className="section-head">
             <p className="eyebrow">Announcements</p>
@@ -314,30 +315,30 @@ function Dashboard() {
           )}
         </section>
 
+        {/* Upcoming Events Digest */}
         <section className="section">
           <div className="section-head">
-            <p className="eyebrow">Incidents</p>
-            <Link to="/incidents" className="link">
-              All incidents
+            <p className="eyebrow">Upcoming Events</p>
+            <Link to="/events" className="link">
+              Event calendar
             </Link>
           </div>
 
-          {latestIncidents.length === 0 ? (
-            <p className="blank">No incidents reported.</p>
+          {upcoming.length === 0 ? (
+            <p className="blank">No upcoming events scheduled.</p>
           ) : (
             <ul className="ledger">
-              {latestIncidents.map((item) => (
+              {upcoming.slice(0, 3).map((item) => (
                 <li className="entry" key={item.id}>
-                  <h3 className="entry-title">{item.incident_type}</h3>
-                  <span className="entry-aside">
-                    <StatusBadge status={item.status} />
+                  <h3 className="entry-title">{item.event_name || item.title}</h3>
+                  <span className="entry-aside mono">
+                    {formatDayDate(item.event_date)}
                   </span>
                   <p className="entry-body">{item.description}</p>
                   <div className="entry-meta">
-                    <span title={formatStamp(item.date_reported)}>
-                      {formatRelative(item.date_reported)}
-                    </span>
-                    {item.location ? <span>{item.location}</span> : null}
+                    <span>{formatStamp(item.event_date)}</span>
+                    <span>{item.event_location || item.location}</span>
+                    <span>{formatRelative(item.event_date)}</span>
                   </div>
                 </li>
               ))}
@@ -345,32 +346,6 @@ function Dashboard() {
           )}
         </section>
       </div>
-
-      <section className="section">
-        <div className="section-head">
-          <p className="eyebrow">Next event</p>
-          <Link to="/events" className="link">
-            Calendar
-          </Link>
-        </div>
-
-        {upcoming.length === 0 ? (
-          <p className="blank">No events scheduled.</p>
-        ) : (
-          <ul className="ledger">
-            <li className="entry">
-              <h3 className="entry-title">{upcoming[0].event_name}</h3>
-              <span className="entry-aside mono">{formatDayDate(upcoming[0].event_date)}</span>
-              <p className="entry-body">{upcoming[0].description}</p>
-              <div className="entry-meta">
-                <span>{formatStamp(upcoming[0].event_date)}</span>
-                <span>{upcoming[0].event_location}</span>
-                <span>{formatRelative(upcoming[0].event_date)}</span>
-              </div>
-            </li>
-          </ul>
-        )}
-      </section>
     </div>
   );
 }

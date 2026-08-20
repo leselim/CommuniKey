@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
   INCIDENT_STATUSES,
   INCIDENT_TYPES,
   incidents as demoIncidents,
-  profile,
 } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
@@ -20,13 +20,20 @@ const EMPTY_DRAFT = {
 };
 
 function Incidents() {
-  const { items, loading, create } = useCollection('/incidents', demoIncidents);
+  const { user } = useAuth();
+  const { items, loading, create, update } = useCollection('/incidents', demoIncidents);
   const [filter, setFilter] = useState('All');
   const [query, setQuery] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState('');
+
+  const canTriage =
+    user &&
+    (user.role === 'Safety Volunteer' ||
+      user.role === 'Community Administrator' ||
+      user.role === 'System Administrator');
 
   useEffect(() => {
     if (!receipt) return undefined;
@@ -56,18 +63,24 @@ function Incidents() {
     }
 
     setError('');
+    const reporterName = user ? `${user.first_name} ${user.last_name}` : 'Resident Member';
     await create({
       ...draft,
       description: draft.description.trim(),
       location: draft.location.trim(),
       status: 'Reported',
       date_reported: new Date().toISOString(),
-      reported_by: `${profile.first_name} ${profile.last_name}`,
+      reported_by: reporterName,
     });
 
     setDraft(EMPTY_DRAFT);
     setFormOpen(false);
-    setReceipt('Report submitted. Track its status below.');
+    setReceipt(`Report submitted by ${reporterName}. Track its status below.`);
+  };
+
+  const handleStatusChange = async (id, nextStatus) => {
+    await update(id, { status: nextStatus });
+    setReceipt(`Incident status updated to "${nextStatus}".`);
   };
 
   const counts = INCIDENT_STATUSES.reduce(
@@ -130,8 +143,25 @@ function Incidents() {
             {visible.map((item) => (
               <li className="entry" key={item.id}>
                 <h3 className="entry-title">{item.incident_type}</h3>
-                <span className="entry-aside">
+                <span className="entry-aside" style={{ display: 'flex', gap: 'var(--s2)', alignItems: 'center' }}>
                   <StatusBadge status={item.status} />
+                  {canTriage ? (
+                    <select
+                      className="control"
+                      value={item.status}
+                      style={{
+                        padding: '0.15rem 0.4rem',
+                        fontSize: '0.7rem',
+                        color: 'var(--paper)',
+                        backgroundColor: 'var(--panel)',
+                      }}
+                      onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                    >
+                      <option value="Reported">Reported</option>
+                      <option value="Under review">Under review</option>
+                      <option value="Resolved">Resolved</option>
+                    </select>
+                  ) : null}
                 </span>
                 <p className="entry-body">{item.description}</p>
                 <div className="entry-meta">
@@ -139,7 +169,7 @@ function Incidents() {
                     {formatRelative(item.date_reported)}
                   </span>
                   {item.location ? <span>{item.location}</span> : null}
-                  {item.reported_by ? <span>{item.reported_by}</span> : null}
+                  {item.reported_by ? <span>By {item.reported_by}</span> : null}
                 </div>
               </li>
             ))}
@@ -219,9 +249,6 @@ function Incidents() {
                   value={draft.image_url}
                   onChange={(event) => setDraft({ ...draft, image_url: event.target.value })}
                 />
-                <p className="hint">
-                  Direct upload arrives with the /uploads/images endpoint.
-                </p>
               </div>
             </div>
 

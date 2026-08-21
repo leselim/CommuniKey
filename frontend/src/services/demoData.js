@@ -58,7 +58,7 @@ export const members = [
     role: 'System Administrator',
     email: 'david.chen@communikey.io',
     phone_number: '+27 82 999 4040',
-    address: 'CommuniKey HQ, Technology Hub',
+    address: 'Estate IT & Technical Support Office',
     status: 'Verified',
     joined_date: 'November 2023 (30 Months)',
     emergency_role: 'Platform Operations Lead',

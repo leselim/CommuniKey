@@ -52,7 +52,7 @@ export const SAMPLE_USERS = [
     first_name: 'David',
     last_name: 'Chen',
     role: 'System Administrator',
-    address: 'CommuniKey HQ, Tech Hub',
+    address: 'Estate IT & Technical Support Office',
     community_name: 'Riverside Estate',
     phone_number: '+27 82 999 4040',
     status: 'Verified',

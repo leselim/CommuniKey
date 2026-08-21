@@ -858,15 +858,39 @@ function Members() {
             <p className="sm faint">Select a verified estate resident or staff member to begin a 1-on-1 private chat:</p>
             <ul className="ledger">
               {memberList.map((m) => (
-                <li className="entry" key={m.id}>
-                  <div>
-                    <h3 className="entry-title">{m.first_name} {m.last_name}</h3>
-                    <p className="entry-body">{m.role} • {m.address}</p>
+                <li
+                  className="entry"
+                  key={m.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: 'var(--s3) 0',
+                    borderBottom: '1px solid var(--line)',
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: 'var(--s3)' }}>
+                    <h3 className="entry-title" style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, margin: 0, color: 'var(--paper)' }}>
+                      {m.first_name} {m.last_name}
+                    </h3>
+                    <p
+                      className="entry-body sm faint"
+                      style={{
+                        color: 'var(--dim)',
+                        margin: 0,
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {m.role} • {m.address}
+                    </p>
                   </div>
                   <button
                     type="button"
                     className="btn btn-solid"
-                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', whiteSpace: 'nowrap', flexShrink: 0 }}
                     onClick={() => handleStartChatWithMember(m)}
                   >
                     Start Chat

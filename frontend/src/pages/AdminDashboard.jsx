@@ -140,11 +140,11 @@ function AdminDashboard() {
       {/* SECTION 2: Top Metrics Grid (3 Stat Cards) */}
       <div className="grid-3" style={{ gap: 'var(--s4)' }}>
         {/* Stat Card 1: Incident Resolution */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             INCIDENT RESOLUTION
           </p>
-          <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)', marginBottom: 'var(--s2)' }}>
+          <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
             <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--paper)' }}>
               {healthPercent}% Cleared
             </span>
@@ -153,12 +153,17 @@ function AdminDashboard() {
             </span>
           </div>
 
+          {/* Distinct Rounded Pill Progress Bar Track */}
           <div
             style={{
-              height: '5px',
-              backgroundColor: 'var(--line-hi)',
-              borderRadius: '3px',
+              height: '10px',
+              width: '100%',
+              backgroundColor: 'var(--ink)',
+              border: '1px solid var(--line-hi)',
+              borderRadius: '9999px',
               overflow: 'hidden',
+              marginTop: 'var(--s3)',
+              marginBottom: 'var(--s2)',
             }}
           >
             <div
@@ -166,6 +171,7 @@ function AdminDashboard() {
                 width: `${healthPercent}%`,
                 height: '100%',
                 backgroundColor: 'var(--signal)',
+                borderRadius: '9999px',
                 transition: 'width 0.3s ease',
               }}
             />
@@ -173,8 +179,8 @@ function AdminDashboard() {
         </section>
 
         {/* Stat Card 2: Pending Approvals */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             PENDING APPROVALS
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -188,8 +194,8 @@ function AdminDashboard() {
         </section>
 
         {/* Stat Card 3: Active Maintenance & Facilities */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             MAINTENANCE & FACILITIES
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -211,7 +217,6 @@ function AdminDashboard() {
           style={{
             padding: 'var(--s5)',
             border: '1px solid var(--line-hi)',
-            borderTop: '3px solid var(--signal)',
           }}
         >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
@@ -230,7 +235,7 @@ function AdminDashboard() {
           ) : (
             <ul className="ledger">
               {pendingQueue.map((m) => (
-                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line)' }}>
+                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line-hi)' }}>
                   <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
                     <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
                       {m.name}
@@ -277,7 +282,6 @@ function AdminDashboard() {
           style={{
             padding: 'var(--s5)',
             border: '1px solid var(--line-hi)',
-            borderTop: '3px solid var(--signal)',
           }}
         >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
@@ -293,7 +297,7 @@ function AdminDashboard() {
 
           <ul className="ledger">
             {bookingList.map((b) => (
-              <li className="entry" key={b.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line)' }}>
+              <li className="entry" key={b.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line-hi)' }}>
                 <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
                   <div>
                     <h3 className="entry-title" style={{ margin: 0, fontSize: 'var(--fs-sm)' }}>
@@ -327,7 +331,6 @@ function AdminDashboard() {
         style={{
           padding: 'var(--s5)',
           border: '1px solid var(--line-hi)',
-          borderTop: '3px solid var(--signal)',
         }}
       >
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
@@ -343,7 +346,7 @@ function AdminDashboard() {
 
         <ul className="ledger">
           {CONTRACTOR_REPAIRS.map((c) => (
-            <li className="entry" key={c.id} style={{ borderBottom: '1px solid var(--line)' }}>
+            <li className="entry" key={c.id} style={{ borderBottom: '1px solid var(--line-hi)' }}>
               <div>
                 <h3 className="entry-title">{c.item}</h3>
                 <p className="entry-body" style={{ color: 'var(--dim)' }}>

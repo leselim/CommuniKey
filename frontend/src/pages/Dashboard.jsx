@@ -43,23 +43,23 @@ const MY_REQUESTS = [
   },
 ];
 
-function formatDisplayName(user) {
+function formatFirstName(user) {
   if (!user) return 'Resident';
   if (user.first_name) {
     const raw = user.first_name.trim();
-    const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2');
-    return spaced
-      .split(/\s+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+    const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
+    const firstWord = spaced.split(/\s+/)[0];
+    if (firstWord) {
+      return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    }
   }
   if (user.email) {
     const handle = user.email.split('@')[0];
-    const cleaned = handle.replace(/[._-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
-    return cleaned
-      .split(/\s+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+    const cleaned = handle.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
+    const firstWord = cleaned.split(/\s+/)[0];
+    if (firstWord) {
+      return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    }
   }
   return 'Resident';
 }
@@ -115,7 +115,7 @@ function Dashboard() {
       <header className="masthead">
         <div>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: 0 }}>
-            Welcome back, {formatDisplayName(currentUser)}
+            Welcome back, {formatFirstName(currentUser)}
           </h1>
           <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s2)' }}>
             Riverside Estate • Pretoria

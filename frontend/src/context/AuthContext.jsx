@@ -105,11 +105,16 @@ export function AuthProvider({ children }) {
     }
 
     // Fallback for custom accounts
+    const handle = cleanEmail.split('@')[0];
+    const parts = handle.split(/[._\-]/);
+    const firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : 'Resident';
+    const lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase() : 'Member';
+
     const customUser = {
       id: Date.now(),
       email: cleanEmail,
-      first_name: cleanEmail.split('@')[0],
-      last_name: 'Member',
+      first_name: firstName,
+      last_name: lastName,
       role: 'Resident',
       address: '14 Riverside Drive',
       community_name: 'Riverside Estate',
@@ -137,11 +142,21 @@ export function AuthProvider({ children }) {
   };
 
   const register = (newUserData) => {
+    const firstNameRaw = newUserData.first_name ? newUserData.first_name.trim() : '';
+    const lastNameRaw = newUserData.last_name ? newUserData.last_name.trim() : '';
+
+    const formattedFirstName = firstNameRaw
+      ? firstNameRaw.charAt(0).toUpperCase() + firstNameRaw.slice(1).toLowerCase()
+      : 'Resident';
+    const formattedLastName = lastNameRaw
+      ? lastNameRaw.charAt(0).toUpperCase() + lastNameRaw.slice(1).toLowerCase()
+      : 'Member';
+
     const newUser = {
       id: Date.now(),
       email: newUserData.email.trim().toLowerCase(),
-      first_name: newUserData.first_name.trim(),
-      last_name: newUserData.last_name.trim(),
+      first_name: formattedFirstName,
+      last_name: formattedLastName,
       role: 'Resident', // Default role for new signups
       address: newUserData.address ? newUserData.address.trim() : '14 Riverside Drive, Section B',
       community_name: 'Riverside Estate',

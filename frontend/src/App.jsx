@@ -52,11 +52,27 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route
                   path="/incidents"
                   element={
-                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator', 'Safety Volunteer']}>
+                    <ProtectedRoute allowedRoles={['Resident', 'Estate Administrator', 'Safety Volunteer']}>
+                      <Incidents />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/incidents"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
                       <Incidents />
                     </ProtectedRoute>
                   }
@@ -65,7 +81,15 @@ function App() {
                 <Route
                   path="/announcements"
                   element={
-                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator']}>
+                    <ProtectedRoute allowedRoles={['Resident', 'Estate Administrator', 'Safety Volunteer']}>
+                      <Announcements />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/announcements"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
                       <Announcements />
                     </ProtectedRoute>
                   }
@@ -74,7 +98,15 @@ function App() {
                 <Route
                   path="/events"
                   element={
-                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator']}>
+                    <ProtectedRoute allowedRoles={['Resident', 'Estate Administrator', 'Safety Volunteer']}>
+                      <Events />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/events"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
                       <Events />
                     </ProtectedRoute>
                   }
@@ -85,6 +117,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Members />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/moderation"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
+                      <Members defaultTab="directory" />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/moderation"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
+                      <Members defaultTab="directory" />
                     </ProtectedRoute>
                   }
                 />

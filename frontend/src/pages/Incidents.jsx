@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
   INCIDENT_STATUSES,
@@ -20,7 +21,8 @@ const EMPTY_DRAFT = {
 };
 
 function Incidents() {
-  const { items, loading, create } = useCollection('/incidents', demoIncidents);
+  const { userRole } = useAuth();
+  const { items, loading, create, update } = useCollection('/incidents', demoIncidents);
   const [filter, setFilter] = useState('All');
   const [query, setQuery] = useState('');
   const [formOpen, setFormOpen] = useState(false);
@@ -128,18 +130,43 @@ function Incidents() {
         ) : (
           <ul className="ledger">
             {visible.map((item) => (
-              <li className="entry" key={item.id}>
-                <h3 className="entry-title">{item.incident_type}</h3>
-                <span className="entry-aside">
-                  <StatusBadge status={item.status} />
-                </span>
-                <p className="entry-body">{item.description}</p>
-                <div className="entry-meta">
-                  <span title={formatStamp(item.date_reported)}>
-                    {formatRelative(item.date_reported)}
-                  </span>
-                  {item.location ? <span>{item.location}</span> : null}
-                  {item.reported_by ? <span>{item.reported_by}</span> : null}
+              <li className="entry" key={item.id} style={{ display: 'block', padding: 'var(--s4) 0', borderBottom: '1px solid var(--line-hi)' }}>
+                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
+                  <h3 className="entry-title" style={{ margin: 0 }}>{item.incident_type}</h3>
+                  <div className="cluster" style={{ gap: 'var(--s2)' }}>
+                    <StatusBadge status={item.status} />
+                    {userRole === 'Estate Administrator' || userRole === 'Safety Volunteer' ? (
+                      <select
+                        className="control sm"
+                        value={item.status}
+                        onChange={(e) => update(item.id, { status: e.target.value })}
+                        style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem', color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
+                      >
+                        <option value="Reported">Reported</option>
+                        <option value="Under review">Under Review</option>
+                        <option value="Dispatched">Dispatched</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                    ) : null}
+                  </div>
+                </div>
+
+                <p className="entry-body" style={{ marginBottom: 'var(--s2)' }}>{item.description}</p>
+
+                <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="entry-meta" style={{ margin: 0 }}>
+                    <span title={formatStamp(item.date_reported)}>
+                      {formatRelative(item.date_reported)}
+                    </span>
+                    {item.location ? <span>📍 {item.location}</span> : null}
+                    {item.reported_by ? <span>👤 Reported by {item.reported_by}</span> : null}
+                  </div>
+
+                  {userRole === 'Estate Administrator' || userRole === 'Safety Volunteer' ? (
+                    <span className="mono sm faint" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
+                      Assigned: {item.assigned_contractor || 'Estate Ops Team'}
+                    </span>
+                  ) : null}
                 </div>
               </li>
             ))}

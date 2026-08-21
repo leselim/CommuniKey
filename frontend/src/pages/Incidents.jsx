@@ -158,8 +158,8 @@ function Incidents() {
                     <span title={formatStamp(item.date_reported)}>
                       {formatRelative(item.date_reported)}
                     </span>
-                    {item.location ? <span>📍 {item.location}</span> : null}
-                    {item.reported_by ? <span>👤 Reported by {item.reported_by}</span> : null}
+                    {item.location ? <span>Location: {item.location}</span> : null}
+                    {item.reported_by ? <span>Reported by {item.reported_by}</span> : null}
                   </div>
 
                   {userRole === 'Estate Administrator' || userRole === 'Safety Volunteer' ? (

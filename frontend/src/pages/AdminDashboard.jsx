@@ -418,7 +418,7 @@ function AdminDashboard() {
               }}
             >
               <p className="sm faint" style={{ color: 'var(--dim)' }}>
-                📄 Preview of {reviewDocModal.fileName}
+                Preview of {reviewDocModal.fileName}
                 <br />
                 (Document ID & Municipal Match Verified)
               </p>

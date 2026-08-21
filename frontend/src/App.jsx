@@ -53,6 +53,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin"
                   element={
                     <ProtectedRoute allowedRoles={['Estate Administrator']}>
@@ -77,6 +85,14 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/volunteer/triage"
+                  element={
+                    <ProtectedRoute allowedRoles={['Safety Volunteer']}>
+                      <Incidents />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route
                   path="/announcements"
@@ -90,6 +106,14 @@ function App() {
                   path="/admin/announcements"
                   element={
                     <ProtectedRoute allowedRoles={['Estate Administrator']}>
+                      <Announcements />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/volunteer/alerts"
+                  element={
+                    <ProtectedRoute allowedRoles={['Safety Volunteer']}>
                       <Announcements />
                     </ProtectedRoute>
                   }
@@ -116,6 +140,14 @@ function App() {
                   path="/messages"
                   element={
                     <ProtectedRoute>
+                      <Members />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/volunteer/patrol"
+                  element={
+                    <ProtectedRoute allowedRoles={['Safety Volunteer']}>
                       <Members />
                     </ProtectedRoute>
                   }

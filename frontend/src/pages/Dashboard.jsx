@@ -47,16 +47,17 @@ function formatDisplayName(user) {
   if (!user) return 'Resident';
   if (user.first_name) {
     const raw = user.first_name.trim();
-    return raw
-      .split(' ')
+    const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return spaced
+      .split(/\s+/)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
   if (user.email) {
     const handle = user.email.split('@')[0];
-    const cleaned = handle.replace(/[._-]/g, ' ');
+    const cleaned = handle.replace(/[._-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
     return cleaned
-      .split(' ')
+      .split(/\s+/)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
@@ -110,43 +111,13 @@ function Dashboard() {
 
   return (
     <div className="stack">
-      {/* HERO SECTION: Estate Status & Quick Actions */}
+      {/* HERO SECTION: Greeting & Quick Actions */}
       <header className="masthead">
         <div>
-          <div className="cluster" style={{ gap: 'var(--s2)', marginBottom: 'var(--s2)', alignItems: 'center' }}>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                color: 'var(--paper)',
-                backgroundColor: 'var(--panel-hi)',
-                padding: '0.3rem 0.75rem',
-                borderRadius: '20px',
-                border: '1px solid var(--line-hi)',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-              }}
-            >
-              <span
-                style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: '#22c55e',
-                  boxShadow: '0 0 6px #22c55e',
-                  display: 'inline-block',
-                }}
-              />
-              Estate Operational • All Gates Clear • 24/7 Patrol Active
-            </span>
-          </div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600 }}>
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: 0 }}>
             Welcome back, {formatDisplayName(currentUser)}
           </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: '4px' }}>
+          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s2)' }}>
             Riverside Estate • Pretoria
           </p>
         </div>

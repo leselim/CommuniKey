@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 import Notifications from './Notifications';
@@ -37,8 +37,10 @@ const ROLE_NAV = {
 function Navbar() {
   const { currentUser, userRole, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
 
+  const isAuthPage = ['/signin', '/login', '/signup', '/forgot-password'].includes(location.pathname);
   const activeNav = (isAuthenticated && userRole && ROLE_NAV[userRole]) ? ROLE_NAV[userRole] : ROLE_NAV.Resident;
 
   const handleLogout = () => {
@@ -99,11 +101,11 @@ function Navbar() {
                 Sign Out
               </button>
             </>
-          ) : (
+          ) : !isAuthPage ? (
             <NavLink to="/signin" className="btn btn-solid" style={{ padding: '0.3rem 0.7rem', fontSize: '0.8rem' }}>
               Sign In
             </NavLink>
-          )}
+          ) : null}
 
           <button
             type="button"

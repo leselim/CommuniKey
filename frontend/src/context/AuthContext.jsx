@@ -136,6 +136,31 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(TOKEN_KEY);
   };
 
+  const register = (newUserData) => {
+    const newUser = {
+      id: Date.now(),
+      email: newUserData.email.trim().toLowerCase(),
+      first_name: newUserData.first_name.trim(),
+      last_name: newUserData.last_name.trim(),
+      role: 'Resident', // Default role for new signups
+      address: newUserData.address ? newUserData.address.trim() : '14 Riverside Drive, Section B',
+      community_name: 'Riverside Estate',
+      phone_number: newUserData.phone_number ? newUserData.phone_number.trim() : '+27 82 000 0000',
+      status: 'Verified Resident',
+    };
+
+    setCurrentUser(newUser);
+    localStorage.setItem(TOKEN_KEY, 'demo_token_resident');
+    return { success: true, user: newUser };
+  };
+
+  const resetPassword = (emailInput) => {
+    return {
+      success: true,
+      message: `Password reset instructions have been dispatched to ${emailInput.trim()}. Check your inbox to complete reset.`,
+    };
+  };
+
   const updateProfile = (updatedData) => {
     setCurrentUser((prev) => ({ ...prev, ...updatedData }));
   };
@@ -197,6 +222,8 @@ export function AuthProvider({ children }) {
     login,
     loginAsPersona,
     logout,
+    register,
+    resetPassword,
     updateProfile,
     canAccessPrivateChat,
     redactResidentProfile,

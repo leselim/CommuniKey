@@ -6,10 +6,12 @@ import { AuthProvider } from './context/AuthContext';
 import Announcements from './pages/Announcements';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
+import ForgotPassword from './pages/ForgotPassword';
 import Incidents from './pages/Incidents';
 import Members from './pages/Members';
 import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
 function NotFound() {
   return (
@@ -39,6 +41,8 @@ function App() {
               <Routes>
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/login" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
                 <Route
                   path="/"

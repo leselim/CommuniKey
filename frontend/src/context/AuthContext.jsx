@@ -25,7 +25,7 @@ export const SAMPLE_USERS = [
     password: SEED_PASSWORD,
     first_name: 'Marcus',
     last_name: 'Vance',
-    role: 'Community Administrator',
+    role: 'Estate Administrator',
     address: '1 Clubhouse Way, Section A',
     community_name: 'Riverside Estate',
     phone_number: '+27 82 111 2020',
@@ -51,7 +51,7 @@ export const SAMPLE_USERS = [
     password: SEED_PASSWORD,
     first_name: 'David',
     last_name: 'Chen',
-    role: 'System Administrator',
+    role: 'IT & App Support',
     address: 'Estate IT & Technical Support Office',
     community_name: 'Riverside Estate',
     phone_number: '+27 82 999 4040',
@@ -178,7 +178,9 @@ export function AuthProvider({ children }) {
 
     // Admin & SysAdmin privacy restriction: No reading private peer-to-peer resident chats unless Admin support is a participant
     if (
+      currentUser.role === 'Estate Administrator' ||
       currentUser.role === 'Community Administrator' ||
+      currentUser.role === 'IT & App Support' ||
       currentUser.role === 'System Administrator'
     ) {
       return (

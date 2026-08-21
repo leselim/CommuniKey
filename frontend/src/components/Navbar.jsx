@@ -13,6 +13,14 @@ const ROLE_NAV = {
     { to: '/messages', label: 'Members & Messages' },
     { to: '/profile', label: 'Profile' },
   ],
+  'Estate Administrator': [
+    { to: '/', label: 'Admin Hub' },
+    { to: '/incidents', label: 'Incident Triage' },
+    { to: '/announcements', label: 'Announcements' },
+    { to: '/events', label: 'Events' },
+    { to: '/messages', label: 'Member Moderation' },
+    { to: '/profile', label: 'Profile' },
+  ],
   'Community Administrator': [
     { to: '/', label: 'Admin Hub' },
     { to: '/incidents', label: 'Incident Triage' },
@@ -25,6 +33,11 @@ const ROLE_NAV = {
     { to: '/', label: 'Responder Hub' },
     { to: '/incidents', label: 'Active Incidents' },
     { to: '/messages', label: 'Dispatch Channel' },
+    { to: '/profile', label: 'Profile' },
+  ],
+  'IT & App Support': [
+    { to: '/', label: 'System Overview' },
+    { to: '/messages', label: 'Member Network' },
     { to: '/profile', label: 'Profile' },
   ],
   'System Administrator': [

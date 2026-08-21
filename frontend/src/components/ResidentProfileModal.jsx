@@ -123,7 +123,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
                     border: '1px solid var(--line-hi)',
                   }}
                 >
-                  Verified Resident
+                  {member.role || 'Resident'}
                 </span>
               </div>
 
@@ -159,7 +159,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
             <div>
               <span className="faint sm">Verification Status</span>
               <p className="sm" style={{ color: 'var(--paper)', fontWeight: 500, marginTop: '2px' }}>
-                Verified Resident Household
+                Verified Household
               </p>
             </div>
 
@@ -170,12 +170,14 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
               </p>
             </div>
 
-            <div>
-              <span className="faint sm">Community Role</span>
-              <p className="sm" style={{ color: 'var(--paper)', marginTop: '2px' }}>
-                {member.emergency_role || 'Resident Member'}
-              </p>
-            </div>
+            {member.emergency_role ? (
+              <div>
+                <span className="faint sm">Estate Department / Team</span>
+                <p className="sm" style={{ color: 'var(--paper)', marginTop: '2px' }}>
+                  {member.emergency_role}
+                </p>
+              </div>
+            ) : null}
 
             <div>
               <span className="faint sm">Gatherings Attended</span>

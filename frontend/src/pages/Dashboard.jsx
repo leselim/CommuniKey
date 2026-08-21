@@ -52,7 +52,7 @@ function Dashboard() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [notice, setNotice] = useState('');
 
-  if (userRole === 'Community Administrator') {
+  if (userRole === 'Estate Administrator' || userRole === 'Community Administrator') {
     return <AdminDashboard />;
   }
 
@@ -60,7 +60,7 @@ function Dashboard() {
     return <VolunteerDashboard />;
   }
 
-  if (userRole === 'System Administrator') {
+  if (userRole === 'IT & App Support' || userRole === 'System Administrator') {
     return <SysAdminDashboard />;
   }
 

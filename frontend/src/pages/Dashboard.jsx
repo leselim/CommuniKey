@@ -92,16 +92,12 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpState, setRsvpState] = useState({});
 
-  if (userRole === 'Estate Administrator' || userRole === 'Community Administrator') {
+  if (userRole === 'Estate Administrator') {
     return <AdminDashboard />;
   }
 
   if (userRole === 'Safety Volunteer') {
     return <VolunteerDashboard />;
-  }
-
-  if (userRole === 'IT & App Support' || userRole === 'System Administrator') {
-    return <SysAdminDashboard />;
   }
 
   const announcements = useCollection('/announcements', demoAnnouncements);

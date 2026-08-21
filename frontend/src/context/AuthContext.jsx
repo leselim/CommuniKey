@@ -44,19 +44,6 @@ export const SAMPLE_USERS = [
     phone_number: '+27 83 456 7890',
     status: 'Verified',
   },
-  {
-    id: 4,
-    email: 'david@example.com',
-    aliases: ['sysadmin@example.com', 'david@example.com'],
-    password: SEED_PASSWORD,
-    first_name: 'David',
-    last_name: 'Chen',
-    role: 'IT & App Support',
-    address: 'Estate IT & Technical Support Office',
-    community_name: 'Riverside Estate',
-    phone_number: '+27 82 999 4040',
-    status: 'Verified',
-  },
 ];
 
 const AUTH_USER_KEY = 'ccp_auth_user';
@@ -200,12 +187,7 @@ export function AuthProvider({ children }) {
     const myFullName = `${currentUser.first_name} ${currentUser.last_name}`;
 
     // Admin & SysAdmin privacy restriction: No reading private peer-to-peer resident chats unless Admin support is a participant
-    if (
-      currentUser.role === 'Estate Administrator' ||
-      currentUser.role === 'Community Administrator' ||
-      currentUser.role === 'IT & App Support' ||
-      currentUser.role === 'System Administrator'
-    ) {
+    if (currentUser.role === 'Estate Administrator') {
       return (
         senderName.includes('Marcus') ||
         recipientName.includes('Marcus') ||

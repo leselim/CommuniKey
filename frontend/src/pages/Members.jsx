@@ -379,10 +379,7 @@ function Members() {
           Verified Members Directory ({memberList.length})
         </button>
 
-        {userRole === 'Estate Administrator' ||
-        userRole === 'Community Administrator' ||
-        userRole === 'IT & App Support' ||
-        userRole === 'System Administrator' ? (
+        {userRole === 'Estate Administrator' ? (
           <button
             type="button"
             className="link"

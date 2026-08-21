@@ -27,7 +27,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
   const initials = getInitials(fullName);
 
   const isSelf = currentUser?.email === member.email;
-  const isAdmin = userRole === 'Community Administrator' || userRole === 'System Administrator';
+  const isAdmin = userRole === 'Estate Administrator';
   const isVolunteer = userRole === 'Safety Volunteer';
   const isPeerResident = !isAdmin && !isVolunteer && !isSelf;
 

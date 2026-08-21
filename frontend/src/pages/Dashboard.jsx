@@ -320,40 +320,54 @@ function Dashboard() {
           </div>
 
           <div className="stack" style={{ gap: 'var(--s3)' }}>
-            {upcomingEvents.map((evt) => (
-              <div
-                key={evt.id}
-                style={{
-                  padding: 'var(--s3) var(--s4)',
-                  backgroundColor: 'var(--panel-hi)',
-                  border: '1px solid var(--line-hi)',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setSelectedEvent(evt)}
-                className="interactive-card"
-              >
-                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                    {evt.title}
-                  </h3>
-                  <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.75rem', fontWeight: 600 }}>
-                    {formatDayDate(evt.event_date)}
-                  </span>
+            {upcomingEvents.map((evt) => {
+              const title = evt.title || evt.event_name;
+              const venue = evt.venue || evt.location || evt.event_location;
+              const organiser = evt.organiser || 'Safety Committee';
+              const statusText = rsvpState[evt.id]
+                ? 'Attending'
+                : `RSVP Open • ${evt.attendees_count || 14} Attending`;
+
+              return (
+                <div
+                  key={evt.id}
+                  style={{
+                    padding: 'var(--s3) var(--s4)',
+                    backgroundColor: 'var(--panel-hi)',
+                    border: '1px solid var(--line-hi)',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setSelectedEvent(evt)}
+                  className="interactive-card"
+                >
+                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                      {title}
+                    </h3>
+                    <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.75rem', fontWeight: 600 }}>
+                      {formatDayDate(evt.event_date)}
+                    </span>
+                  </div>
+
+                  <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                    {venue} • Organised by {organiser}
+                  </p>
+
+                  <div className="cluster" style={{ justifyContent: 'space-between', marginTop: '6px' }}>
+                    <span
+                      className="mono sm"
+                      style={{ color: rsvpState[evt.id] ? 'var(--signal)' : 'var(--dim)', fontSize: '0.75rem' }}
+                    >
+                      {statusText}
+                    </span>
+                    <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--signal)' }}>
+                      View Details →
+                    </span>
+                  </div>
                 </div>
-                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                  Venue: {evt.location} • Organiser: {evt.organiser}
-                </p>
-                <div className="cluster" style={{ justifyContent: 'space-between', marginTop: '6px' }}>
-                  <span className="mono sm" style={{ color: rsvpState[evt.id] ? 'var(--signal)' : 'var(--dim)', fontSize: '0.75rem' }}>
-                    {rsvpState[evt.id] ? 'Attending' : 'RSVP Open'}
-                  </span>
-                  <span className="link sm" style={{ fontSize: '0.75rem' }}>
-                    View Details →
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </div>
@@ -453,7 +467,7 @@ function Dashboard() {
       {/* INTERACTIVE EVENT DETAILS MODAL */}
       {selectedEvent ? (
         <Modal
-          title={selectedEvent.title}
+          title={selectedEvent.title || selectedEvent.event_name}
           onClose={() => setSelectedEvent(null)}
           footer={
             <>
@@ -476,7 +490,7 @@ function Dashboard() {
           <div className="stack" style={{ gap: 'var(--s3)' }}>
             <div className="cluster" style={{ justifyContent: 'space-between' }}>
               <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-                {formatDayDate(selectedEvent.event_date)}
+                {formatDayDate(selectedEvent.event_date)} • {selectedEvent.time || '18:30 to 19:30'}
               </span>
               <span className="status status-closed">
                 {rsvpState[selectedEvent.id] ? 'Attending' : 'RSVP Open'}
@@ -485,10 +499,10 @@ function Dashboard() {
 
             <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Location / Venue:</strong> {selectedEvent.location}
+                <strong>Venue:</strong> {selectedEvent.venue || selectedEvent.location || selectedEvent.event_location}
               </p>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Organiser:</strong> {selectedEvent.organiser}
+                <strong>Organiser:</strong> {selectedEvent.organiser || 'Safety Committee'}
               </p>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)', lineHeight: 1.5 }}>
                 {selectedEvent.description || 'Join your fellow residents for this estate gathering.'}

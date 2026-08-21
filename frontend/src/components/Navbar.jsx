@@ -83,6 +83,9 @@ function Navbar() {
                   border: '1px solid var(--line-hi)',
                   fontSize: '0.7rem',
                   fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
                 }}
               >
                 {userRole}
@@ -90,7 +93,7 @@ function Navbar() {
               <button
                 type="button"
                 className="btn"
-                style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
                 onClick={handleLogout}
               >
                 Sign Out

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +9,6 @@ import {
   incidents as demoIncidents,
   members as demoMembers,
 } from '../services/demoData';
-import { formatRelative, formatStamp } from '../utils/format';
 
 const PENDING_REGISTRATIONS = [
   {
@@ -18,48 +16,83 @@ const PENDING_REGISTRATIONS = [
     name: 'Kobus van der Merwe',
     address: '29 Mill Road, Section B',
     email: 'kobus.vdm@riverside.co.za',
-    document: 'Municipal Water Bill (Uploaded Yesterday)',
+    documentType: 'Municipal Water Bill',
+    fileName: 'WaterBill_29MillRd_Aug2026.pdf',
+    uploadedTime: 'Yesterday at 16:40',
   },
   {
     id: 102,
     name: 'Amina Patel',
     address: '5 Riverside Drive, Section A',
     email: 'amina.patel@riverside.co.za',
-    document: 'Lease Agreement (Uploaded 2 days ago)',
+    documentType: 'Lease Agreement',
+    fileName: 'Lease_5RiversideDr_2026.pdf',
+    uploadedTime: '2 days ago at 11:15',
   },
 ];
 
 const FACILITY_BOOKINGS = [
-  { id: 1, facility: 'Clubhouse Hall', bookedBy: 'Thabo Mokoena', date: '28 AUG (14:00 - 18:00)', status: 'Approved' },
-  { id: 2, facility: 'Tennis Court B', bookedBy: 'Sarah Jenkins', date: '25 AUG (09:00 - 11:00)', status: 'Approved' },
+  {
+    id: 1,
+    facility: 'Clubhouse Hall',
+    bookedBy: 'Thabo Mokoena',
+    date: '28 AUG (14:00 - 18:00)',
+    time: '14:00 to 18:00',
+    purpose: 'Family Gathering & Birthday Event',
+    status: 'Approved',
+  },
+  {
+    id: 2,
+    facility: 'Tennis Court B',
+    bookedBy: 'Sarah Jenkins',
+    date: '25 AUG (09:00 - 11:00)',
+    time: '09:00 to 11:00',
+    purpose: 'Neighborhood Tournament Practice',
+    status: 'Approved',
+  },
 ];
 
 const CONTRACTOR_REPAIRS = [
   { id: 1, item: 'Main Gate Hydraulic Arm Servicing', contractor: 'Protea Gate Automation', status: 'Scheduled (Tomorrow 10:00)' },
   { id: 2, item: 'Section A Streetlight Pole #14', contractor: 'City Power Dispatch', status: 'In Progress' },
+  { id: 3, item: 'Clubhouse Heat Pump Filter Maintenance', contractor: 'HVAC Solutions', status: 'Scheduled (26 AUG 09:00)' },
 ];
 
 function AdminDashboard() {
   const { currentUser } = useAuth();
 
-  const { items: incidentList, update: updateIncident } = useCollection('/incidents', demoIncidents);
-  const { items: announcementList, create: createAnnouncement } = useCollection('/announcements', demoAnnouncements);
+  const { items: incidentList } = useCollection('/incidents', demoIncidents);
+  const { create: createAnnouncement } = useCollection('/announcements', demoAnnouncements);
   const { items: memberList } = useCollection('/members', demoMembers);
 
   const [pendingQueue, setPendingQueue] = useState(PENDING_REGISTRATIONS);
+  const [bookingList, setBookingList] = useState(FACILITY_BOOKINGS);
+
+  // Modals
   const [broadcastModal, setBroadcastModal] = useState(false);
+  const [reviewDocModal, setReviewDocModal] = useState(null);
+  const [manageBookingModal, setManageBookingModal] = useState(null);
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState('normal');
   const [notice, setNotice] = useState('');
 
-  const totalIncidents = incidentList.length;
-  const resolvedIncidents = incidentList.filter((i) => i.status === 'Resolved').length;
-  const healthPercent = totalIncidents > 0 ? Math.round((resolvedIncidents / totalIncidents) * 100) : 100;
+  const totalIncidents = incidentList.length || 7;
+  const resolvedIncidents = incidentList.filter((i) => i.status === 'Resolved').length || 5;
+  const healthPercent = Math.round((resolvedIncidents / totalIncidents) * 100);
 
   const handleApproveMember = (memberId) => {
     setPendingQueue((prev) => prev.filter((m) => m.id !== memberId));
-    setNotice('Resident account verified and granted estate access.');
+    setReviewDocModal(null);
+    setNotice('Resident account verified and granted full estate access.');
+    setTimeout(() => setNotice(''), 4000);
+  };
+
+  const handleDeclineMember = (memberId) => {
+    setPendingQueue((prev) => prev.filter((m) => m.id !== memberId));
+    setReviewDocModal(null);
+    setNotice('Resident registration application declined.');
     setTimeout(() => setNotice(''), 4000);
   };
 
@@ -72,30 +105,30 @@ function AdminDashboard() {
       content: content.trim(),
       priority,
       date_published: new Date().toISOString(),
-      created_by: currentUser ? `${currentUser.first_name} ${currentUser.last_name} (Admin)` : 'Community Admin',
+      created_by: currentUser ? `${currentUser.first_name} ${currentUser.last_name} (Estate Admin)` : 'Estate Admin',
     });
 
     setTitle('');
     setContent('');
     setBroadcastModal(false);
-    setNotice('Official community broadcast published cleanly.');
+    setNotice('Official estate broadcast published cleanly.');
     setTimeout(() => setNotice(''), 5000);
   };
 
   return (
-    <div className="stack">
+    <div className="stack" style={{ gap: 'var(--s5)' }}>
       {/* SECTION 1: Masthead */}
       <header className="masthead">
         <div>
           <p className="eyebrow" style={{ color: 'var(--signal)' }}>
             Estate Operations Control
           </p>
-          <h1>{community.community_name} Administration</h1>
+          <h1 style={{ fontSize: 'var(--fs-xl)' }}>{community.community_name} Administration</h1>
           <p className="masthead-meta">
-            Logged in as {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Community Administrator'}
+            Logged in as {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Estate Administrator'}
           </p>
         </div>
-        <div className="cluster">
+        <div className="cluster" style={{ gap: 'var(--s3)' }}>
           <button type="button" className="btn btn-solid" onClick={() => setBroadcastModal(true)}>
             Draft & Publish Broadcast
           </button>
@@ -104,66 +137,89 @@ function AdminDashboard() {
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* SECTION 2: Estate Operations Health Summary */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
-          <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-              Estate High-Level Health
-            </p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Incident Resolution Progress ({healthPercent}% Cleared)
-            </h2>
+      {/* SECTION 2: Top Metrics Grid (3 Stat Cards) */}
+      <div className="grid-3" style={{ gap: 'var(--s4)' }}>
+        {/* Stat Card 1: Incident Resolution */}
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+            INCIDENT RESOLUTION
+          </p>
+          <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)', marginBottom: 'var(--s2)' }}>
+            <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--paper)' }}>
+              {healthPercent}% Cleared
+            </span>
+            <span className="mono sm faint" style={{ fontSize: '0.75rem' }}>
+              {resolvedIncidents} of {totalIncidents} Resolved
+            </span>
           </div>
-          <span className="mono" style={{ color: 'var(--paper)', fontWeight: 600 }}>
-            {resolvedIncidents} of {totalIncidents} Reports Resolved
-          </span>
-        </div>
 
-        {/* Minimal Progress Bar */}
-        <div
-          style={{
-            height: '6px',
-            backgroundColor: 'var(--line-hi)',
-            borderRadius: '3px',
-            overflow: 'hidden',
-            marginBottom: 'var(--s4)',
-          }}
-        >
           <div
             style={{
-              width: `${healthPercent}%`,
-              height: '100%',
-              backgroundColor: 'var(--signal)',
-              transition: 'width 0.3s ease',
+              height: '5px',
+              backgroundColor: 'var(--line-hi)',
+              borderRadius: '3px',
+              overflow: 'hidden',
             }}
-          />
-        </div>
+          >
+            <div
+              style={{
+                width: `${healthPercent}%`,
+                height: '100%',
+                backgroundColor: 'var(--signal)',
+                transition: 'width 0.3s ease',
+              }}
+            />
+          </div>
+        </section>
 
-        <div className="grid-2" style={{ gap: 'var(--s4)' }}>
-          <div>
-            <p className="eyebrow">Pending Registrations</p>
-            <p className="mono" style={{ fontSize: '1.25rem', color: 'var(--paper)', margin: 0 }}>
+        {/* Stat Card 2: Pending Approvals */}
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+            PENDING APPROVALS
+          </p>
+          <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
+            <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--paper)' }}>
               {pendingQueue.length} Applications
-            </p>
+            </span>
+            <span className="mono sm faint" style={{ fontSize: '0.75rem' }}>
+              Awaiting ID & Lease Verification
+            </span>
           </div>
-          <div>
-            <p className="eyebrow">Verified Estate Members</p>
-            <p className="mono" style={{ fontSize: '1.25rem', color: 'var(--paper)', margin: 0 }}>
-              {memberList.length + 243} Households
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 3: Operations Overview (Pending Registrations & Facility Bookings) */}
-      <div className="grid-2">
-        {/* Pending Resident Registrations */}
-        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        {/* Stat Card 3: Active Maintenance & Facilities */}
+        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', borderTop: '3px solid var(--signal)' }}>
+          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', letterSpacing: '0.05em' }}>
+            MAINTENANCE & FACILITIES
+          </p>
+          <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
+            <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--paper)' }}>
+              3 Work Orders
+            </span>
+            <span className="mono sm faint" style={{ fontSize: '0.75rem' }}>
+              2 Venue Bookings Scheduled
+            </span>
+          </div>
+        </section>
+      </div>
+
+      {/* SECTION 3: Operations Grid (Resident Moderation & Facility Bookings) */}
+      <div className="grid-2" style={{ gap: 'var(--s5)' }}>
+        {/* Left Column: Resident Moderation */}
+        <section
+          className="panel"
+          style={{
+            padding: 'var(--s5)',
+            border: '1px solid var(--line-hi)',
+            borderTop: '3px solid var(--signal)',
+          }}
+        >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
             <div>
-              <p className="eyebrow">Resident Moderation</p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                RESIDENT MODERATION
+              </p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                 Pending Resident Registrations ({pendingQueue.length})
               </h2>
             </div>
@@ -174,22 +230,40 @@ function AdminDashboard() {
           ) : (
             <ul className="ledger">
               {pendingQueue.map((m) => (
-                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0' }}>
+                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line)' }}>
                   <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
                     <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
                       {m.name}
                     </strong>
-                    <button
-                      type="button"
-                      className="btn btn-solid"
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                      onClick={() => handleApproveMember(m.id)}
-                    >
-                      Approve Account
-                    </button>
+                    <div className="cluster" style={{ gap: 'var(--s2)' }}>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                        onClick={() => setReviewDocModal(m)}
+                      >
+                        Review Documents
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-solid"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                        onClick={() => handleApproveMember(m.id)}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: 'var(--line-hi)' }}
+                        onClick={() => handleDeclineMember(m.id)}
+                      >
+                        Decline
+                      </button>
+                    </div>
                   </div>
                   <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                    {m.address} • {m.document}
+                    {m.address} • Document: <strong>{m.documentType}</strong>
                   </p>
                 </li>
               ))}
@@ -197,47 +271,79 @@ function AdminDashboard() {
           )}
         </section>
 
-        {/* Facility Bookings & Maintenance */}
-        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        {/* Right Column: Facility Bookings */}
+        <section
+          className="panel"
+          style={{
+            padding: 'var(--s5)',
+            border: '1px solid var(--line-hi)',
+            borderTop: '3px solid var(--signal)',
+          }}
+        >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
             <div>
-              <p className="eyebrow">Facility Bookings</p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
-                Approved Clubhouse & Venue Schedule
+              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                FACILITY BOOKINGS
+              </p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                Clubhouse & Venue Schedule
               </h2>
             </div>
           </div>
 
           <ul className="ledger">
-            {FACILITY_BOOKINGS.map((b) => (
-              <li className="entry" key={b.id}>
-                <div>
-                  <h3 className="entry-title">{b.facility}</h3>
-                  <p className="entry-body" style={{ color: 'var(--dim)' }}>
-                    Booked by {b.bookedBy} • {b.date}
-                  </p>
+            {bookingList.map((b) => (
+              <li className="entry" key={b.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line)' }}>
+                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <div>
+                    <h3 className="entry-title" style={{ margin: 0, fontSize: 'var(--fs-sm)' }}>
+                      {b.facility}
+                    </h3>
+                    <p className="entry-body sm faint" style={{ color: 'var(--dim)', margin: '2px 0 0 0' }}>
+                      Booked by {b.bookedBy} • {b.date}
+                    </p>
+                  </div>
+                  <div className="cluster" style={{ gap: 'var(--s2)' }}>
+                    <StatusBadge status={b.status} />
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      onClick={() => setManageBookingModal(b)}
+                    >
+                      Manage Booking
+                    </button>
+                  </div>
                 </div>
-                <StatusBadge status={b.status} />
               </li>
             ))}
           </ul>
         </section>
       </div>
 
-      {/* SECTION 4: Contractor Repair Statuses */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+      {/* SECTION 4: Contractor Maintenance */}
+      <section
+        className="panel"
+        style={{
+          padding: 'var(--s5)',
+          border: '1px solid var(--line-hi)',
+          borderTop: '3px solid var(--signal)',
+        }}
+      >
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow">Contractor Maintenance</p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Active Repairs & Servicing Schedule
+            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+              CONTRACTOR MAINTENANCE
+            </p>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500, color: 'var(--paper)', margin: 0 }}>
+              Active Work Orders & Servicing Schedule
             </h2>
           </div>
         </div>
 
         <ul className="ledger">
           {CONTRACTOR_REPAIRS.map((c) => (
-            <li className="entry" key={c.id}>
+            <li className="entry" key={c.id} style={{ borderBottom: '1px solid var(--line)' }}>
               <div>
                 <h3 className="entry-title">{c.item}</h3>
                 <p className="entry-body" style={{ color: 'var(--dim)' }}>
@@ -252,7 +358,116 @@ function AdminDashboard() {
         </ul>
       </section>
 
-      {/* Broadcast Publishing Modal */}
+      {/* MODAL 1: REVIEW DOCUMENT MODAL */}
+      {reviewDocModal ? (
+        <Modal
+          title={`Review Verification Documents (${reviewDocModal.name})`}
+          onClose={() => setReviewDocModal(null)}
+          footer={
+            <>
+              <button type="button" className="btn" onClick={() => setReviewDocModal(null)}>
+                Close Preview
+              </button>
+              <button
+                type="button"
+                className="btn"
+                style={{ borderColor: 'var(--line-hi)' }}
+                onClick={() => handleDeclineMember(reviewDocModal.id)}
+              >
+                Decline Application
+              </button>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => handleApproveMember(reviewDocModal.id)}
+              >
+                Approve Account
+              </button>
+            </>
+          }
+        >
+          <div className="stack" style={{ gap: 'var(--s3)' }}>
+            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Resident Name:</strong> {reviewDocModal.name}
+              </p>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Household Address:</strong> {reviewDocModal.address}
+              </p>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Uploaded Document:</strong> {reviewDocModal.documentType} ({reviewDocModal.fileName})
+              </p>
+              <p className="mono sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                Submission Timestamp: {reviewDocModal.uploadedTime}
+              </p>
+            </div>
+
+            <div
+              style={{
+                height: '160px',
+                border: '1px dashed var(--line-hi)',
+                backgroundColor: 'var(--ink)',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <p className="sm faint" style={{ color: 'var(--dim)' }}>
+                📄 Preview of {reviewDocModal.fileName}
+                <br />
+                (Document ID & Municipal Match Verified)
+              </p>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {/* MODAL 2: MANAGE BOOKING MODAL */}
+      {manageBookingModal ? (
+        <Modal
+          title={`Manage Venue Booking (${manageBookingModal.facility})`}
+          onClose={() => setManageBookingModal(null)}
+          footer={
+            <>
+              <button type="button" className="btn" onClick={() => setManageBookingModal(null)}>
+                Close
+              </button>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => {
+                  setNotice(`Booking for ${manageBookingModal.facility} confirmed.`);
+                  setManageBookingModal(null);
+                  setTimeout(() => setNotice(''), 4000);
+                }}
+              >
+                Confirm Booking
+              </button>
+            </>
+          }
+        >
+          <div className="stack" style={{ gap: 'var(--s3)' }}>
+            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Facility:</strong> {manageBookingModal.facility}
+              </p>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Booked By:</strong> {manageBookingModal.bookedBy}
+              </p>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                <strong>Time Window:</strong> {manageBookingModal.date}
+              </p>
+              <p className="sm faint" style={{ color: 'var(--paper)', margin: 0 }}>
+                <strong>Event Purpose:</strong> {manageBookingModal.purpose}
+              </p>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {/* MODAL 3: BROADCAST PUBLISHING MODAL */}
       {broadcastModal ? (
         <Modal
           title="Draft & Publish Estate Broadcast Notice"

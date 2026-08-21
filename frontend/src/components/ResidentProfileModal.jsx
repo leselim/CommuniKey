@@ -1,10 +1,13 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
 
-function ResidentProfileModal({ member, onClose, onStartChat, onSendPing }) {
-  if (!member) return null;
+function ResidentProfileModal({ member: rawMember, onClose, onStartChat, onSendPing }) {
+  const { redactResidentProfile } = useAuth();
+  if (!rawMember) return null;
 
+  const member = redactResidentProfile ? redactResidentProfile(rawMember) : rawMember;
   const fullName = `${member.first_name} ${member.last_name}`;
 
   return (

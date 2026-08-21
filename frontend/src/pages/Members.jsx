@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Modal from '../components/Modal';
 import ResidentProfileModal from '../components/ResidentProfileModal';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
   directMessages as demoDirectMessages,
@@ -241,9 +242,15 @@ function Members() {
     [conversations, activeConvId]
   );
 
+  const { canAccessPrivateChat } = useAuth();
+
   const directConvs = useMemo(
-    () => conversations.filter((c) => c.type === 'direct'),
-    [conversations]
+    () =>
+      conversations.filter((c) => {
+        if (c.type !== 'direct') return false;
+        return canAccessPrivateChat ? canAccessPrivateChat('Resident', c.name) : true;
+      }),
+    [conversations, canAccessPrivateChat]
   );
   const groupConvs = useMemo(
     () => conversations.filter((c) => c.type === 'group'),

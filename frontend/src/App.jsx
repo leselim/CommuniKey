@@ -38,6 +38,7 @@ function App() {
             <div className="shell">
               <Routes>
                 <Route path="/signin" element={<SignIn />} />
+                <Route path="/login" element={<SignIn />} />
 
                 <Route
                   path="/"

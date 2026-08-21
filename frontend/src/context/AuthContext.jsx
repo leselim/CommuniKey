@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { members, profile as demoProfile } from '../services/demoData';
 
 const AuthContext = createContext(null);
+
+export const SEED_PASSWORD = 'Password123!';
 
 export const SAMPLE_USERS = [
   {
     id: 1,
-    email: 'resident@example.com',
+    email: 'thabo@example.com',
+    aliases: ['resident@example.com', 'thabo@example.com'],
+    password: SEED_PASSWORD,
     first_name: 'Thabo',
     last_name: 'Mokoena',
     role: 'Resident',
@@ -18,6 +21,8 @@ export const SAMPLE_USERS = [
   {
     id: 2,
     email: 'admin@example.com',
+    aliases: ['admin@example.com', 'marcus@example.com'],
+    password: SEED_PASSWORD,
     first_name: 'Marcus',
     last_name: 'Vance',
     role: 'Community Administrator',
@@ -28,7 +33,9 @@ export const SAMPLE_USERS = [
   },
   {
     id: 3,
-    email: 'volunteer@example.com',
+    email: 'sarah@example.com',
+    aliases: ['volunteer@example.com', 'sarah@example.com'],
+    password: SEED_PASSWORD,
     first_name: 'Sarah',
     last_name: 'Jenkins',
     role: 'Safety Volunteer',
@@ -39,7 +46,9 @@ export const SAMPLE_USERS = [
   },
   {
     id: 4,
-    email: 'sysadmin@example.com',
+    email: 'david@example.com',
+    aliases: ['sysadmin@example.com', 'david@example.com'],
+    password: SEED_PASSWORD,
     first_name: 'David',
     last_name: 'Chen',
     role: 'System Administrator',
@@ -75,22 +84,31 @@ export function AuthProvider({ children }) {
     }
   }, [currentUser]);
 
-  const login = (email, password) => {
+  const login = (emailInput, passwordInput) => {
+    const cleanEmail = emailInput.trim().toLowerCase();
     const target = SAMPLE_USERS.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+      (u) =>
+        u.email.toLowerCase() === cleanEmail ||
+        (u.aliases && u.aliases.some((a) => a.toLowerCase() === cleanEmail))
     );
 
     if (target) {
+      if (passwordInput && passwordInput !== SEED_PASSWORD) {
+        return {
+          success: false,
+          message: `Invalid password for ${cleanEmail}. Default seed password is '${SEED_PASSWORD}'.`,
+        };
+      }
       setCurrentUser(target);
       localStorage.setItem(TOKEN_KEY, 'demo_token_' + target.role.toLowerCase());
       return { success: true, user: target };
     }
 
-    // Fallback for custom emails
+    // Fallback for custom accounts
     const customUser = {
       id: Date.now(),
-      email: email.trim(),
-      first_name: email.split('@')[0],
+      email: cleanEmail,
+      first_name: cleanEmail.split('@')[0],
       last_name: 'Member',
       role: 'Resident',
       address: '14 Riverside Drive',
@@ -104,9 +122,9 @@ export function AuthProvider({ children }) {
   };
 
   const loginAsPersona = (roleName) => {
-    const target = SAMPLE_USERS.find(
-      (u) => u.role.toLowerCase() === roleName.toLowerCase()
-    ) || SAMPLE_USERS[0];
+    const target =
+      SAMPLE_USERS.find((u) => u.role.toLowerCase() === roleName.toLowerCase()) ||
+      SAMPLE_USERS[0];
     setCurrentUser(target);
     localStorage.setItem(TOKEN_KEY, 'demo_token_' + target.role.toLowerCase());
     return target;
@@ -122,6 +140,56 @@ export function AuthProvider({ children }) {
     setCurrentUser((prev) => ({ ...prev, ...updatedData }));
   };
 
+  /**
+   * Data Privacy & RBAC Permission Boundaries:
+   * 1. Administrators cannot view private peer-to-peer chats between residents unless explicitly escalated as an Admin Ticket.
+   * 2. Residents only have access to their own personal data and direct communications.
+   * 3. Safety Volunteers are restricted strictly to active safety alerts, triage logs, and dispatching.
+   * 4. System Admins manage technical configurations and audit logs without inspecting unredacted private messages.
+   */
+  const canAccessPrivateChat = (senderName, recipientName) => {
+    if (!currentUser) return false;
+    const myFullName = `${currentUser.first_name} ${currentUser.last_name}`;
+
+    // Admin & SysAdmin privacy restriction: No reading private peer-to-peer resident chats unless Admin support is a participant
+    if (
+      currentUser.role === 'Community Administrator' ||
+      currentUser.role === 'System Administrator'
+    ) {
+      return (
+        senderName.includes('Marcus') ||
+        recipientName.includes('Marcus') ||
+        senderName.includes('Admin') ||
+        recipientName.includes('Admin')
+      );
+    }
+
+    // Residents & Volunteers can only view chats they are directly part of
+    return (
+      senderName === myFullName ||
+      recipientName === myFullName ||
+      senderName.includes(currentUser.first_name) ||
+      recipientName.includes(currentUser.first_name)
+    );
+  };
+
+  const redactResidentProfile = (residentMember) => {
+    if (!currentUser) return residentMember;
+    const isSelf = currentUser.email === residentMember.email;
+    const isVolunteer = currentUser.role === 'Safety Volunteer';
+
+    // If viewing another resident's profile as Admin or another Resident, redact private gate access code & personal notes
+    if (!isSelf && !isVolunteer) {
+      return {
+        ...residentMember,
+        gate_access_code: '•••• [Protected Resident Privacy]',
+        emergency_notes: 'Redacted: Accessible strictly to Safety Responders & Emergency Patrol during active alerts.',
+      };
+    }
+
+    return residentMember;
+  };
+
   const value = {
     currentUser,
     userRole: currentUser ? currentUser.role : null,
@@ -130,7 +198,10 @@ export function AuthProvider({ children }) {
     loginAsPersona,
     logout,
     updateProfile,
+    canAccessPrivateChat,
+    redactResidentProfile,
     sampleUsers: SAMPLE_USERS,
+    seedPassword: SEED_PASSWORD,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

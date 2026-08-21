@@ -235,7 +235,7 @@ function Dashboard() {
       </section>
 
       {/* MIDDLE GRID: My Activity (Left) & Upcoming Community Events (Right) */}
-      <div className="grid-2">
+      <div className="grid-2" style={{ gap: 'var(--s5)' }}>
         {/* Left Column: My Activity & Requests */}
         <section
           className="panel"
@@ -247,10 +247,10 @@ function Dashboard() {
         >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
             <div>
-              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', letterSpacing: '0.05em' }}>
+              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
                 MY ACTIVITY & REQUESTS
               </p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                 My Gate Passes & Maintenance Reports
               </h2>
             </div>
@@ -284,7 +284,7 @@ function Dashboard() {
                   <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
                     {req.time}
                   </span>
-                  <span className="link sm" style={{ fontSize: '0.75rem' }}>
+                  <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--signal)' }}>
                     View Request →
                   </span>
                 </div>
@@ -299,7 +299,7 @@ function Dashboard() {
           style={{
             padding: 'var(--s5)',
             border: '1px solid var(--line-hi)',
-            borderTop: '3px solid var(--line-hi)',
+            borderTop: '3px solid var(--signal)',
           }}
         >
           <div
@@ -307,14 +307,14 @@ function Dashboard() {
             style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
           >
             <div>
-              <p className="eyebrow" style={{ color: 'var(--paper)', fontSize: '0.7rem', letterSpacing: '0.05em' }}>
+              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
                 COMMUNITY EVENTS
               </p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                 Upcoming Gatherings & Meetings
               </h2>
             </div>
-            <Link to="/events" className="link">
+            <Link to="/events" className="link" style={{ color: 'var(--signal)', fontWeight: 500, fontSize: '0.8rem' }}>
               View calendar →
             </Link>
           </div>

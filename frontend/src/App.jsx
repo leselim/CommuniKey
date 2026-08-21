@@ -8,7 +8,9 @@ import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import ForgotPassword from './pages/ForgotPassword';
 import Incidents from './pages/Incidents';
+import MemberModeration from './pages/MemberModeration';
 import Members from './pages/Members';
+import PatrolOps from './pages/PatrolOps';
 import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -145,10 +147,18 @@ function App() {
                   }
                 />
                 <Route
+                  path="/admin/messages"
+                  element={
+                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
+                      <Members defaultTab="helpdesk" />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/volunteer/patrol"
                   element={
                     <ProtectedRoute allowedRoles={['Safety Volunteer']}>
-                      <Members />
+                      <PatrolOps />
                     </ProtectedRoute>
                   }
                 />
@@ -156,7 +166,7 @@ function App() {
                   path="/moderation"
                   element={
                     <ProtectedRoute allowedRoles={['Estate Administrator']}>
-                      <Members defaultTab="directory" />
+                      <MemberModeration />
                     </ProtectedRoute>
                   }
                 />
@@ -164,7 +174,7 @@ function App() {
                   path="/admin/moderation"
                   element={
                     <ProtectedRoute allowedRoles={['Estate Administrator']}>
-                      <Members defaultTab="directory" />
+                      <MemberModeration />
                     </ProtectedRoute>
                   }
                 />

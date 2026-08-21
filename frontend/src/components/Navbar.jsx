@@ -26,6 +26,7 @@ const ROLE_NAV = {
     { to: '/admin/announcements', label: 'Announcements' },
     { to: '/admin/events', label: 'Events' },
     { to: '/admin/moderation', label: 'Member Moderation' },
+    { to: '/admin/messages', label: 'Messages & Helpdesk' },
     { to: '/profile', label: 'Profile' },
   ],
 };

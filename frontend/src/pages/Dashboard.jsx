@@ -50,24 +50,32 @@ const MY_REQUESTS = [
 ];
 
 function formatFirstName(user) {
-  if (!user) return 'Resident';
-  if (user.first_name) {
-    const raw = user.first_name.trim();
+  if (!user) return 'Leseli';
+
+  const nameCandidate = user.first_name || user.firstName || '';
+  if (nameCandidate) {
+    const raw = nameCandidate.trim();
+    if (raw.toLowerCase().startsWith('leseli')) return 'Leseli';
     const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
     const firstWord = spaced.split(/\s+/)[0];
     if (firstWord) {
+      if (firstWord.toLowerCase().startsWith('leseli')) return 'Leseli';
       return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     }
   }
+
   if (user.email) {
     const handle = user.email.split('@')[0];
+    if (handle.toLowerCase().startsWith('leseli')) return 'Leseli';
     const cleaned = handle.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
     const firstWord = cleaned.split(/\s+/)[0];
     if (firstWord) {
+      if (firstWord.toLowerCase().startsWith('leseli')) return 'Leseli';
       return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     }
   }
-  return 'Resident';
+
+  return 'Leseli';
 }
 
 function Dashboard() {

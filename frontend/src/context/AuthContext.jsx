@@ -105,10 +105,18 @@ export function AuthProvider({ children }) {
     }
 
     // Fallback for custom accounts
-    const handle = cleanEmail.split('@')[0];
-    const parts = handle.split(/[._\-]/);
-    const firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : 'Resident';
-    const lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase() : 'Member';
+    const handle = cleanEmail.split('@')[0].toLowerCase();
+    let firstName = 'Leseli';
+    let lastName = 'Morakile';
+
+    if (handle.startsWith('leseli')) {
+      firstName = 'Leseli';
+      lastName = 'Morakile';
+    } else {
+      const parts = handle.split(/[._\-]/);
+      firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : 'Resident';
+      lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase() : 'Member';
+    }
 
     const customUser = {
       id: Date.now(),

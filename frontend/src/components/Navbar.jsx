@@ -35,13 +35,29 @@ const ROLE_NAV = {
 };
 
 function Navbar() {
-  const { currentUser, userRole, logout, isAuthenticated } = useAuth();
+  const { userRole, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const isAuthPage = ['/signin', '/login', '/signup', '/forgot-password'].includes(location.pathname);
-  const activeNav = (isAuthenticated && userRole && ROLE_NAV[userRole]) ? ROLE_NAV[userRole] : ROLE_NAV.Resident;
+  const isAuthPage = ['/signin', '/login', '/signup', '/forgot-password'].includes(
+    location.pathname.toLowerCase()
+  );
+
+  // Layout Isolation: Public Auth Pages or Unauthenticated users get ONLY the brand logo header
+  if (isAuthPage || !isAuthenticated) {
+    return (
+      <header className="topbar">
+        <div className="shell topbar-inner" style={{ justifyContent: 'center' }}>
+          <NavLink to="/signin" className="wordmark-link" style={{ textDecoration: 'none' }}>
+            <Logo />
+          </NavLink>
+        </div>
+      </header>
+    );
+  }
+
+  const activeNav = userRole && ROLE_NAV[userRole] ? ROLE_NAV[userRole] : ROLE_NAV.Resident;
 
   const handleLogout = () => {
     logout();
@@ -55,57 +71,47 @@ function Navbar() {
           <Logo />
         </NavLink>
 
-        {isAuthenticated ? (
-          <nav className={`nav${open ? ' open' : ''}`} id="site-nav">
-            {activeNav.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/'}
-                className={({ isActive }) => `nav-item${isActive ? ' current' : ''}`}
-                onClick={() => setOpen(false)}
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        ) : null}
+        <nav className={`nav${open ? ' open' : ''}`} id="site-nav">
+          {activeNav.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => `nav-item${isActive ? ' current' : ''}`}
+              onClick={() => setOpen(false)}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
 
         <div className="bar-end">
-          {isAuthenticated ? (
-            <>
-              <Notifications />
-              <span
-                className="mono sm hide-mobile"
-                style={{
-                  color: 'var(--signal)',
-                  backgroundColor: 'var(--signal-wash)',
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '3px',
-                  border: '1px solid var(--line-hi)',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                {userRole}
-              </span>
-              <button
-                type="button"
-                className="btn"
-                style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-                onClick={handleLogout}
-              >
-                Sign Out
-              </button>
-            </>
-          ) : !isAuthPage ? (
-            <NavLink to="/signin" className="btn btn-solid" style={{ padding: '0.3rem 0.7rem', fontSize: '0.8rem' }}>
-              Sign In
-            </NavLink>
-          ) : null}
+          <Notifications />
+          <span
+            className="mono sm hide-mobile"
+            style={{
+              color: 'var(--signal)',
+              backgroundColor: 'var(--signal-wash)',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '3px',
+              border: '1px solid var(--line-hi)',
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            {userRole}
+          </span>
+          <button
+            type="button"
+            className="btn"
+            style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+            onClick={handleLogout}
+          >
+            Sign Out
+          </button>
 
           <button
             type="button"

@@ -66,9 +66,9 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem(AUTH_USER_KEY);
-      return saved ? JSON.parse(saved) : SAMPLE_USERS[0];
+      return saved ? JSON.parse(saved) : null;
     } catch (e) {
-      return SAMPLE_USERS[0];
+      return null;
     }
   });
 

@@ -43,6 +43,26 @@ const MY_REQUESTS = [
   },
 ];
 
+function formatDisplayName(user) {
+  if (!user) return 'Resident';
+  if (user.first_name) {
+    const raw = user.first_name.trim();
+    return raw
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+  if (user.email) {
+    const handle = user.email.split('@')[0];
+    const cleaned = handle.replace(/[._-]/g, ' ');
+    return cleaned
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+  return 'Resident';
+}
+
 function Dashboard() {
   const { userRole, currentUser } = useAuth();
 
@@ -93,32 +113,49 @@ function Dashboard() {
       {/* HERO SECTION: Estate Status & Quick Actions */}
       <header className="masthead">
         <div>
-          <div className="cluster" style={{ gap: 'var(--s2)', marginBottom: 'var(--s2)' }}>
+          <div className="cluster" style={{ gap: 'var(--s2)', marginBottom: 'var(--s2)', alignItems: 'center' }}>
             <span
-              className="mono sm"
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
                 color: 'var(--paper)',
                 backgroundColor: 'var(--panel-hi)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '3px',
+                padding: '0.3rem 0.75rem',
+                borderRadius: '20px',
                 border: '1px solid var(--line-hi)',
-                fontSize: '0.75rem',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
               }}
             >
-              Riverside Estate • All Gates Operational • 24/7 Patrol Active
+              <span
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  boxShadow: '0 0 6px #22c55e',
+                  display: 'inline-block',
+                }}
+              />
+              Estate Operational • All Gates Clear • 24/7 Patrol Active
             </span>
           </div>
-          <h1>Welcome, {currentUser ? currentUser.first_name : 'Resident'}</h1>
-          <p className="masthead-meta">
-            {community.community_name} • {community.suburb}, {community.city}
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600 }}>
+            Welcome back, {formatDisplayName(currentUser)}
+          </h1>
+          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: '4px' }}>
+            Riverside Estate • Pretoria
           </p>
         </div>
 
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+        <div className="cluster" style={{ gap: 'var(--s3)', alignItems: 'center' }}>
           <button
             type="button"
             className="btn"
-            style={{ borderColor: 'var(--signal)' }}
+            style={{ borderColor: 'var(--line-hi)' }}
             onClick={() => setVisitorModal(true)}
           >
             Generate Visitor Pass
@@ -126,6 +163,7 @@ function Dashboard() {
           <button
             type="button"
             className="btn"
+            style={{ borderColor: 'var(--line-hi)' }}
             onClick={handleContactGuardhouse}
           >
             Contact Guardhouse

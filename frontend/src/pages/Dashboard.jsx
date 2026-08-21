@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Modal from '../components/Modal';
 import SOSButton from '../components/SOSButton';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
@@ -10,22 +11,46 @@ import {
   events as demoEvents,
   incidents as demoIncidents,
 } from '../services/demoData';
-import { formatDayDate, formatRelative, formatStamp } from '../utils/format';
+import { formatDayDate, formatRelative } from '../utils/format';
 import AdminDashboard from './AdminDashboard';
 import SysAdminDashboard from './SysAdminDashboard';
 import VolunteerDashboard from './VolunteerDashboard';
 
-function Figure({ label, value }) {
-  return (
-    <div className="figure">
-      <span className="eyebrow">{label}</span>
-      <span className="figure-value">{value}</span>
-    </div>
-  );
-}
+const MY_REQUESTS = [
+  {
+    id: 'CK-492',
+    title: 'Visitor Access Gate Pass',
+    type: 'Gate Pass',
+    status: 'Active',
+    details: 'Valid for guest: Johan Smith (Car: GP 482 CP)',
+    time: 'Expires today at 22:00',
+  },
+  {
+    id: 'INC-104',
+    title: 'Streetlight Repair Request',
+    type: 'Maintenance',
+    status: 'In Progress',
+    details: 'Section A pole #14. City infrastructure dispatched.',
+    time: 'Updated 2h ago',
+  },
+  {
+    id: 'REQ-88',
+    title: 'Gate Remote Access Sync',
+    type: 'Access Key',
+    status: 'Completed',
+    details: 'Secondary remote programmed for Unit 22.',
+    time: 'Completed yesterday',
+  },
+];
 
 function Dashboard() {
-  const { userRole } = useAuth();
+  const { userRole, currentUser } = useAuth();
+
+  const [visitorModal, setVisitorModal] = useState(false);
+  const [visitorName, setVisitorName] = useState('');
+  const [visitorVehicle, setVisitorVehicle] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [notice, setNotice] = useState('');
 
   if (userRole === 'Community Administrator') {
     return <AdminDashboard />;
@@ -38,335 +63,313 @@ function Dashboard() {
   if (userRole === 'System Administrator') {
     return <SysAdminDashboard />;
   }
+
   const announcements = useCollection('/announcements', demoAnnouncements);
   const incidents = useCollection('/incidents', demoIncidents);
   const events = useCollection('/events', demoEvents);
 
-  const open = incidents.items.filter((item) => item.status !== 'Resolved');
-  const upcoming = events.items
+  const upcomingEvents = events.items
     .filter((item) => new Date(item.event_date) >= new Date())
     .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
 
-  const latestAnnouncements = [...announcements.items]
-    .sort((a, b) => new Date(b.date_published) - new Date(a.date_published))
-    .slice(0, 3);
+  const pinnedAnnouncements = announcements.items.slice(0, 2);
 
-  const totalIncidents = incidents.items.length;
-  const resolvedCount = incidents.items.filter((i) => i.status === 'Resolved').length;
-  const underReviewCount = incidents.items.filter((i) => i.status === 'Under review').length;
-  const reportedCount = incidents.items.filter((i) => i.status === 'Reported').length;
+  const handleGenerateVisitorPass = (e) => {
+    e.preventDefault();
+    if (!visitorName.trim()) return;
 
-  const resolvedPercent = totalIncidents > 0 ? Math.round((resolvedCount / totalIncidents) * 100) : 0;
-  const reviewPercent = totalIncidents > 0 ? Math.round((underReviewCount / totalIncidents) * 100) : 0;
-  const reportedPercent = Math.max(0, 100 - resolvedPercent - reviewPercent);
+    const code = `CK-${Math.floor(100 + Math.random() * 900)}`;
+    setGeneratedCode(code);
+    setNotice(`Visitor Pass ${code} created for ${visitorName}. Code sent to gate guardhouse.`);
+  };
 
-  // Group incidents by category dynamically
-  const categoryCounts = incidents.items.reduce((acc, item) => {
-    const type = item.incident_type || 'Other';
-    acc[type] = (acc[type] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Detailed resident insights per category
-  const INSIGHTS = {
-    'Suspicious activity': {
-      location: 'Riverside Drive & Main Gate',
-      advice: 'Most common concern. Unrecognized vehicles parked for over 30 mins are checked by gate patrol.',
-    },
-    'Streetlight fault': {
-      location: 'Mill Road',
-      advice: 'Occurs after municipal power surges. Reported to city infrastructure team within 24 hours.',
-    },
-    'Attempted break-in': {
-      location: 'Section C Perimeter',
-      advice: 'Occasional overnight gate latch damage. Security patrol conducts extra night rounds here.',
-    },
-    'Noise disturbance': {
-      location: 'Section B & Clubhouse',
-      advice: 'Loud music or late gatherings past quiet hours (22:00). Resolved promptly by patrol.',
-    },
+  const handleContactGuardhouse = () => {
+    setNotice('Direct channel open to Main Gate Guardhouse. Security officer on duty notified.');
+    setTimeout(() => setNotice(''), 4000);
   };
 
   return (
     <div className="stack">
-      {/* SECTION 1: Masthead & Overview */}
+      {/* HERO SECTION: Estate Status & Quick Actions */}
       <header className="masthead">
         <div>
-          <p className="eyebrow">Community Overview</p>
-          <h1>{community.community_name}</h1>
+          <div className="cluster" style={{ gap: 'var(--s2)', marginBottom: 'var(--s2)' }}>
+            <span
+              className="mono sm"
+              style={{
+                color: 'var(--paper)',
+                backgroundColor: 'var(--panel-hi)',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '3px',
+                border: '1px solid var(--line-hi)',
+                fontSize: '0.75rem',
+              }}
+            >
+              Riverside Estate • All Gates Operational • 24/7 Patrol Active
+            </span>
+          </div>
+          <h1>Welcome, {currentUser ? currentUser.first_name : 'Resident'}</h1>
           <p className="masthead-meta">
-            {community.suburb}, {community.city}, {community.province}
+            {community.community_name} • {community.suburb}, {community.city}
           </p>
         </div>
-        <Link to="/messages" className="mono link" title="Open Members Directory & Messaging Hub">
-          {community.member_count} verified members
-        </Link>
+
+        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+          <button
+            type="button"
+            className="btn"
+            style={{ borderColor: 'var(--signal)' }}
+            onClick={() => setVisitorModal(true)}
+          >
+            Generate Visitor Pass
+          </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleContactGuardhouse}
+          >
+            Contact Guardhouse
+          </button>
+          <Link to="/incidents" className="btn btn-solid">
+            Report Issue / Alert
+          </Link>
+        </div>
       </header>
 
-      {/* Emergency SOS Bar */}
+      {notice ? <p className="notice">{notice}</p> : null}
+
+      {/* SOS EMERGENCY ALERT PANEL */}
       <SOSButton />
 
-      {/* SECTION 2: Key Metric Figures Bar */}
-      <div className="figures">
-        <Figure label="Open incidents" value={open.length} />
-        <Figure label="Announcements" value={announcements.items.length} />
-        <Figure label="Upcoming events" value={upcoming.length} />
-        <Link to="/messages" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <Figure label="Verified members" value={community.member_count} />
-        </Link>
-      </div>
-
-      {/* SECTION 3: Community Safety Resolution Progress */}
+      {/* TOP SECTION: Active Pinned Estate Broadcasts */}
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s2)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
-            <p className="eyebrow">Safety Progress Overview</p>
+            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+              Active Pinned Notices
+            </p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Neighborhood Incident Status
+              Official Estate Broadcasts & Utilities
             </h2>
           </div>
-          <span className="mono" style={{ fontSize: 'var(--fs-lg)', color: 'var(--signal)', fontWeight: 600 }}>
-            {resolvedPercent}% Resolved
-          </span>
+          <Link to="/announcements" className="link">
+            All announcements
+          </Link>
         </div>
 
-        <p className="sm faint">
-          A live breakdown showing how reported safety concerns in Riverside Estate are being resolved by security and volunteers.
-        </p>
-
-        <div className="progress-track">
-          <div
-            className="progress-segment progress-segment-resolved"
-            style={{ width: `${resolvedPercent}%` }}
-            title={`Resolved: ${resolvedPercent}%`}
-          />
-          <div
-            className="progress-segment progress-segment-review"
-            style={{ width: `${reviewPercent}%` }}
-            title={`Under Review: ${reviewPercent}%`}
-          />
-          <div
-            className="progress-segment progress-segment-reported"
-            style={{ width: `${reportedPercent}%` }}
-            title={`Reported: ${reportedPercent}%`}
-          />
-        </div>
-
-        <div className="entry-meta" style={{ marginTop: 'var(--s3)', gap: 'var(--s5)', display: 'flex', flexWrap: 'wrap' }}>
-          <span className="cluster" style={{ gap: 'var(--s2)' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--signal)' }} />
-            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{resolvedCount}</strong> Resolved ({resolvedPercent}%)
-          </span>
-          <span className="cluster" style={{ gap: 'var(--s2)' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--signal-hi)' }} />
-            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{underReviewCount}</strong> Under Review ({reviewPercent}%)
-          </span>
-          <span className="cluster" style={{ gap: 'var(--s2)' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--line-hi)' }} />
-            <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>{reportedCount}</strong> Awaiting Review ({reportedPercent}%)
-          </span>
+        <div className="stack" style={{ gap: 'var(--s3)' }}>
+          {pinnedAnnouncements.map((anc) => (
+            <div
+              key={anc.id}
+              style={{
+                padding: 'var(--s4)',
+                backgroundColor: 'var(--panel-hi)',
+                border: '1px solid var(--line-hi)',
+                borderRadius: '4px',
+              }}
+            >
+              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
+                <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                  {anc.title}
+                </h3>
+                <span
+                  className="mono sm"
+                  style={{
+                    color: 'var(--signal)',
+                    backgroundColor: 'var(--signal-wash)',
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '3px',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {anc.priority === 'high' ? 'High Priority' : 'Notice'}
+                </span>
+              </div>
+              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
+                {anc.content}
+              </p>
+              <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
+                Published {formatRelative(anc.date_published)} by {anc.created_by}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* SECTION 4: Safety Patterns & Monthly Trends */}
-      <div className="columns">
-        {/* Most Common Incidents in Your Area */}
+      {/* MIDDLE GRID: My Activity (Left) & Upcoming Community Events (Right) */}
+      <div className="grid-2">
+        {/* Left Column: My Activity & Requests */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-          <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
             <div>
-              <p className="eyebrow">Resident Safety Guide</p>
-              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-                Most Likely Incidents in Your Area
+              <p className="eyebrow">My Activity & Requests</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                My Gate Passes & Maintenance Reports
               </h2>
             </div>
-            <Link to="/incidents" className="link">
-              View all reports
-            </Link>
           </div>
 
-          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-            If you just moved into Riverside Estate, here is what safety patterns look like based on community reports:
-          </p>
-
-          <div className="stack" style={{ gap: 'var(--s5)' }}>
-            {Object.entries(categoryCounts).map(([cat, count]) => {
-              const pct = totalIncidents > 0 ? Math.round((count / totalIncidents) * 100) : 0;
-              const info = INSIGHTS[cat] || { location: 'General Area', advice: 'Reported concern being tracked.' };
-
-              return (
-                <div key={cat} style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
-                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
-                    <span style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', fontWeight: 500 }}>
-                      {cat}
-                    </span>
-                    <span className="mono" style={{ fontSize: 'var(--fs-sm)', color: 'var(--signal)', fontWeight: 600 }}>
-                      {pct}% of all reports ({count})
-                    </span>
-                  </div>
-
-                  <div className="progress-track" style={{ margin: 'var(--s2) 0', height: '6px' }}>
-                    <div
-                      className="progress-segment progress-segment-resolved"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-
-                  <div className="entry-meta" style={{ marginTop: 'var(--s2)' }}>
-                    <span className="faint" style={{ color: 'var(--dim)', fontSize: '0.8rem' }}>
-                      Hotspot: <strong>{info.location}</strong>
-                    </span>
-                    <p className="sm faint" style={{ marginTop: '2px', color: 'var(--dim)' }}>
-                      {info.advice}
-                    </p>
-                  </div>
+          <ul className="ledger">
+            {MY_REQUESTS.map((req) => (
+              <li className="entry" key={req.id} style={{ display: 'block', padding: 'var(--s3) 0' }}>
+                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                    {req.title} <span className="mono faint">({req.id})</span>
+                  </strong>
+                  <StatusBadge status={req.status} />
                 </div>
-              );
-            })}
-          </div>
+                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                  {req.details}
+                </p>
+                <p className="mono sm" style={{ color: 'var(--dim)', marginTop: '4px', fontSize: '0.75rem' }}>
+                  {req.time}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        {/* Monthly Activity Trends & Dominant Incidents */}
+        {/* Right Column: Upcoming Community Events */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
           <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <div>
-              <p className="eyebrow">Monthly Activity Trends</p>
-              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-                What Dominated Each Month?
+              <p className="eyebrow">Community Events</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                Upcoming Gatherings & Meetings
               </h2>
             </div>
-            <span className="mono sm" style={{ color: 'var(--signal)' }}>
-              Updated Live
-            </span>
-          </div>
-
-          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-            How safety incidents change month-by-month and where patrol efforts focus:
-          </p>
-
-          <div className="stack" style={{ gap: 'var(--s5)' }}>
-            {/* Current Month Story */}
-            <div style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', fontWeight: 500 }}>
-                  August (Current Month)
-                </span>
-                <span className="mono sm" style={{ color: 'var(--signal)' }}>
-                  3 Reports • Dominant: Suspicious Vehicles
-                </span>
-              </div>
-              <p className="sm faint" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
-                Unfamiliar vehicles reported around <strong>Riverside Drive</strong>. Security patrol increased gate checks.
-              </p>
-              <div className="entry-meta" style={{ marginTop: 'var(--s2)' }}>
-                <span>67% Resolved</span>
-                <span>1 Under Active Review</span>
-              </div>
-            </div>
-
-            {/* Past Month Story */}
-            <div style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', fontWeight: 500 }}>
-                  July (Past Month)
-                </span>
-                <span className="mono sm" style={{ color: 'var(--paper)' }}>
-                  2 Reports • Dominant: Streetlight Repair
-                </span>
-              </div>
-              <p className="sm faint" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
-                Power surge damaged streetlights on <strong>Mill Road</strong>. Municipal team repaired within 48 hours.
-              </p>
-              <div className="entry-meta" style={{ marginTop: 'var(--s2)' }}>
-                <span style={{ color: 'var(--signal)' }}>100% Resolved</span>
-              </div>
-            </div>
-
-            {/* Prior Month Story */}
-            <div>
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', fontWeight: 500 }}>
-                  June (Prior Month)
-                </span>
-                <span className="mono sm" style={{ color: 'var(--paper)' }}>
-                  2 Reports • Dominant: Perimeter Checks
-                </span>
-              </div>
-              <p className="sm faint" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
-                Gate latch maintenance in <strong>Section C</strong> and clubhouse noise complaint. Both handled smoothly.
-              </p>
-              <div className="entry-meta" style={{ marginTop: 'var(--s2)' }}>
-                <span style={{ color: 'var(--signal)' }}>100% Resolved</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* SECTION 5: Active Community Digest (Announcements & Upcoming Events Side-by-Side) */}
-      <div className="columns">
-        {/* Latest Announcements */}
-        <section className="section">
-          <div className="section-head">
-            <p className="eyebrow">Announcements</p>
-            <Link to="/announcements" className="link">
-              All announcements
-            </Link>
-          </div>
-
-          {latestAnnouncements.length === 0 ? (
-            <p className="blank">Nothing published yet.</p>
-          ) : (
-            <ul className="ledger">
-              {latestAnnouncements.map((item) => (
-                <li className="entry" key={item.id}>
-                  <h3 className="entry-title">{item.title}</h3>
-                  <span className="entry-aside">
-                    {item.priority === 'high' ? <StatusBadge status="Priority" /> : null}
-                  </span>
-                  <p className="entry-body">{item.content}</p>
-                  <div className="entry-meta">
-                    <span title={formatStamp(item.date_published)}>
-                      {formatRelative(item.date_published)}
-                    </span>
-                    <span>{item.created_by}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Upcoming Events Digest */}
-        <section className="section">
-          <div className="section-head">
-            <p className="eyebrow">Upcoming Events</p>
             <Link to="/events" className="link">
-              Event calendar
+              View calendar
             </Link>
           </div>
 
-          {upcoming.length === 0 ? (
-            <p className="blank">No upcoming events scheduled.</p>
-          ) : (
-            <ul className="ledger">
-              {upcoming.slice(0, 3).map((item) => (
-                <li className="entry" key={item.id}>
-                  <h3 className="entry-title">{item.event_name || item.title}</h3>
-                  <span className="entry-aside mono">
-                    {formatDayDate(item.event_date)}
+          <div className="stack" style={{ gap: 'var(--s3)' }}>
+            {upcomingEvents.map((evt) => (
+              <div
+                key={evt.id}
+                style={{
+                  padding: 'var(--s3) var(--s4)',
+                  backgroundColor: 'var(--panel-hi)',
+                  border: '1px solid var(--line-hi)',
+                  borderRadius: '4px',
+                }}
+              >
+                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                    {evt.title}
+                  </h3>
+                  <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.75rem', fontWeight: 600 }}>
+                    {formatDayDate(evt.event_date)}
                   </span>
-                  <p className="entry-body">{item.description}</p>
-                  <div className="entry-meta">
-                    <span>{formatStamp(item.event_date)}</span>
-                    <span>{item.event_location || item.location}</span>
-                    <span>{formatRelative(item.event_date)}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                </div>
+                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                  Venue: {evt.location} • Organiser: {evt.organiser}
+                </p>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
+
+      {/* BOTTOM SECTION: Reassuring Community Safety Digest */}
+      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+          <div>
+            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+              Estate Safety Digest
+            </p>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+              Weekly Community Safety Status
+            </h2>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: 'var(--s4)',
+            backgroundColor: 'var(--panel-hi)',
+            borderLeft: '3px solid var(--signal)',
+            borderTop: '1px solid var(--line-hi)',
+            borderRight: '1px solid var(--line-hi)',
+            borderBottom: '1px solid var(--line-hi)',
+          }}
+        >
+          <p className="sm" style={{ color: 'var(--paper)', margin: 0, lineHeight: 1.6 }}>
+            <strong>5 of 5 community safety reports resolved this week.</strong> All gate access barriers, perimeter fencing sensors, and night patrol routes remain fully operational with zero open security breaches.
+          </p>
+        </div>
+      </section>
+
+      {/* Visitor Pass Generator Modal */}
+      {visitorModal ? (
+        <Modal
+          title="Generate Visitor Access Pass"
+          onClose={() => {
+            setVisitorModal(false);
+            setGeneratedCode('');
+          }}
+          footer={
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                setVisitorModal(false);
+                setGeneratedCode('');
+              }}
+            >
+              Close
+            </button>
+          }
+        >
+          {generatedCode ? (
+            <div className="stack" style={{ textAlign: 'center', gap: 'var(--s3)' }}>
+              <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+                Pass Created Cleanly
+              </p>
+              <h2 className="mono" style={{ fontSize: '2rem', letterSpacing: '0.1em', color: 'var(--paper)' }}>
+                {generatedCode}
+              </h2>
+              <p className="sm faint">
+                Share this 6-digit access code with <strong>{visitorName}</strong>. Sent automatically to Main Gate Guardhouse.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleGenerateVisitorPass} className="stack" style={{ gap: 'var(--s4)' }}>
+              <div className="field">
+                <label className="eyebrow" htmlFor="v-name">
+                  Visitor Full Name *
+                </label>
+                <input
+                  id="v-name"
+                  className="control"
+                  placeholder="e.g., Johan Smith"
+                  value={visitorName}
+                  onChange={(e) => setVisitorName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <label className="eyebrow" htmlFor="v-vehicle">
+                  Visitor Vehicle Reg (Optional)
+                </label>
+                <input
+                  id="v-vehicle"
+                  className="control"
+                  placeholder="e.g., GP 482 CP"
+                  value={visitorVehicle}
+                  onChange={(e) => setVisitorVehicle(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-solid" style={{ width: '100%', padding: '0.6rem' }}>
+                Generate Access Pass
+              </button>
+            </form>
+          )}
+        </Modal>
+      ) : null}
     </div>
   );
 }

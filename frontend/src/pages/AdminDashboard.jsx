@@ -10,16 +10,15 @@ import {
   incidents as demoIncidents,
   members as demoMembers,
 } from '../services/demoData';
-import { formatDayDate, formatRelative, formatStamp } from '../utils/format';
+import { formatRelative, formatStamp } from '../utils/format';
 
-const PENDING_MEMBERS = [
+const PENDING_REGISTRATIONS = [
   {
     id: 101,
     name: 'Kobus van der Merwe',
     address: '29 Mill Road, Section B',
     email: 'kobus.vdm@riverside.co.za',
     document: 'Municipal Water Bill (Uploaded Yesterday)',
-    date_applied: '2026-08-20',
   },
   {
     id: 102,
@@ -27,38 +26,40 @@ const PENDING_MEMBERS = [
     address: '5 Riverside Drive, Section A',
     email: 'amina.patel@riverside.co.za',
     document: 'Lease Agreement (Uploaded 2 days ago)',
-    date_applied: '2026-08-19',
   },
+];
+
+const FACILITY_BOOKINGS = [
+  { id: 1, facility: 'Clubhouse Hall', bookedBy: 'Thabo Mokoena', date: '28 AUG (14:00 - 18:00)', status: 'Approved' },
+  { id: 2, facility: 'Tennis Court B', bookedBy: 'Sarah Jenkins', date: '25 AUG (09:00 - 11:00)', status: 'Approved' },
+];
+
+const CONTRACTOR_REPAIRS = [
+  { id: 1, item: 'Main Gate Hydraulic Arm Servicing', contractor: 'Protea Gate Automation', status: 'Scheduled (Tomorrow 10:00)' },
+  { id: 2, item: 'Section A Streetlight Pole #14', contractor: 'City Power Dispatch', status: 'In Progress' },
 ];
 
 function AdminDashboard() {
   const { currentUser } = useAuth();
 
   const { items: incidentList, update: updateIncident } = useCollection('/incidents', demoIncidents);
-  const { items: announcementList, create: createAnnouncement } = useCollection(
-    '/announcements',
-    demoAnnouncements
-  );
+  const { items: announcementList, create: createAnnouncement } = useCollection('/announcements', demoAnnouncements);
   const { items: memberList } = useCollection('/members', demoMembers);
 
-  const [pendingQueue, setPendingQueue] = useState(PENDING_MEMBERS);
+  const [pendingQueue, setPendingQueue] = useState(PENDING_REGISTRATIONS);
   const [broadcastModal, setBroadcastModal] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState('normal');
   const [notice, setNotice] = useState('');
 
-  const openIncidents = incidentList.filter((i) => i.status !== 'Resolved');
-
-  const handleStatusChange = async (incidentId, newStatus) => {
-    await updateIncident(incidentId, { status: newStatus });
-    setNotice(`Incident status updated to ${newStatus}.`);
-    setTimeout(() => setNotice(''), 4000);
-  };
+  const totalIncidents = incidentList.length;
+  const resolvedIncidents = incidentList.filter((i) => i.status === 'Resolved').length;
+  const healthPercent = totalIncidents > 0 ? Math.round((resolvedIncidents / totalIncidents) * 100) : 100;
 
   const handleApproveMember = (memberId) => {
     setPendingQueue((prev) => prev.filter((m) => m.id !== memberId));
-    setNotice('Resident account verified and granted community access.');
+    setNotice('Resident account verified and granted estate access.');
     setTimeout(() => setNotice(''), 4000);
   };
 
@@ -71,13 +72,13 @@ function AdminDashboard() {
       content: content.trim(),
       priority,
       date_published: new Date().toISOString(),
-      created_by: `${currentUser.first_name} ${currentUser.last_name} (Administrator)`,
+      created_by: currentUser ? `${currentUser.first_name} ${currentUser.last_name} (Admin)` : 'Community Admin',
     });
 
     setTitle('');
     setContent('');
     setBroadcastModal(false);
-    setNotice('Official community announcement published.');
+    setNotice('Official community broadcast published cleanly.');
     setTimeout(() => setNotice(''), 5000);
   };
 
@@ -87,167 +88,174 @@ function AdminDashboard() {
       <header className="masthead">
         <div>
           <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-            Administrative Control Hub
+            Estate Operations Control
           </p>
-          <h1>{community.community_name} Management</h1>
+          <h1>{community.community_name} Administration</h1>
           <p className="masthead-meta">
-            Logged in as {currentUser.first_name} {currentUser.last_name} (Community Administrator)
+            Logged in as {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Community Administrator'}
           </p>
         </div>
         <div className="cluster">
-          <button
-            type="button"
-            className="btn btn-solid"
-            onClick={() => setBroadcastModal(true)}
-          >
-            Publish Announcement
+          <button type="button" className="btn btn-solid" onClick={() => setBroadcastModal(true)}>
+            Draft & Publish Broadcast
           </button>
         </div>
       </header>
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* SECTION 2: Admin Metrics */}
-      <div className="figures">
-        <div className="figure">
-          <span className="eyebrow">Open Incidents</span>
-          <span className="figure-value">{openIncidents.length}</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">Verified Members</span>
-          <span className="figure-value">{memberList.length + 243}</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">Pending Approvals</span>
-          <span className="figure-value">{pendingQueue.length}</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">Active Announcements</span>
-          <span className="figure-value">{announcementList.length}</span>
-        </div>
-      </div>
-
-      {/* SECTION 3: Incident Management & Status Triage */}
+      {/* SECTION 2: Estate Operations Health Summary */}
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
           <div>
-            <p className="eyebrow">Incident Management</p>
+            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+              Estate High-Level Health
+            </p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Report Triage & Status Controls
+              Incident Resolution Progress ({healthPercent}% Cleared)
             </h2>
           </div>
-          <Link to="/incidents" className="link">
-            View full ledger
-          </Link>
+          <span className="mono" style={{ color: 'var(--paper)', fontWeight: 600 }}>
+            {resolvedIncidents} of {totalIncidents} Reports Resolved
+          </span>
         </div>
 
-        <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-          Review reported safety concerns, change statuses, and assign patrol follow-ups.
-        </p>
+        {/* Minimal Progress Bar */}
+        <div
+          style={{
+            height: '6px',
+            backgroundColor: 'var(--line-hi)',
+            borderRadius: '3px',
+            overflow: 'hidden',
+            marginBottom: 'var(--s4)',
+          }}
+        >
+          <div
+            style={{
+              width: `${healthPercent}%`,
+              height: '100%',
+              backgroundColor: 'var(--signal)',
+              transition: 'width 0.3s ease',
+            }}
+          />
+        </div>
 
-        <ul className="ledger">
-          {incidentList.map((item) => (
-            <li className="entry" key={item.id} style={{ display: 'block', padding: 'var(--s4) 0' }}>
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
+        <div className="grid-2" style={{ gap: 'var(--s4)' }}>
+          <div>
+            <p className="eyebrow">Pending Registrations</p>
+            <p className="mono" style={{ fontSize: '1.25rem', color: 'var(--paper)', margin: 0 }}>
+              {pendingQueue.length} Applications
+            </p>
+          </div>
+          <div>
+            <p className="eyebrow">Verified Estate Members</p>
+            <p className="mono" style={{ fontSize: '1.25rem', color: 'var(--paper)', margin: 0 }}>
+              {memberList.length + 243} Households
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Operations Overview (Pending Registrations & Facility Bookings) */}
+      <div className="grid-2">
+        {/* Pending Resident Registrations */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+            <div>
+              <p className="eyebrow">Resident Moderation</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                Pending Resident Registrations ({pendingQueue.length})
+              </h2>
+            </div>
+          </div>
+
+          {pendingQueue.length === 0 ? (
+            <p className="blank">All resident verification applications processed.</p>
+          ) : (
+            <ul className="ledger">
+              {pendingQueue.map((m) => (
+                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0' }}>
+                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                      {m.name}
+                    </strong>
+                    <button
+                      type="button"
+                      className="btn btn-solid"
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      onClick={() => handleApproveMember(m.id)}
+                    >
+                      Approve Account
+                    </button>
+                  </div>
+                  <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                    {m.address} • {m.document}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Facility Bookings & Maintenance */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+            <div>
+              <p className="eyebrow">Facility Bookings</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                Approved Clubhouse & Venue Schedule
+              </h2>
+            </div>
+          </div>
+
+          <ul className="ledger">
+            {FACILITY_BOOKINGS.map((b) => (
+              <li className="entry" key={b.id}>
                 <div>
-                  <h3 className="entry-title">{item.incident_type}</h3>
-                  <p className="sm faint" style={{ color: 'var(--dim)', marginTop: '2px' }}>
-                    Location: <strong>{item.location || 'General Estate'}</strong> • Reported by {item.reported_by || 'Resident'}
+                  <h3 className="entry-title">{b.facility}</h3>
+                  <p className="entry-body" style={{ color: 'var(--dim)' }}>
+                    Booked by {b.bookedBy} • {b.date}
                   </p>
                 </div>
-                <StatusBadge status={item.status} />
+                <StatusBadge status={b.status} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      {/* SECTION 4: Contractor Repair Statuses */}
+      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+          <div>
+            <p className="eyebrow">Contractor Maintenance</p>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+              Active Repairs & Servicing Schedule
+            </h2>
+          </div>
+        </div>
+
+        <ul className="ledger">
+          {CONTRACTOR_REPAIRS.map((c) => (
+            <li className="entry" key={c.id}>
+              <div>
+                <h3 className="entry-title">{c.item}</h3>
+                <p className="entry-body" style={{ color: 'var(--dim)' }}>
+                  Assigned Contractor: {c.contractor}
+                </p>
               </div>
-
-              <p className="entry-body" style={{ color: 'var(--paper)', marginBottom: 'var(--s3)' }}>
-                {item.description}
-              </p>
-
-              <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                <div className="entry-meta">
-                  <span>{formatRelative(item.date_reported)}</span>
-                  <span>{formatStamp(item.date_reported)}</span>
-                </div>
-
-                <div className="cluster" style={{ gap: 'var(--s2)' }}>
-                  <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Set Status:</span>
-                  <button
-                    type="button"
-                    className="btn"
-                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                    onClick={() => handleStatusChange(item.id, 'Under review')}
-                  >
-                    Under Review
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-solid"
-                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                    onClick={() => handleStatusChange(item.id, 'Resolved')}
-                  >
-                    Mark Resolved
-                  </button>
-                </div>
-              </div>
+              <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
+                {c.status}
+              </span>
             </li>
           ))}
         </ul>
       </section>
 
-      {/* SECTION 4: Pending Member Verifications */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <div>
-            <p className="eyebrow">Member Moderation</p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Pending Resident Verification Queue ({pendingQueue.length})
-            </h2>
-          </div>
-          <Link to="/messages" className="link">
-            Member directory
-          </Link>
-        </div>
-
-        <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-          Review proof of residence documents submitted by new estate applicants.
-        </p>
-
-        {pendingQueue.length === 0 ? (
-          <p className="blank">No pending member verification applications.</p>
-        ) : (
-          <ul className="ledger">
-            {pendingQueue.map((m) => (
-              <li className="entry" key={m.id}>
-                <div>
-                  <h3 className="entry-title">{m.name}</h3>
-                  <p className="entry-body">
-                    Address: {m.address} • {m.document}
-                  </p>
-                  <div className="entry-meta">
-                    <span>Applied {m.date_applied}</span>
-                    <span>{m.email}</span>
-                  </div>
-                </div>
-
-                <span className="entry-aside cluster" style={{ gap: 'var(--s2)' }}>
-                  <button
-                    type="button"
-                    className="btn btn-solid"
-                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
-                    onClick={() => handleApproveMember(m.id)}
-                  >
-                    Approve Member
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Broadcast Announcement Modal */}
+      {/* Broadcast Publishing Modal */}
       {broadcastModal ? (
         <Modal
-          title="Publish Community Announcement"
+          title="Draft & Publish Estate Broadcast Notice"
           onClose={() => setBroadcastModal(false)}
           footer={
             <>
@@ -263,12 +271,12 @@ function AdminDashboard() {
           <form id="broadcast-form" onSubmit={handlePublishAnnouncement} className="stack" style={{ gap: 'var(--s4)' }}>
             <div className="field">
               <label className="eyebrow" htmlFor="anc-title">
-                Announcement Title
+                Broadcast Title *
               </label>
               <input
                 id="anc-title"
                 className="control"
-                placeholder="e.g., Gate Security Upgrade & Visitor Registration"
+                placeholder="e.g., Planned Water Interruption Notice"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -293,13 +301,13 @@ function AdminDashboard() {
 
             <div className="field">
               <label className="eyebrow" htmlFor="anc-content">
-                Announcement Content
+                Notice Content *
               </label>
               <textarea
                 id="anc-content"
                 className="control"
                 rows={4}
-                placeholder="Write the official notice details for residents..."
+                placeholder="Write official notice details for residents..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required

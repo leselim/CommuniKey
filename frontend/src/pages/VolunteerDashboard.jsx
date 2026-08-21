@@ -9,20 +9,16 @@ import {
 } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
-const ACTIVE_EMERGENCY = {
-  id: 'sos_991',
-  location: '14 Riverside Drive, Section A',
-  caller: 'Resident Member',
-  time: '3 minutes ago',
-  status: 'Dispatched',
-  notes: 'SOS Alert triggered from mobile app. Gate patrol and nearest volunteer notified.',
-};
+const VOLUNTEER_TEAM = [
+  { id: 1, name: 'Sarah Jenkins', role: 'Team Lead / Section B Patrol', status: 'On Shift', phone: '+27 83 456 7890' },
+  { id: 2, name: 'Sipho Dlamini', role: 'Main Gate Patrol Officer', status: 'On Shift', phone: '+27 82 555 1212' },
+  { id: 3, name: 'Johan Venter', role: 'Perimeter Night Watch', status: 'On Standby', phone: '+27 84 999 3333' },
+];
 
-const CHECKPOINTS = [
-  { id: 1, name: 'Main Security Gate & Access Barrier', status: 'Secured', time: '15m ago' },
-  { id: 2, name: 'Riverside Drive North Boundary Wall', status: 'Secured', time: '30m ago' },
-  { id: 3, name: 'Section C Back Perimeter Latch', status: 'Checked & Locked', time: '45m ago' },
-  { id: 4, name: 'Mill Road Park Entrance Lighting', status: 'Checked', time: '1h ago' },
+const PATROL_ROUTES = [
+  { id: 1, route: 'Section A & Riverside Drive Perimeter', status: 'Completed', time: '20m ago' },
+  { id: 2, route: 'Section B & Mill Road Park Entrance', status: 'In Progress', time: 'Active now' },
+  { id: 3, route: 'Section C Back Fence & Access Latch', status: 'Scheduled', time: 'Next at 23:00' },
 ];
 
 function VolunteerDashboard() {
@@ -32,17 +28,15 @@ function VolunteerDashboard() {
   const [emergencyState, setEmergencyState] = useState('Dispatched');
   const [notice, setNotice] = useState('');
 
-  const openIncidents = incidentList.filter((i) => i.status !== 'Resolved');
-
   const handleResponderAction = (actionName) => {
     setEmergencyState(actionName);
-    setNotice(`Responder status updated to ${actionName}. Dispatch team notified.`);
+    setNotice(`Responder status updated to ${actionName}. Security dispatch notified.`);
     setTimeout(() => setNotice(''), 4000);
   };
 
   const handleIncidentStatus = async (id, status) => {
     await updateIncident(id, { status });
-    setNotice(`Safety report status updated to ${status}.`);
+    setNotice(`Safety incident status updated to ${status}.`);
     setTimeout(() => setNotice(''), 4000);
   };
 
@@ -54,9 +48,9 @@ function VolunteerDashboard() {
           <p className="eyebrow" style={{ color: 'var(--signal)' }}>
             Safety Volunteer & First Responder Hub
           </p>
-          <h1>{community.community_name} Emergency Response</h1>
+          <h1>Emergency Dispatch & Patrol Triage</h1>
           <p className="masthead-meta">
-            Logged in as {currentUser.first_name} {currentUser.last_name} ({currentUser.role})
+            Logged in as {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Safety Volunteer'} ({community.community_name})
           </p>
         </div>
         <div className="cluster">
@@ -68,7 +62,7 @@ function VolunteerDashboard() {
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* SECTION 2: Active SOS Callout Banner */}
+      {/* SECTION 2: Live Emergency Triage Banner */}
       <section
         className="panel"
         style={{
@@ -83,19 +77,19 @@ function VolunteerDashboard() {
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
           <div>
             <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-              Active Emergency Alert
+              Live Emergency Triage Queue
             </p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--paper)' }}>
-              SOS Triggered at {ACTIVE_EMERGENCY.location}
+              SOS Triggered at 14 Riverside Drive, Section A
             </h2>
           </div>
-          <span className="mono" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-            Status: {emergencyState}
+          <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
+            Triage Status: {emergencyState}
           </span>
         </div>
 
         <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s4)' }}>
-          {ACTIVE_EMERGENCY.notes} Triggered by {ACTIVE_EMERGENCY.caller} ({ACTIVE_EMERGENCY.time}).
+          SOS Alert triggered from resident app. Patrol officer Sipho Dlamini notified.
         </p>
 
         <div className="cluster" style={{ gap: 'var(--s3)' }}>
@@ -137,42 +131,22 @@ function VolunteerDashboard() {
             className="btn btn-solid"
             onClick={() => handleResponderAction('Resolved & Clear')}
           >
-            Mark Emergency Clear
+            Mark Incident Resolved
           </button>
         </div>
       </section>
 
-      {/* SECTION 3: Responder Figures */}
-      <div className="figures">
-        <div className="figure">
-          <span className="eyebrow">Active SOS Alerts</span>
-          <span className="figure-value">1</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">Open Safety Concerns</span>
-          <span className="figure-value">{openIncidents.length}</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">Patrol Rounds Today</span>
-          <span className="figure-value">8</span>
-        </div>
-        <div className="figure">
-          <span className="eyebrow">On-Duty Volunteers</span>
-          <span className="figure-value">4</span>
-        </div>
-      </div>
-
-      {/* SECTION 4: Active Incidents & Patrol Action List */}
+      {/* SECTION 3: Live Incident Triage Feed */}
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
-            <p className="eyebrow">Incident Response</p>
+            <p className="eyebrow">Triage Feed</p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Active Safety Concerns Requiring Attention
+              Incoming Incident Reports Requiring Dispatch
             </h2>
           </div>
           <Link to="/incidents" className="link">
-            All reports
+            Full incident ledger
           </Link>
         </div>
 
@@ -183,7 +157,7 @@ function VolunteerDashboard() {
                 <div>
                   <h3 className="entry-title">{item.incident_type}</h3>
                   <p className="sm faint" style={{ color: 'var(--dim)', marginTop: '2px' }}>
-                    Hotspot: <strong>{item.location || 'General Estate'}</strong> • Reported by {item.reported_by}
+                    Location: <strong>{item.location || 'General Estate'}</strong> • Reported by {item.reported_by}
                   </p>
                 </div>
                 <StatusBadge status={item.status} />
@@ -206,7 +180,7 @@ function VolunteerDashboard() {
                     style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
                     onClick={() => handleIncidentStatus(item.id, 'Under review')}
                   >
-                    Investigating
+                    Set Under Review
                   </button>
                   <button
                     type="button"
@@ -223,33 +197,63 @@ function VolunteerDashboard() {
         </ul>
       </section>
 
-      {/* SECTION 5: Patrol Checkpoints */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-          <div>
-            <p className="eyebrow">Night Patrol</p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Perimeter Security Checkpoints
-            </h2>
+      {/* SECTION 4: Patrol Coordination Grid */}
+      <div className="grid-2">
+        {/* Patrol Routes */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+            <div>
+              <p className="eyebrow">Patrol Coordination</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                Active Patrol Routes & Check-Ins
+              </h2>
+            </div>
           </div>
-        </div>
 
-        <ul className="ledger">
-          {CHECKPOINTS.map((cp) => (
-            <li className="entry" key={cp.id}>
-              <div>
-                <h3 className="entry-title">{cp.name}</h3>
-                <p className="entry-body" style={{ color: 'var(--dim)' }}>
-                  Last inspected {cp.time} by Volunteer Patrol.
-                </p>
-              </div>
-              <span className="entry-aside mono" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-                {cp.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <ul className="ledger">
+            {PATROL_ROUTES.map((p) => (
+              <li className="entry" key={p.id}>
+                <div>
+                  <h3 className="entry-title">{p.route}</h3>
+                  <p className="entry-body" style={{ color: 'var(--dim)' }}>
+                    Status: {p.time}
+                  </p>
+                </div>
+                <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
+                  {p.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Safety Volunteer Roster */}
+        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+            <div>
+              <p className="eyebrow">Volunteer Roster</p>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>
+                On-Duty Responders & Contacts
+              </h2>
+            </div>
+          </div>
+
+          <ul className="ledger">
+            {VOLUNTEER_TEAM.map((v) => (
+              <li className="entry" key={v.id}>
+                <div>
+                  <h3 className="entry-title">{v.name}</h3>
+                  <p className="entry-body">{v.role}</p>
+                  <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
+                    Contact: {v.phone}
+                  </p>
+                </div>
+                <span className="status status-closed">{v.status}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }

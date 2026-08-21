@@ -74,6 +74,7 @@ const INITIAL_CHANNELS = [
     role: 'Official Broadcast Channel',
     type: 'group',
     lastSeen: 'Official Notices Only',
+    readOnlyForResidents: true,
     messages: [
       {
         id: 'an1',
@@ -87,8 +88,8 @@ const INITIAL_CHANNELS = [
   },
   {
     id: 'ch_safety_ops',
-    name: '#safety-ops-dispatch',
-    role: 'Safety Responder Ops Channel',
+    name: '#safety-operations',
+    role: 'Safety Responder Tactical Channel',
     type: 'group',
     lastSeen: 'Responders & Patrol Only',
     messages: [
@@ -150,7 +151,7 @@ const INITIAL_DIRECT = [
   {
     id: 'd_thabo',
     name: 'Thabo Mokoena',
-    role: 'Resident & Neighbor',
+    role: 'Resident Member',
     online: true,
     lastSeen: 'Last active 15m ago',
     type: 'direct',
@@ -183,8 +184,9 @@ function Members() {
   const [searchFilter, setSearchFilter] = useState('');
   const [ticketFilter, setTicketFilter] = useState('all');
 
-  // Support Request Modal
+  // Support Request & New Chat Modals
   const [supportModal, setSupportModal] = useState(false);
+  const [newChatModal, setNewChatModal] = useState(false);
   const [supportCategory, setSupportCategory] = useState(SUPPORT_CATEGORIES[0]);
   const [supportBody, setSupportBody] = useState('');
   const [profileModalMember, setProfileModalMember] = useState(null);
@@ -198,10 +200,12 @@ function Members() {
     [conversations, activeConvId]
   );
 
-  // Accessible channels based on role
+  // Role-based channel visibility filter
   const visibleConversations = useMemo(() => {
     return conversations.filter((c) => {
+      // Hide tactical #safety-operations from regular Residents
       if (c.id === 'ch_safety_ops' && userRole === 'Resident') return false;
+      // Filter private direct chats
       if (c.type === 'direct' && canAccessPrivateChat) {
         return canAccessPrivateChat('Resident', c.name);
       }
@@ -229,6 +233,43 @@ function Members() {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [activeConv.messages]);
+
+  // Initiate / Navigate to 1-on-1 Direct Message with Member
+  const handleStartChatWithMember = (member) => {
+    const memberName = `${member.first_name} ${member.last_name}`;
+    const existing = conversations.find(
+      (c) => c.type === 'direct' && (c.name === memberName || c.name.includes(member.first_name))
+    );
+
+    if (existing) {
+      setActiveConvId(existing.id);
+    } else {
+      const newConv = {
+        id: `d_${member.id || Date.now()}`,
+        name: memberName,
+        role: member.role || 'Resident Member',
+        online: true,
+        lastSeen: 'Active Member',
+        type: 'direct',
+        messages: [
+          {
+            id: `init_${Date.now()}`,
+            sender: memberName,
+            role: member.role || 'Resident',
+            text: `Direct private conversation started with ${memberName}.`,
+            time: new Date().toISOString(),
+            isMe: false,
+          },
+        ],
+      };
+      setConversations((prev) => [newConv, ...prev]);
+      setActiveConvId(newConv.id);
+    }
+
+    setActiveTab('chat');
+    setProfileModalMember(null);
+    setNewChatModal(false);
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -279,6 +320,11 @@ function Members() {
     setNotice(`Support ticket updated to ${newStatus}.`);
     setTimeout(() => setNotice(''), 4000);
   };
+
+  const isReadOnlyChannel =
+    activeConv.id === 'ch_announcements' &&
+    userRole !== 'Community Administrator' &&
+    userRole !== 'System Administrator';
 
   return (
     <div className="stack" style={{ gap: 'var(--s3)' }}>
@@ -350,13 +396,13 @@ function Members() {
         ) : null}
       </div>
 
-      {/* TAB 1: SPLIT CHAT INTERFACE (Fills Viewport Height Neatly) */}
+      {/* TAB 1: SPLIT CHAT INTERFACE */}
       {activeTab === 'chat' ? (
         <div
           className="panel"
           style={{
-            height: 'calc(100vh - 220px)',
-            minHeight: '520px',
+            height: 'calc(100vh - 210px)',
+            minHeight: '540px',
             display: 'flex',
             border: '1px solid var(--line-hi)',
             overflow: 'hidden',
@@ -408,9 +454,26 @@ function Members() {
                   </button>
                 ))}
 
-              <p className="eyebrow" style={{ color: 'var(--dim)', marginTop: 'var(--s4)', marginBottom: 'var(--s2)', fontSize: '0.68rem' }}>
-                Direct Support & Messages
-              </p>
+              <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s4)', marginBottom: 'var(--s2)' }}>
+                <p className="eyebrow" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.68rem' }}>
+                  Direct Support & Messages
+                </p>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    padding: '0.1rem 0.4rem',
+                    fontSize: '0.75rem',
+                    borderColor: 'var(--line-hi)',
+                    color: 'var(--signal)',
+                  }}
+                  onClick={() => setNewChatModal(true)}
+                  title="Start New Direct Message"
+                >
+                  + New
+                </button>
+              </div>
+
               {visibleConversations
                 .filter((c) => c.type === 'direct')
                 .map((conv) => (
@@ -435,6 +498,16 @@ function Members() {
                       <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
                         {conv.name}
                       </strong>
+                      <span
+                        style={{
+                          width: '7px',
+                          height: '7px',
+                          borderRadius: '50%',
+                          backgroundColor: conv.online ? 'var(--signal)' : 'var(--dim)',
+                          display: 'inline-block',
+                        }}
+                        title={conv.online ? 'Online' : 'Offline'}
+                      />
                     </div>
                     <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
                       {conv.role}
@@ -477,7 +550,6 @@ function Members() {
             <div
               className="cluster"
               style={{
-                justify: 'space-between',
                 justifyContent: 'space-between',
                 padding: 'var(--s3) var(--s4)',
                 borderBottom: '1px solid var(--line)',
@@ -547,51 +619,70 @@ function Members() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Integrated Message Input Box */}
-            <form
-              onSubmit={handleSendMessage}
-              style={{
-                padding: 'var(--s3)',
-                borderTop: '1px solid var(--line)',
-                backgroundColor: 'var(--panel)',
-                display: 'flex',
-                gap: 'var(--s2)',
-                alignItems: 'center',
-              }}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setAttachment(e.target.files[0]);
-                  }
+            {/* Integrated Message Input Box or Read-Only Banner */}
+            {isReadOnlyChannel ? (
+              <div
+                style={{
+                  padding: 'var(--s3)',
+                  borderTop: '1px solid var(--line)',
+                  backgroundColor: 'var(--panel-hi)',
+                  textAlign: 'center',
                 }}
-              />
-
-              <button
-                type="button"
-                className="btn"
-                style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}
-                onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                title="Attach document or photo"
               >
-                {attachment ? 'File Attached' : 'Attach'}
-              </button>
+                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                  Only Community Administrators can publish official notices to {activeConv.name}.
+                </p>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSendMessage}
+                style={{
+                  padding: 'var(--s3)',
+                  borderTop: '1px solid var(--line)',
+                  backgroundColor: 'var(--panel)',
+                  display: 'flex',
+                  gap: 'var(--s2)',
+                  alignItems: 'center',
+                }}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setAttachment(e.target.files[0]);
+                    }
+                  }}
+                />
 
-              <input
-                className="control"
-                placeholder={attachment ? `Attached: ${attachment.name} - Write message...` : `Write a message in ${activeConv.name}...`}
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                style={{ flex: 1 }}
-              />
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  title="Attach document or photo"
+                >
+                  {attachment ? 'File Attached' : 'Attach'}
+                </button>
 
-              <button type="submit" className="btn btn-solid" style={{ padding: '0.4rem 1rem' }}>
-                Send
-              </button>
-            </form>
+                <input
+                  className="control"
+                  placeholder={
+                    attachment
+                      ? `Attached: ${attachment.name} - Write message...`
+                      : `Message ${activeConv.name}...`
+                  }
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+
+                <button type="submit" className="btn btn-solid" style={{ padding: '0.4rem 1rem' }}>
+                  Send
+                </button>
+              </form>
+            )}
           </div>
         </div>
       ) : activeTab === 'directory' ? (
@@ -637,14 +728,21 @@ function Members() {
                 </div>
 
                 <span className="entry-aside cluster" style={{ gap: 'var(--s2)' }}>
-                  <span className="status status-closed">Verified</span>
                   <button
                     type="button"
                     className="btn"
                     style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
                     onClick={() => setProfileModalMember(m)}
                   >
-                    View Verified Profile
+                    View Profile
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-solid"
+                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
+                    onClick={() => handleStartChatWithMember(m)}
+                  >
+                    Start Live Chat
                   </button>
                 </span>
               </li>
@@ -745,6 +843,41 @@ function Members() {
         </section>
       )}
 
+      {/* NEW DIRECT MESSAGE PICKER MODAL */}
+      {newChatModal ? (
+        <Modal
+          title="Start Private Direct Message"
+          onClose={() => setNewChatModal(false)}
+          footer={
+            <button type="button" className="btn" onClick={() => setNewChatModal(false)}>
+              Cancel
+            </button>
+          }
+        >
+          <div className="stack" style={{ gap: 'var(--s3)' }}>
+            <p className="sm faint">Select a verified estate resident or staff member to begin a 1-on-1 private chat:</p>
+            <ul className="ledger">
+              {memberList.map((m) => (
+                <li className="entry" key={m.id}>
+                  <div>
+                    <h3 className="entry-title">{m.first_name} {m.last_name}</h3>
+                    <p className="entry-body">{m.role} • {m.address}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-solid"
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                    onClick={() => handleStartChatWithMember(m)}
+                  >
+                    Start Chat
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Modal>
+      ) : null}
+
       {/* STRUCTURED NEW SUPPORT REQUEST MODAL */}
       {supportModal ? (
         <Modal
@@ -804,10 +937,7 @@ function Members() {
         <ResidentProfileModal
           member={profileModalMember}
           onClose={() => setProfileModalMember(null)}
-          onStartChat={(m) => {
-            setProfileModalMember(null);
-            setActiveTab('chat');
-          }}
+          onStartChat={handleStartChatWithMember}
         />
       ) : null}
     </div>

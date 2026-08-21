@@ -27,184 +27,139 @@ function playPingChime() {
   } catch (e) {}
 }
 
-const CATEGORIES = [
-  'Urgent Neighbor Emergency',
-  'Report Misconduct / Complaint',
-  'Gate & Access Assistance',
-  'General Neighbor Inquiry',
+const SUPPORT_CATEGORIES = [
+  'Maintenance & Repairs',
+  'Noise & Disturbance',
+  'Billing & Levy Inquiry',
+  'General Admin Question',
 ];
 
-const INITIAL_CONVERSATIONS = [
+const INITIAL_CHANNELS = [
   {
-    id: 1,
-    name: 'Marcus Vance',
+    id: 'ch_estate',
+    name: '#estate-chat',
+    role: 'Public Community Channel',
+    type: 'group',
+    lastSeen: 'Public Discussion Channel',
+    messages: [
+      {
+        id: 'cm1',
+        sender: 'Sarah Jenkins',
+        role: 'Safety Volunteer',
+        text: 'Reminder to all residents: The south gate barrier arm will undergo routine maintenance at 14:00 today.',
+        time: new Date(Date.now() - 7200000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'cm2',
+        sender: 'Thabo Mokoena',
+        role: 'Resident',
+        text: 'Thanks Sarah! Will the side pedestrian gate remain open?',
+        time: new Date(Date.now() - 3600000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'cm3',
+        sender: 'Marcus Vance',
+        role: 'Community Administrator',
+        text: 'Yes, pedestrian access remains fully active. Main gate guard will manually clear vehicles.',
+        time: new Date(Date.now() - 1800000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
+  {
+    id: 'ch_announcements',
+    name: '#general-announcements',
+    role: 'Official Broadcast Channel',
+    type: 'group',
+    lastSeen: 'Official Notices Only',
+    messages: [
+      {
+        id: 'an1',
+        sender: 'Marcus Vance (Admin)',
+        role: 'Community Administrator',
+        text: 'Planned municipal water maintenance scheduled for Tuesday 09:00 - 15:00. Please store backup water.',
+        time: new Date(Date.now() - 86400000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
+  {
+    id: 'ch_safety_ops',
+    name: '#safety-ops-dispatch',
+    role: 'Safety Responder Ops Channel',
+    type: 'group',
+    lastSeen: 'Responders & Patrol Only',
+    messages: [
+      {
+        id: 'so1',
+        sender: 'Sarah Jenkins',
+        role: 'Safety Volunteer',
+        text: 'Patrol Round 3 complete. Section A & C perimeter fences secure.',
+        time: new Date(Date.now() - 1800000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'so2',
+        sender: 'Gate Guardhouse',
+        role: 'Security Patrol',
+        text: 'SOS alert from Unit 14 acknowledged. Patrol officer en route.',
+        time: new Date(Date.now() - 600000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
+];
+
+const INITIAL_DIRECT = [
+  {
+    id: 'd_admin',
+    name: 'Marcus Vance (Admin Support)',
     role: 'Community Administrator',
-    address: '1 Clubhouse Way',
     online: true,
-    lastSeen: 'Online • Active in Estate',
+    lastSeen: 'Online • Active in Estate Office',
     type: 'direct',
     messages: [
       {
         id: 'm1',
         sender: 'Marcus Vance',
         role: 'Community Administrator',
-        text: 'Hey! Just following up on your message regarding the water leak on Riverside Drive.',
-        time: new Date(Date.now() - 3600000).toISOString(),
+        text: 'Hello! This is your direct private line to Estate Management. How can we assist you today?',
+        time: new Date(Date.now() - 86400000).toISOString(),
         isMe: false,
       },
       {
         id: 'm2',
         sender: 'Resident Member',
         role: 'Resident',
-        text: 'Thanks Marcus! Is the gate entrance going to be blocked during rush hour?',
-        time: new Date(Date.now() - 1800000).toISOString(),
+        text: 'Hi Marcus! Just submitted a ticket regarding the streetlight repair near unit 22.',
+        time: new Date(Date.now() - 3600000).toISOString(),
         isMe: true,
       },
       {
         id: 'm3',
         sender: 'Marcus Vance',
         role: 'Community Administrator',
-        text: 'Spoke to the supervisor 5 mins ago. They are keeping one lane open and gate security will direct traffic. Let me know if you run into any delays!',
-        time: new Date(Date.now() - 600000).toISOString(),
-        isMe: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Thabo Mokoena',
-    role: 'Resident & Neighbor',
-    address: '22 Riverside Drive',
-    online: true,
-    lastSeen: 'Last seen today at 21:40',
-    type: 'direct',
-    messages: [
-      {
-        id: 't1',
-        sender: 'Thabo Mokoena',
-        role: 'Resident',
-        text: 'Hey neighbor! Did you see that silver Polo parked near house 18? Just checking if it belongs to your visitors.',
-        time: new Date(Date.now() - 7200000).toISOString(),
-        isMe: false,
-      },
-      {
-        id: 't2',
-        sender: 'Resident Member',
-        role: 'Resident',
-        text: 'Hi Thabo! No, not ours. Was it parked there long?',
-        time: new Date(Date.now() - 3600000).toISOString(),
-        isMe: true,
-      },
-      {
-        id: 't3',
-        sender: 'Thabo Mokoena',
-        role: 'Resident',
-        text: 'Yeah about 45 mins. I asked gate security to do a quick drive-by. Everything looks fine now though!',
+        text: 'Received! City Power has been dispatched for tomorrow morning.',
         time: new Date(Date.now() - 1200000).toISOString(),
         isMe: false,
       },
     ],
   },
   {
-    id: 3,
-    name: 'Sarah Jenkins',
-    role: 'Safety Volunteer',
-    address: '8 Mill Road',
-    online: false,
-    lastSeen: 'Last seen 12m ago',
+    id: 'd_thabo',
+    name: 'Thabo Mokoena',
+    role: 'Resident & Neighbor',
+    online: true,
+    lastSeen: 'Last active 15m ago',
     type: 'direct',
     messages: [
       {
-        id: 's1',
-        sender: 'Sarah Jenkins',
-        role: 'Safety Volunteer',
-        text: 'Evening! Starting night patrol rounds on Mill Road and Section C now.',
-        time: new Date(Date.now() - 14400000).toISOString(),
-        isMe: false,
-      },
-      {
-        id: 's2',
-        sender: 'Resident Member',
-        role: 'Resident',
-        text: 'Thanks Sarah! Could you double check the back gate latch near the park?',
-        time: new Date(Date.now() - 10800000).toISOString(),
-        isMe: true,
-      },
-      {
-        id: 's3',
-        sender: 'Sarah Jenkins',
-        role: 'Safety Volunteer',
-        text: 'Just checked it, the latch is secure and gate lock is holding fine.',
-        time: new Date(Date.now() - 9000000).toISOString(),
-        isMe: false,
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: 'David Chen',
-    role: 'System Administrator',
-    address: 'CommuniKey HQ',
-    online: true,
-    lastSeen: 'Online • HQ Desk',
-    type: 'direct',
-    messages: [
-      {
-        id: 'd1',
-        sender: 'David Chen',
-        role: 'System Administrator',
-        text: 'Hi there! Saw your query regarding address verification documents.',
-        time: new Date(Date.now() - 86400000).toISOString(),
-        isMe: false,
-      },
-      {
-        id: 'd2',
-        sender: 'Resident Member',
-        role: 'Resident',
-        text: 'Hi David! Yes, uploaded my municipal bill yesterday, wanted to confirm if it was received.',
-        time: new Date(Date.now() - 43200000).toISOString(),
-        isMe: true,
-      },
-      {
-        id: 'd3',
-        sender: 'David Chen',
-        role: 'System Administrator',
-        text: 'Just reviewed it, everything looks spot on! Your verified resident badge is now active on your profile.',
-        time: new Date(Date.now() - 21600000).toISOString(),
-        isMe: false,
-      },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Estate Safety Watch Group',
-    role: 'Community Channel',
-    address: 'All Estate Sections',
-    online: true,
-    lastSeen: 'Active Group • 14 Members',
-    type: 'group',
-    messages: [
-      {
-        id: 'g1',
+        id: 't1',
         sender: 'Thabo Mokoena',
         role: 'Resident',
-        text: 'Streetlight on corner of Mill Road is flickering on and off again tonight.',
-        time: new Date(Date.now() - 28800000).toISOString(),
-        isMe: false,
-      },
-      {
-        id: 'g2',
-        sender: 'Sarah Jenkins',
-        role: 'Safety Volunteer',
-        text: 'Logged on municipal portal! Ticket reference #4092.',
-        time: new Date(Date.now() - 14400000).toISOString(),
-        isMe: false,
-      },
-      {
-        id: 'g3',
-        sender: 'Marcus Vance',
-        role: 'Community Administrator',
-        text: 'Thanks Sarah, admin team will track it tomorrow morning.',
+        text: 'Hey neighbor! Did you receive the visitor access code for the weekend event?',
         time: new Date(Date.now() - 7200000).toISOString(),
         isMe: false,
       },
@@ -213,77 +168,78 @@ const INITIAL_CONVERSATIONS = [
 ];
 
 function Members() {
+  const { currentUser, userRole, canAccessPrivateChat } = useAuth();
   const { items: memberList } = useCollection('/members', demoMembers);
-  const { items: messageList, create: createMessage } = useCollection(
-    '/direct-messages',
+  const { items: ticketList, create: createTicket, update: updateTicket } = useCollection(
+    '/messages',
     demoDirectMessages
   );
 
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'directory' | 'tickets'
-  const [conversations, setConversations] = useState(INITIAL_CONVERSATIONS);
-  const [activeConvId, setActiveConvId] = useState(1);
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'directory' | 'helpdesk'
+  const [conversations, setConversations] = useState([...INITIAL_CHANNELS, ...INITIAL_DIRECT]);
+  const [activeConvId, setActiveConvId] = useState('ch_estate');
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [receipt, setReceipt] = useState('');
+  const [attachment, setAttachment] = useState(null);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [ticketFilter, setTicketFilter] = useState('all');
 
-  // Ticket & Profile Modals
-  const [modalOpen, setModalOpen] = useState(false);
+  // Support Request Modal
+  const [supportModal, setSupportModal] = useState(false);
+  const [supportCategory, setSupportCategory] = useState(SUPPORT_CATEGORIES[0]);
+  const [supportBody, setSupportBody] = useState('');
   const [profileModalMember, setProfileModalMember] = useState(null);
-  const [recipientRole, setRecipientRole] = useState('Community Administrator');
-  const [recipientName, setRecipientName] = useState('Marcus Vance');
-  const [category, setCategory] = useState(CATEGORIES[0]);
-  const [ticketBody, setTicketBody] = useState('');
+  const [notice, setNotice] = useState('');
 
   const chatEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const activeConv = useMemo(
     () => conversations.find((c) => c.id === activeConvId) || conversations[0],
     [conversations, activeConvId]
   );
 
-  const { canAccessPrivateChat } = useAuth();
-
-  const directConvs = useMemo(
-    () =>
-      conversations.filter((c) => {
-        if (c.type !== 'direct') return false;
-        return canAccessPrivateChat ? canAccessPrivateChat('Resident', c.name) : true;
-      }),
-    [conversations, canAccessPrivateChat]
-  );
-  const groupConvs = useMemo(
-    () => conversations.filter((c) => c.type === 'group'),
-    [conversations]
-  );
+  // Accessible channels based on role
+  const visibleConversations = useMemo(() => {
+    return conversations.filter((c) => {
+      if (c.id === 'ch_safety_ops' && userRole === 'Resident') return false;
+      if (c.type === 'direct' && canAccessPrivateChat) {
+        return canAccessPrivateChat('Resident', c.name);
+      }
+      return true;
+    });
+  }, [conversations, userRole, canAccessPrivateChat]);
 
   const visibleMembers = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = searchFilter.trim().toLowerCase();
     return memberList.filter(
       (m) =>
         !term ||
         `${m.first_name} ${m.last_name} ${m.role} ${m.address}`.toLowerCase().includes(term)
     );
-  }, [memberList, search]);
+  }, [memberList, searchFilter]);
+
+  const filteredTickets = useMemo(() => {
+    if (ticketFilter === 'awaiting') return ticketList.filter((t) => t.status === 'Awaiting Response');
+    if (ticketFilter === 'resolved') return ticketList.filter((t) => t.status === 'Resolved');
+    return ticketList;
+  }, [ticketList, ticketFilter]);
 
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeConv?.messages, isTyping]);
+  }, [activeConv.messages]);
 
-  const handleSendChatMessage = (e) => {
+  const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() && !attachment) return;
 
-    playPingChime();
-
-    const userMsgText = inputMessage.trim();
+    const myName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Resident Member';
     const newMsg = {
       id: `m_${Date.now()}`,
-      sender: 'Resident Member',
-      role: 'Resident',
-      text: userMsgText,
+      sender: myName,
+      role: userRole || 'Resident',
+      text: inputMessage.trim() + (attachment ? ` [Attachment: ${attachment.name}]` : ''),
       time: new Date().toISOString(),
       isMe: true,
     };
@@ -292,153 +248,63 @@ function Members() {
       prev.map((c) => (c.id === activeConvId ? { ...c, messages: [...c.messages, newMsg] } : c))
     );
     setInputMessage('');
-
-    // Trigger genuine human response based on contact persona
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      playPingChime();
-
-      let replyText = '';
-      if (activeConv.name.includes('Marcus')) {
-        replyText = `Thanks for letting me know! I am following up on this right away with the estate team.`;
-      } else if (activeConv.name.includes('Thabo')) {
-        replyText = `Got your message neighbor! Appreciate you checking in, let's keep an eye on it.`;
-      } else if (activeConv.name.includes('Sarah')) {
-        replyText = `Thanks for the heads up! Adding this location to our night patrol checklist now.`;
-      } else if (activeConv.name.includes('David')) {
-        replyText = `Hi! Received your message. Updating your request details right now.`;
-      } else {
-        replyText = `Message noted by estate watch team! Thanks for updating the channel.`;
-      }
-
-      const autoReplyMsg = {
-        id: `r_${Date.now()}`,
-        sender: activeConv.name,
-        role: activeConv.role,
-        text: replyText,
-        time: new Date().toISOString(),
-        isMe: false,
-      };
-
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === activeConvId ? { ...c, messages: [...c.messages, autoReplyMsg] } : c
-        )
-      );
-    }, 2200);
+    setAttachment(null);
   };
 
-  const handleStartChatWithMember = (member) => {
-    const fullName = `${member.first_name} ${member.last_name}`;
-    let existing = conversations.find((c) => c.name === fullName);
-    if (!existing) {
-      const newC = {
-        id: Date.now(),
-        name: fullName,
-        role: member.role,
-        address: member.address,
-        online: true,
-        lastSeen: 'Online • Just started chat',
-        type: 'direct',
-        messages: [
-          {
-            id: `init_${Date.now()}`,
-            sender: fullName,
-            role: member.role,
-            text: `Hey! Starting a private chat channel here on CommuniKey.`,
-            time: new Date().toISOString(),
-            isMe: false,
-          },
-        ],
-      };
-      setConversations((prev) => [newC, ...prev]);
-      setActiveConvId(newC.id);
-    } else {
-      setActiveConvId(existing.id);
-    }
-    setActiveTab('chat');
-  };
-
-  const handleSendEmergencyPing = () => {
-    playPingChime();
-    const pingMsg = {
-      id: `ping_${Date.now()}`,
-      sender: 'Resident Member',
-      role: 'Resident',
-      text: 'EMERGENCY LOCATION PING: Priority assistance requested at 14 Riverside Drive.',
-      time: new Date().toISOString(),
-      isMe: true,
-    };
-    setConversations((prev) =>
-      prev.map((c) => (c.id === activeConvId ? { ...c, messages: [...c.messages, pingMsg] } : c))
-    );
-
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      playPingChime();
-      const emergencyReply = {
-        id: `r_ping_${Date.now()}`,
-        sender: activeConv.name,
-        role: activeConv.role,
-        text: `Emergency ping received loud and clear! Dispatched nearest security patrol to 14 Riverside Drive right now.`,
-        time: new Date().toISOString(),
-        isMe: false,
-      };
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === activeConvId ? { ...c, messages: [...c.messages, emergencyReply] } : c
-        )
-      );
-    }, 1600);
-  };
-
-  const handleCreateTicket = async (e) => {
+  const handleCreateSupportRequest = async (e) => {
     e.preventDefault();
-    if (!ticketBody.trim()) return;
+    if (!supportBody.trim()) return;
 
     playPingChime();
-    await createMessage({
-      sender_name: 'Resident Member',
-      recipient_role: recipientRole,
-      recipient_name: recipientName,
-      category,
-      message: ticketBody.trim(),
+    const myName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Resident Member';
+
+    await createTicket({
+      sender_name: myName,
+      recipient_role: 'Community Administrator',
+      recipient_name: 'Marcus Vance',
+      category: supportCategory,
+      message: supportBody.trim(),
       status: 'Awaiting Response',
       date_sent: new Date().toISOString(),
-      response: '',
     });
 
-    setTicketBody('');
-    setModalOpen(false);
-    setReceipt(`Admin ticket created and dispatched to ${recipientName}.`);
-    setTimeout(() => setReceipt(''), 5000);
+    setSupportBody('');
+    setSupportModal(false);
+    setNotice('Support request created and routed to Estate Administration.');
+    setTimeout(() => setNotice(''), 5000);
+  };
+
+  const handleTicketAction = async (ticketId, newStatus) => {
+    await updateTicket(ticketId, { status: newStatus });
+    setNotice(`Support ticket updated to ${newStatus}.`);
+    setTimeout(() => setNotice(''), 4000);
   };
 
   return (
-    <div className="stack">
+    <div className="stack" style={{ gap: 'var(--s3)' }}>
       {/* PAGE HEADER */}
-      <header className="masthead">
+      <header className="masthead" style={{ paddingBottom: 'var(--s3)' }}>
         <div>
-          <p className="eyebrow">Community Directory & Messaging</p>
-          <h1>Resident Communications & Hotline</h1>
+          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+            Communication Center
+          </p>
+          <h1 style={{ fontSize: 'var(--fs-xl)' }}>Estate Messaging & Member Hub</h1>
           <p className="masthead-meta">
-            Direct neighbor messaging, emergency location pings, and administrator support.
+            Private 1-on-1 support tickets, community discussion channels, and member directory.
           </p>
         </div>
-        <div className="cluster">
-          <button type="button" className="btn btn-solid" onClick={() => setModalOpen(true)}>
-            Submit Admin Ticket
+
+        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+          <button type="button" className="btn btn-solid" onClick={() => setSupportModal(true)}>
+            New Support Request
           </button>
-          <p className="mono">{memberList.length} verified members</p>
         </div>
       </header>
 
-      {receipt ? <p className="notice">{receipt}</p> : null}
+      {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* TAB CONTROLS */}
-      <div className="cluster" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s3)' }}>
+      {/* TAB NAVIGATION BAR */}
+      <div className="cluster" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 'var(--s2)' }}>
         <button
           type="button"
           className="link"
@@ -446,11 +312,13 @@ function Members() {
             fontWeight: activeTab === 'chat' ? 600 : 400,
             color: activeTab === 'chat' ? 'var(--paper)' : 'var(--dim)',
             borderBottomColor: activeTab === 'chat' ? 'var(--signal)' : 'transparent',
+            paddingBottom: '0.4rem',
           }}
           onClick={() => setActiveTab('chat')}
         >
-          Live Estate Chat ({conversations.length})
+          Message Channels & Chat
         </button>
+
         <button
           type="button"
           className="link"
@@ -458,294 +326,300 @@ function Members() {
             fontWeight: activeTab === 'directory' ? 600 : 400,
             color: activeTab === 'directory' ? 'var(--paper)' : 'var(--dim)',
             borderBottomColor: activeTab === 'directory' ? 'var(--signal)' : 'transparent',
+            paddingBottom: '0.4rem',
           }}
           onClick={() => setActiveTab('directory')}
         >
           Verified Members Directory ({memberList.length})
         </button>
-        <button
-          type="button"
-          className="link"
-          style={{
-            fontWeight: activeTab === 'tickets' ? 600 : 400,
-            color: activeTab === 'tickets' ? 'var(--paper)' : 'var(--dim)',
-            borderBottomColor: activeTab === 'tickets' ? 'var(--signal)' : 'transparent',
-          }}
-          onClick={() => setActiveTab('tickets')}
-        >
-          Support & Admin Tickets ({messageList.length})
-        </button>
+
+        {userRole === 'Community Administrator' || userRole === 'System Administrator' ? (
+          <button
+            type="button"
+            className="link"
+            style={{
+              fontWeight: activeTab === 'helpdesk' ? 600 : 400,
+              color: activeTab === 'helpdesk' ? 'var(--paper)' : 'var(--dim)',
+              borderBottomColor: activeTab === 'helpdesk' ? 'var(--signal)' : 'transparent',
+              paddingBottom: '0.4rem',
+            }}
+            onClick={() => setActiveTab('helpdesk')}
+          >
+            Admin Support Helpdesk ({ticketList.length})
+          </button>
+        ) : null}
       </div>
 
+      {/* TAB 1: SPLIT CHAT INTERFACE (Fills Viewport Height Neatly) */}
       {activeTab === 'chat' ? (
-        <section className="panel" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--line-hi)' }}>
-          <div className="columns" style={{ margin: 0, gap: 0 }}>
-            {/* CONVERSATIONS SIDEBAR */}
-            <div
-              style={{
-                width: '320px',
-                borderRight: '1px solid var(--line)',
-                backgroundColor: 'var(--panel)',
-                padding: 'var(--s4)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--s4)',
-              }}
-            >
-              {/* Direct Messages Sub-Heading */}
-              <div>
-                <p className="eyebrow" style={{ marginBottom: 'var(--s2)' }}>
-                  Direct Messages
-                </p>
-                <div className="stack" style={{ gap: 'var(--s2)' }}>
-                  {directConvs.map((conv) => {
-                    const isActive = conv.id === activeConvId;
-                    const lastMsg = conv.messages[conv.messages.length - 1];
-
-                    return (
-                      <button
-                        key={conv.id}
-                        type="button"
-                        onClick={() => setActiveConvId(conv.id)}
-                        style={{
-                          textAlign: 'left',
-                          padding: 'var(--s3)',
-                          borderRadius: '4px',
-                          backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
-                          border: isActive ? '1px solid var(--line-hi)' : '1px solid transparent',
-                          cursor: 'pointer',
-                          display: 'block',
-                          width: '100%',
-                        }}
-                      >
-                        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
-                            {conv.name}
-                          </strong>
-                          <span className="mono sm" style={{ color: conv.online ? 'var(--signal)' : 'var(--dim)', fontSize: '0.65rem' }}>
-                            {conv.online ? 'Online' : 'Offline'}
-                          </span>
-                        </div>
-                        <p className="eyebrow" style={{ fontSize: '0.65rem', marginBottom: '4px' }}>
-                          {conv.role}
-                        </p>
-                        <p className="sm faint" style={{ color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
-                          {lastMsg ? lastMsg.text : 'No messages'}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Community Groups Sub-Heading */}
-              <div>
-                <p className="eyebrow" style={{ marginBottom: 'var(--s2)' }}>
-                  Community Channels
-                </p>
-                <div className="stack" style={{ gap: 'var(--s2)' }}>
-                  {groupConvs.map((conv) => {
-                    const isActive = conv.id === activeConvId;
-                    const lastMsg = conv.messages[conv.messages.length - 1];
-
-                    return (
-                      <button
-                        key={conv.id}
-                        type="button"
-                        onClick={() => setActiveConvId(conv.id)}
-                        style={{
-                          textAlign: 'left',
-                          padding: 'var(--s3)',
-                          borderRadius: '4px',
-                          backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
-                          border: isActive ? '1px solid var(--line-hi)' : '1px solid transparent',
-                          cursor: 'pointer',
-                          display: 'block',
-                          width: '100%',
-                        }}
-                      >
-                        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
-                            {conv.name}
-                          </strong>
-                          <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.65rem' }}>
-                            Active
-                          </span>
-                        </div>
-                        <p className="sm faint" style={{ color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
-                          {lastMsg ? lastMsg.text : 'No messages'}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* ACTIVE CHAT THREAD WINDOW */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '540px', backgroundColor: 'var(--ink)' }}>
-              {/* Chat Thread Header */}
-              <div
-                className="cluster"
-                style={{
-                  justifyContent: 'space-between',
-                  padding: 'var(--s3) var(--s4)',
-                  borderBottom: '1px solid var(--line)',
-                  backgroundColor: 'var(--panel)',
-                }}
-              >
-                <div>
+        <div
+          className="panel"
+          style={{
+            height: 'calc(100vh - 220px)',
+            minHeight: '520px',
+            display: 'flex',
+            border: '1px solid var(--line-hi)',
+            overflow: 'hidden',
+            padding: 0,
+          }}
+        >
+          {/* LEFT SIDEBAR: Channels, Support Threads & Emergency Quick-Calls */}
+          <div
+            style={{
+              width: '320px',
+              borderRight: '1px solid var(--line)',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: 'var(--panel)',
+              flexShrink: 0,
+            }}
+          >
+            {/* Conversation List */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--s3)' }}>
+              <p className="eyebrow" style={{ color: 'var(--dim)', marginBottom: 'var(--s2)', fontSize: '0.68rem' }}>
+                Community Channels
+              </p>
+              {visibleConversations
+                .filter((c) => c.type === 'group')
+                .map((conv) => (
                   <button
+                    key={conv.id}
                     type="button"
-                    className="link"
                     style={{
-                      fontSize: 'var(--fs-base)',
-                      fontWeight: 600,
-                      color: 'var(--paper)',
-                      textDecoration: 'none',
-                      padding: 0,
+                      display: 'block',
+                      width: '100%',
                       textAlign: 'left',
-                      border: 'none',
-                      background: 'none',
+                      padding: 'var(--s3)',
+                      marginBottom: 'var(--s2)',
+                      backgroundColor: activeConvId === conv.id ? 'var(--panel-hi)' : 'transparent',
+                      borderLeft: activeConvId === conv.id ? '3px solid var(--signal)' : '3px solid transparent',
+                      borderRadius: '3px',
+                      border: '1px solid var(--line)',
                       cursor: 'pointer',
                     }}
-                    onClick={() => {
-                      const target = memberList.find(
-                        (m) => `${m.first_name} ${m.last_name}` === activeConv.name
-                      );
-                      setProfileModalMember(target || memberList[0]);
-                    }}
-                    title="Click to view verified profile"
+                    onClick={() => setActiveConvId(conv.id)}
                   >
-                    {activeConv.name}
-                  </button>
-                  <div className="cluster" style={{ gap: 'var(--s3)', marginTop: '2px' }}>
-                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>
-                      {activeConv.role}
-                    </span>
+                    <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', display: 'block' }}>
+                      {conv.name}
+                    </strong>
                     <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
-                      {activeConv.lastSeen}
+                      {conv.role}
                     </span>
-                  </div>
-                </div>
-                <div className="cluster">
-                  <button
-                    type="button"
-                    className="btn"
-                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
-                    onClick={() => {
-                      const target = memberList.find(
-                        (m) => `${m.first_name} ${m.last_name}` === activeConv.name
-                      );
-                      setProfileModalMember(target || memberList[0]);
-                    }}
-                  >
-                    View Profile
                   </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', borderColor: 'var(--signal)' }}
-                    onClick={handleSendEmergencyPing}
-                  >
-                    Send Emergency Ping
-                  </button>
-                </div>
-              </div>
-
-              {/* Message Stream */}
-              <div
-                style={{
-                  flex: 1,
-                  padding: 'var(--s4)',
-                  overflowY: 'auto',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--s3)',
-                }}
-              >
-                {activeConv.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    style={{
-                      alignSelf: msg.isMe ? 'flex-end' : 'flex-start',
-                      maxWidth: '75%',
-                      backgroundColor: msg.isMe ? 'var(--signal)' : 'var(--panel-hi)',
-                      border: msg.isMe ? 'none' : '1px solid var(--line-hi)',
-                      borderRadius: '6px',
-                      padding: 'var(--s3) var(--s4)',
-                    }}
-                  >
-                    <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px', gap: 'var(--s3)' }}>
-                      <span className="eyebrow" style={{ color: msg.isMe ? 'var(--paper)' : 'var(--dim)', fontSize: '0.65rem' }}>
-                        {msg.sender}
-                      </span>
-                      <span className="mono sm" style={{ color: msg.isMe ? 'var(--paper)' : 'var(--faint)', fontSize: '0.65rem' }}>
-                        {formatRelative(msg.time)}
-                      </span>
-                    </div>
-                    <p style={{ color: 'var(--paper)', fontSize: 'var(--fs-sm)', lineHeight: 1.45, margin: 0 }}>
-                      {msg.text}
-                    </p>
-                  </div>
                 ))}
 
-                {isTyping ? (
-                  <div
+              <p className="eyebrow" style={{ color: 'var(--dim)', marginTop: 'var(--s4)', marginBottom: 'var(--s2)', fontSize: '0.68rem' }}>
+                Direct Support & Messages
+              </p>
+              {visibleConversations
+                .filter((c) => c.type === 'direct')
+                .map((conv) => (
+                  <button
+                    key={conv.id}
+                    type="button"
                     style={{
-                      alignSelf: 'flex-start',
-                      backgroundColor: 'var(--panel-hi)',
-                      border: '1px solid var(--line-hi)',
-                      borderRadius: '6px',
-                      padding: 'var(--s2) var(--s4)',
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: 'var(--s3)',
+                      marginBottom: 'var(--s2)',
+                      backgroundColor: activeConvId === conv.id ? 'var(--panel-hi)' : 'transparent',
+                      borderLeft: activeConvId === conv.id ? '3px solid var(--signal)' : '3px solid transparent',
+                      borderRadius: '3px',
+                      border: '1px solid var(--line)',
+                      cursor: 'pointer',
                     }}
+                    onClick={() => setActiveConvId(conv.id)}
                   >
-                    <p className="mono sm faint" style={{ color: 'var(--signal)', fontSize: '0.75rem', margin: 0 }}>
-                      {activeConv.name} is typing a response...
-                    </p>
-                  </div>
-                ) : null}
+                    <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                        {conv.name}
+                      </strong>
+                    </div>
+                    <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
+                      {conv.role}
+                    </span>
+                  </button>
+                ))}
+            </div>
 
-                <div ref={chatEndRef} />
+            {/* STATIC EMERGENCY QUICK CALL CHIPS */}
+            <div
+              style={{
+                padding: 'var(--s3)',
+                borderTop: '1px solid var(--line)',
+                backgroundColor: 'var(--ink)',
+              }}
+            >
+              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', marginBottom: 'var(--s2)' }}>
+                Emergency Contacts / Guardhouse
+              </p>
+              <div className="stack" style={{ gap: 'var(--s1)' }}>
+                <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                  <span style={{ color: 'var(--paper)' }}>24/7 Main Gatehouse</span>
+                  <span className="mono" style={{ color: 'var(--signal)' }}>+27 82 000 1111</span>
+                </div>
+                <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                  <span style={{ color: 'var(--paper)' }}>Security Night Patrol</span>
+                  <span className="mono" style={{ color: 'var(--signal)' }}>+27 82 000 2222</span>
+                </div>
+                <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                  <span style={{ color: 'var(--paper)' }}>Estate Management Office</span>
+                  <span className="mono" style={{ color: 'var(--signal)' }}>+27 82 000 3333</span>
+                </div>
               </div>
-
-              {/* Live Input Bar */}
-              <form
-                onSubmit={handleSendChatMessage}
-                style={{
-                  padding: 'var(--s3) var(--s4)',
-                  borderTop: '1px solid var(--line)',
-                  backgroundColor: 'var(--panel)',
-                  display: 'flex',
-                  gap: 'var(--s3)',
-                }}
-              >
-                <input
-                  className="control"
-                  placeholder={`Write a message to ${activeConv.name}...`}
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <button type="submit" className="btn btn-solid" style={{ padding: '0.4rem 1rem' }}>
-                  Send
-                </button>
-              </form>
             </div>
           </div>
-        </section>
+
+          {/* MAIN CHAT STREAM & HEADER */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ink)' }}>
+            {/* Header */}
+            <div
+              className="cluster"
+              style={{
+                justify: 'space-between',
+                justifyContent: 'space-between',
+                padding: 'var(--s3) var(--s4)',
+                borderBottom: '1px solid var(--line)',
+                backgroundColor: 'var(--panel)',
+              }}
+            >
+              <div>
+                <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)' }}>
+                  {activeConv.name}
+                </h3>
+                <p className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem', margin: 0 }}>
+                  {activeConv.role} • {activeConv.lastSeen}
+                </p>
+              </div>
+
+              {activeConv.type === 'direct' ? (
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                  onClick={() => {
+                    const target = memberList.find((m) => `${m.first_name} ${m.last_name}` === activeConv.name);
+                    setProfileModalMember(target || memberList[0]);
+                  }}
+                >
+                  View Profile
+                </button>
+              ) : null}
+            </div>
+
+            {/* Message Stream */}
+            <div
+              style={{
+                flex: 1,
+                padding: 'var(--s4)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--s3)',
+              }}
+            >
+              {activeConv.messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  style={{
+                    alignSelf: msg.isMe ? 'flex-end' : 'flex-start',
+                    maxWidth: '75%',
+                    backgroundColor: msg.isMe ? 'var(--signal-wash)' : 'var(--panel-hi)',
+                    border: '1px solid var(--line-hi)',
+                    borderRadius: '6px',
+                    padding: 'var(--s3) var(--s4)',
+                  }}
+                >
+                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <strong style={{ fontSize: '0.8rem', color: msg.isMe ? 'var(--signal)' : 'var(--paper)' }}>
+                      {msg.sender}
+                    </strong>
+                    <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
+                      {formatStamp(msg.time)}
+                    </span>
+                  </div>
+                  <p className="sm" style={{ color: 'var(--paper)', margin: 0, lineHeight: 1.5 }}>
+                    {msg.text}
+                  </p>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Integrated Message Input Box */}
+            <form
+              onSubmit={handleSendMessage}
+              style={{
+                padding: 'var(--s3)',
+                borderTop: '1px solid var(--line)',
+                backgroundColor: 'var(--panel)',
+                display: 'flex',
+                gap: 'var(--s2)',
+                alignItems: 'center',
+              }}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setAttachment(e.target.files[0]);
+                  }
+                }}
+              />
+
+              <button
+                type="button"
+                className="btn"
+                style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                title="Attach document or photo"
+              >
+                {attachment ? 'File Attached' : 'Attach'}
+              </button>
+
+              <input
+                className="control"
+                placeholder={attachment ? `Attached: ${attachment.name} - Write message...` : `Write a message in ${activeConv.name}...`}
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                style={{ flex: 1 }}
+              />
+
+              <button type="submit" className="btn btn-solid" style={{ padding: '0.4rem 1rem' }}>
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
       ) : activeTab === 'directory' ? (
+        /* TAB 2: VERIFIED MEMBERS DIRECTORY (PRIVACY PROTECTED) */
         <section className="section">
-          <div className="section-head">
-            <p className="eyebrow">Estate Member Directory</p>
+          <div className="section-head" style={{ marginBottom: 'var(--s4)' }}>
+            <div>
+              <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+                Privacy Protected Directory
+              </p>
+              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+                Verified Resident Household Roster
+              </h2>
+            </div>
+
             <input
               className="searchbar"
               type="search"
               placeholder="Search members by name, street, or role..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              style={{ maxWidth: '320px' }}
             />
           </div>
+
+          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
+            Personal phone numbers and private email addresses are masked for resident privacy protection.
+          </p>
 
           <ul className="ledger">
             {visibleMembers.map((m) => (
@@ -757,8 +631,12 @@ function Members() {
                   <p className="entry-body">
                     Address: {m.address} • Role: {m.role}
                   </p>
+                  <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
+                    Phone: <strong>+27 82 ••• ••••</strong> • Email: <strong>•••••@riverside.co.za</strong>
+                  </p>
                 </div>
-                <span className="entry-aside cluster" style={{ gap: 'var(--s3)' }}>
+
+                <span className="entry-aside cluster" style={{ gap: 'var(--s2)' }}>
                   <span className="status status-closed">Verified</span>
                   <button
                     type="button"
@@ -768,49 +646,98 @@ function Members() {
                   >
                     View Verified Profile
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-solid"
-                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
-                    onClick={() => handleStartChatWithMember(m)}
-                  >
-                    Start Chat Thread
-                  </button>
                 </span>
               </li>
             ))}
           </ul>
         </section>
       ) : (
+        /* TAB 3: ADMIN SUPPORT HELPDESK INBOX */
         <section className="section">
-          <div className="section-head">
-            <p className="eyebrow">Administrator Support Tickets</p>
+          <div className="section-head" style={{ marginBottom: 'var(--s3)' }}>
+            <div>
+              <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+                Admin Support Inbox
+              </p>
+              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+                Resident Support Requests ({filteredTickets.length})
+              </h2>
+            </div>
+
+            <div className="cluster" style={{ gap: 'var(--s2)' }}>
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  backgroundColor: ticketFilter === 'all' ? 'var(--signal-wash)' : 'transparent',
+                  borderColor: ticketFilter === 'all' ? 'var(--signal)' : 'var(--line-hi)',
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => setTicketFilter('all')}
+              >
+                All Tickets
+              </button>
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  backgroundColor: ticketFilter === 'awaiting' ? 'var(--signal-wash)' : 'transparent',
+                  borderColor: ticketFilter === 'awaiting' ? 'var(--signal)' : 'var(--line-hi)',
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => setTicketFilter('awaiting')}
+              >
+                Awaiting Admin
+              </button>
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  backgroundColor: ticketFilter === 'resolved' ? 'var(--signal-wash)' : 'transparent',
+                  borderColor: ticketFilter === 'resolved' ? 'var(--signal)' : 'var(--line-hi)',
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => setTicketFilter('resolved')}
+              >
+                Resolved
+              </button>
+            </div>
           </div>
 
-          <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-            Logged complaints, gate issues, and administrator support tickets.
-          </p>
-
           <ul className="ledger">
-            {messageList.map((msg) => (
-              <li className="entry" key={msg.id} style={{ display: 'block', padding: 'var(--s4) 0' }}>
+            {filteredTickets.map((t) => (
+              <li className="entry" key={t.id} style={{ display: 'block', padding: 'var(--s4) 0' }}>
                 <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
                   <div>
-                    <span className="eyebrow">{msg.category}</span>
-                    <h3 className="entry-title" style={{ marginTop: '2px' }}>
-                      From {msg.sender_name} to {msg.recipient_name} ({msg.recipient_role})
-                    </h3>
+                    <h3 className="entry-title">{t.category || 'General Support Inquiry'}</h3>
+                    <p className="sm faint" style={{ color: 'var(--dim)', marginTop: '2px' }}>
+                      From: <strong>{t.sender_name}</strong> • Sent {formatRelative(t.date_sent)}
+                    </p>
                   </div>
-                  <StatusBadge status={msg.status === 'Resolved' ? 'Resolved' : 'Reported'} />
+                  <StatusBadge status={t.status} />
                 </div>
 
-                <p className="entry-body" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                  {msg.message}
+                <p className="entry-body" style={{ color: 'var(--paper)', marginBottom: 'var(--s3)' }}>
+                  {t.message}
                 </p>
 
-                <div className="entry-meta">
-                  <span>Logged {formatRelative(msg.date_sent)}</span>
-                  <span>{formatStamp(msg.date_sent)}</span>
+                <div className="cluster" style={{ justifyContent: 'flex-end', gap: 'var(--s2)' }}>
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                    onClick={() => handleTicketAction(t.id, 'Under Investigation')}
+                  >
+                    Set Under Investigation
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-solid"
+                    style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                    onClick={() => handleTicketAction(t.id, 'Resolved')}
+                  >
+                    Close Ticket
+                  </button>
                 </div>
               </li>
             ))}
@@ -818,73 +745,53 @@ function Members() {
         </section>
       )}
 
-      {/* Ticket Modal */}
-      {modalOpen ? (
+      {/* STRUCTURED NEW SUPPORT REQUEST MODAL */}
+      {supportModal ? (
         <Modal
-          title="Submit Report / Admin Ticket"
-          onClose={() => setModalOpen(false)}
+          title="New Support Request"
+          onClose={() => setSupportModal(false)}
           footer={
             <>
-              <button type="button" className="btn" onClick={() => setModalOpen(false)}>
+              <button type="button" className="btn" onClick={() => setSupportModal(false)}>
                 Cancel
               </button>
-              <button type="submit" form="admin-ticket-form" className="btn btn-solid">
-                Submit Ticket
+              <button type="submit" form="support-form" className="btn btn-solid">
+                Submit Request
               </button>
             </>
           }
         >
-          <form id="admin-ticket-form" onSubmit={handleCreateTicket} className="stack" style={{ gap: 'var(--s4)' }}>
+          <form id="support-form" onSubmit={handleCreateSupportRequest} className="stack" style={{ gap: 'var(--s4)' }}>
             <div className="field">
-              <label className="eyebrow" htmlFor="t-recipient">
-                Target Administrator
+              <label className="eyebrow" htmlFor="sup-category">
+                Request Category *
               </label>
               <select
-                id="t-recipient"
+                id="sup-category"
                 className="control"
-                value={recipientName}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setRecipientName(val);
-                  setRecipientRole(val.includes('David') ? 'System Administrator' : 'Community Administrator');
-                }}
+                value={supportCategory}
+                onChange={(e) => setSupportCategory(e.target.value)}
                 style={{ color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
               >
-                <option value="Marcus Vance">Marcus Vance (Community Administrator)</option>
-                <option value="David Chen">David Chen (System Administrator)</option>
-              </select>
-            </div>
-
-            <div className="field">
-              <label className="eyebrow" htmlFor="t-category">
-                Category
-              </label>
-              <select
-                id="t-category"
-                className="control"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                style={{ color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                {SUPPORT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="field">
-              <label className="eyebrow" htmlFor="t-body">
-                Ticket Details
+              <label className="eyebrow" htmlFor="sup-body">
+                Request Details *
               </label>
               <textarea
-                id="t-body"
+                id="sup-body"
                 className="control"
                 rows={4}
-                placeholder="Describe your inquiry, complaint, or report..."
-                value={ticketBody}
-                onChange={(e) => setTicketBody(e.target.value)}
+                placeholder="Describe your maintenance inquiry, noise report, or administrative request..."
+                value={supportBody}
+                onChange={(e) => setSupportBody(e.target.value)}
                 required
               />
             </div>
@@ -892,13 +799,15 @@ function Members() {
         </Modal>
       ) : null}
 
-      {/* Resident Profile Modal */}
+      {/* RESIDENT PROFILE VIEW MODAL */}
       {profileModalMember ? (
         <ResidentProfileModal
           member={profileModalMember}
           onClose={() => setProfileModalMember(null)}
-          onStartChat={(m) => handleStartChatWithMember(m)}
-          onSendPing={() => handleSendEmergencyPing()}
+          onStartChat={(m) => {
+            setProfileModalMember(null);
+            setActiveTab('chat');
+          }}
         />
       ) : null}
     </div>

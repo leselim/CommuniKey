@@ -1,12 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Dashboard from './pages/Dashboard';
-import Incidents from './pages/Incidents';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 import Announcements from './pages/Announcements';
+import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
+import Incidents from './pages/Incidents';
 import Members from './pages/Members';
 import Profile from './pages/Profile';
+import SignIn from './pages/SignIn';
 
 function NotFound() {
   return (
@@ -28,22 +31,74 @@ function NotFound() {
 function App() {
   return (
     <BrowserRouter>
-      <div className="app">
-        <Navbar />
-        <main className="view">
-          <div className="shell">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/incidents" element={<Incidents />} />
-              <Route path="/announcements" element={<Announcements />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/messages" element={<Members />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-        </main>
-      </div>
+      <AuthProvider>
+        <div className="app">
+          <Navbar />
+          <main className="view">
+            <div className="shell">
+              <Routes>
+                <Route path="/signin" element={<SignIn />} />
+
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/incidents"
+                  element={
+                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator', 'Safety Volunteer']}>
+                      <Incidents />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/announcements"
+                  element={
+                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator']}>
+                      <Announcements />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/events"
+                  element={
+                    <ProtectedRoute allowedRoles={['Resident', 'Community Administrator']}>
+                      <Events />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <Members />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

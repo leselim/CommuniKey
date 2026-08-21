@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SAMPLE_USERS, useAuth } from '../context/AuthContext';
 import api, { save, unwrap } from '../services/api';
 import { community, profile as demoProfile } from '../services/demoData';
 
@@ -52,24 +53,21 @@ function Toggle({ checked, label, hint, onChange }) {
 }
 
 function Profile() {
-  const [form, setForm] = useState({ ...demoProfile, ...loadStoredSettings() });
+  const { currentUser, updateProfile, loginAsPersona } = useAuth();
+
+  const [form, setForm] = useState({
+    ...demoProfile,
+    ...(currentUser || {}),
+    ...loadStoredSettings(),
+  });
   const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
-    let active = true;
-    api
-      .get('/auth/profile')
-      .then((response) => {
-        const data = unwrap(response);
-        if (active && data && typeof data === 'object') {
-          setForm((current) => ({ ...current, ...data }));
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (currentUser) {
+      setForm((current) => ({ ...current, ...currentUser }));
+    }
+  }, [currentUser]);
 
   const setField = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -84,15 +82,18 @@ function Profile() {
         SETTINGS.reduce((acc, item) => ({ ...acc, [item.key]: Boolean(form[item.key]) }), {})
       )
     );
+    updateProfile(form);
     await save('/auth/profile', form, 'put');
     setSaved(true);
+    setNotice('Profile details saved successfully.');
+    setTimeout(() => setNotice(''), 4000);
   };
 
   return (
     <form className="stack" onSubmit={submit}>
       <header className="masthead">
         <div>
-          <p className="eyebrow">Account</p>
+          <p className="eyebrow" style={{ color: 'var(--signal)' }}>Account Profile</p>
           <h1>
             {form.first_name} {form.last_name}
           </h1>
@@ -100,12 +101,17 @@ function Profile() {
             {form.role || 'Resident'}, {community.community_name}
           </p>
         </div>
-        <p className="mono">{form.email}</p>
+        <div className="cluster">
+          <p className="mono">{form.email}</p>
+        </div>
       </header>
+
+      {notice ? <p className="notice">{notice}</p> : null}
 
       <section className="section">
         <div className="section-head">
           <p className="eyebrow">Personal details</p>
+          <span className="status status-closed">Verified Role: {form.role}</span>
         </div>
 
         <div className="fields">
@@ -165,6 +171,43 @@ function Profile() {
               onChange={(event) => setField('address', event.target.value)}
             />
           </div>
+        </div>
+      </section>
+
+      {/* Role Switcher Section for Testing */}
+      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+          <div>
+            <p className="eyebrow">Testing Role Switcher</p>
+            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 500 }}>
+              Switch Active Role Persona
+            </h2>
+          </div>
+        </div>
+
+        <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
+          Quickly switch your active session role to test different user dashboards and navigation permissions:
+        </p>
+
+        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+          {SAMPLE_USERS.map((u) => (
+            <button
+              key={u.id}
+              type="button"
+              className="btn"
+              style={{
+                borderColor: currentUser?.role === u.role ? 'var(--signal)' : 'var(--line-hi)',
+                backgroundColor: currentUser?.role === u.role ? 'var(--signal-wash)' : 'transparent',
+              }}
+              onClick={() => {
+                loginAsPersona(u.role);
+                setNotice(`Active persona switched to ${u.role} (${u.first_name} ${u.last_name}).`);
+                setTimeout(() => setNotice(''), 4000);
+              }}
+            >
+              {u.role} ({u.first_name})
+            </button>
+          ))}
         </div>
       </section>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import SOSButton from '../components/SOSButton';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
   announcements as demoAnnouncements,
@@ -10,6 +11,9 @@ import {
   incidents as demoIncidents,
 } from '../services/demoData';
 import { formatDayDate, formatRelative, formatStamp } from '../utils/format';
+import AdminDashboard from './AdminDashboard';
+import SysAdminDashboard from './SysAdminDashboard';
+import VolunteerDashboard from './VolunteerDashboard';
 
 function Figure({ label, value }) {
   return (
@@ -21,6 +25,19 @@ function Figure({ label, value }) {
 }
 
 function Dashboard() {
+  const { userRole } = useAuth();
+
+  if (userRole === 'Community Administrator') {
+    return <AdminDashboard />;
+  }
+
+  if (userRole === 'Safety Volunteer') {
+    return <VolunteerDashboard />;
+  }
+
+  if (userRole === 'System Administrator') {
+    return <SysAdminDashboard />;
+  }
   const announcements = useCollection('/announcements', demoAnnouncements);
   const incidents = useCollection('/incidents', demoIncidents);
   const events = useCollection('/events', demoEvents);

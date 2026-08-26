@@ -39,11 +39,17 @@ function Incidents() {
   const visible = useMemo(() => {
     const term = query.trim().toLowerCase();
     return items
-      .filter((item) => filter === 'All' || item.status === filter)
+      .filter((item) => {
+        if (filter === 'All') return true;
+        const normFilter = filter.toLowerCase();
+        const normStatus = String(item.status || '').toLowerCase();
+        if (normFilter === 'under review' && (normStatus.includes('review') || normStatus.includes('pending'))) return true;
+        return normStatus === normFilter;
+      })
       .filter(
         (item) =>
           !term ||
-          `${item.incident_type} ${item.description} ${item.location || ''}`
+          `${item.incident_type || ''} ${item.description || ''} ${item.location || ''} ${item.reported_by || ''} ${item.assigned_contractor || ''}`
             .toLowerCase()
             .includes(term)
       )

@@ -62,9 +62,29 @@ export function getStatusClass(status = '') {
   return 'status-resolved';
 }
 
+export function getStatusTooltip(cls, status = '') {
+  switch (cls) {
+    case 'status-active':
+      return `Brand Blue (ACTIVE): Live gate pass, active incident response, or ongoing patrol operation (${status}).`;
+    case 'status-pending':
+      return `Warm Amber (UNDER REVIEW / PENDING): Request awaiting administrator review or scheduled ticket (${status}).`;
+    case 'status-resolved':
+      return `Muted Neutral (RESOLVED): Resolved incident, verified resident account, or completed operation (${status}).`;
+    case 'status-critical':
+      return `Muted Rose (CRITICAL): Urgent emergency, active SOS dispatch, or high-priority security issue (${status}).`;
+    default:
+      return `Status: ${status}`;
+  }
+}
+
 function StatusBadge({ status }) {
   const cls = getStatusClass(status);
-  return <span className={`status ${cls}`}>{status}</span>;
+  const tooltip = getStatusTooltip(cls, status);
+  return (
+    <span className={`status ${cls}`} title={tooltip} aria-label={tooltip}>
+      {status}
+    </span>
+  );
 }
 
 export default StatusBadge;

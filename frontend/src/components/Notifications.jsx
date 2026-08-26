@@ -34,6 +34,11 @@ function Notifications() {
     await save(`/notifications/${id}/read`, {}, 'put');
   };
 
+  const markAllRead = async () => {
+    setItems((prev) => prev.map((item) => ({ ...item, read_status: true })));
+    await Promise.all(unread.map((item) => save(`/notifications/${item.id}/read`, {}, 'put')));
+  };
+
   return (
     <div className="notify" ref={wrapper}>
       <button
@@ -41,22 +46,37 @@ function Notifications() {
         className="notify-btn"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '0.35rem 0.65rem',
+          backgroundColor: open ? 'var(--panel-hi)' : 'transparent',
+          border: '1px solid var(--line-hi)',
+          borderRadius: '4px',
+          color: 'var(--paper)',
+          fontSize: '0.8rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+        }}
       >
-        Notifications
-        {unread.length ? <span className="notify-count">{unread.length}</span> : null}
+        Notifications ({unread.length})
       </button>
 
       {open ? (
-        <div className="tray">
+        <div className="tray" style={{ zIndex: 100 }}>
           <div className="tray-head">
-            <p className="eyebrow">Notifications</p>
-            {unread.length ? (
+            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, margin: 0 }}>
+              ESTATE NOTIFICATIONS & ALERTS
+            </p>
+            {unread.length > 0 ? (
               <button
                 type="button"
                 className="link"
-                onClick={() => unread.forEach((item) => markRead(item.id))}
+                onClick={markAllRead}
+                style={{ fontSize: '0.72rem', color: 'var(--signal)', background: 'none', border: 'none', cursor: 'pointer' }}
               >
-                Mark all read
+                Mark all as read
               </button>
             ) : null}
           </div>

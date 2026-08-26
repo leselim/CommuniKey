@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
+import GuardhouseVerificationModal from '../components/GuardhouseVerificationModal';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import api, { unwrap } from '../services/api';
@@ -65,6 +66,7 @@ function AdminDashboard() {
   // Modals
   const [broadcastModal, setBroadcastModal] = useState(false);
   const [reviewDocModal, setReviewDocModal] = useState(null);
+  const [guardhouseModalOpen, setGuardhouseModalOpen] = useState(false);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -394,6 +396,9 @@ function AdminDashboard() {
           <div className="cluster" style={{ gap: 'var(--s2)', flexWrap: 'wrap' }}>
             <button type="button" className="btn btn-solid" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => setBroadcastModal(true)}>
               Draft & Publish Broadcast
+            </button>
+            <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => setGuardhouseModalOpen(true)}>
+              Verify Gate Pass
             </button>
             <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => navigate('/admin/incidents')}>
               Incident Triage
@@ -1028,6 +1033,15 @@ function AdminDashboard() {
           </form>
         </Modal>
       ) : null}
+
+      <GuardhouseVerificationModal
+        isOpen={guardhouseModalOpen}
+        onClose={() => setGuardhouseModalOpen(false)}
+        onLogEntry={(msg) => {
+          setNotice(msg);
+          setTimeout(() => setNotice(''), 6000);
+        }}
+      />
     </div>
   );
 }

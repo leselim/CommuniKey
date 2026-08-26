@@ -4,6 +4,7 @@ import Modal from '../components/Modal';
 import SOSButton from '../components/SOSButton';
 import StatusBadge from '../components/StatusBadge';
 import PlatformGuideModal from '../components/PlatformGuideModal';
+import GuardhouseVerificationModal from '../components/GuardhouseVerificationModal';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -93,6 +94,7 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpState, setRsvpState] = useState({});
   const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [guardhouseModalOpen, setGuardhouseModalOpen] = useState(false);
 
   const announcements = useCollection('/announcements', demoAnnouncements);
   const incidents = useCollection('/incidents', demoIncidents);
@@ -160,6 +162,14 @@ function Dashboard() {
             onClick={() => setVisitorModal(true)}
           >
             Generate Visitor Pass
+          </button>
+          <button
+            type="button"
+            className="btn"
+            style={{ borderColor: 'var(--line-hi)' }}
+            onClick={() => setGuardhouseModalOpen(true)}
+          >
+            Verify Gate Pass
           </button>
           <button
             type="button"
@@ -730,6 +740,14 @@ function Dashboard() {
       ) : null}
 
       <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
+      <GuardhouseVerificationModal
+        isOpen={guardhouseModalOpen}
+        onClose={() => setGuardhouseModalOpen(false)}
+        onLogEntry={(msg) => {
+          setNotice(msg);
+          setTimeout(() => setNotice(''), 6000);
+        }}
+      />
     </div>
   );
 }

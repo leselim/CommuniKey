@@ -4,16 +4,30 @@ import useCollection from '../hooks/useCollection';
 import { announcements as demoAnnouncements } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
+const ANNOUNCEMENT_FILTERS = ['All', 'High Priority', 'General'];
+
 function Announcements() {
   const { items, loading } = useCollection('/announcements', demoAnnouncements);
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('All');
 
   const visible = useMemo(() => {
     const term = query.trim().toLowerCase();
     return items
-      .filter((item) => !term || `${item.title} ${item.content}`.toLowerCase().includes(term))
+      .filter((item) => {
+        if (filter === 'High Priority') return item.priority === 'high';
+        if (filter === 'General') return item.priority !== 'high';
+        return true;
+      })
+      .filter(
+        (item) =>
+          !term ||
+          `${item.title || ''} ${item.content || ''} ${item.created_by || ''}`
+            .toLowerCase()
+            .includes(term)
+      )
       .sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
-  }, [items, query]);
+  }, [items, query, filter]);
 
   return (
     <div className="stack">
@@ -28,11 +42,22 @@ function Announcements() {
 
       <section className="section">
         <div className="section-head">
-          <p className="eyebrow">Archive</p>
+          <div className="filter">
+            {ANNOUNCEMENT_FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                className={`filter-item${filter === f ? ' on' : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
           <input
             className="searchbar"
             type="search"
-            placeholder="Search announcements"
+            placeholder="Search announcements by title, content, or author"
             value={query}
             aria-label="Search announcements"
             onChange={(event) => setQuery(event.target.value)}

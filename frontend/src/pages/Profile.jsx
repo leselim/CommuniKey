@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SAMPLE_USERS, useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import api, { save, unwrap } from '../services/api';
 import { community, profile as demoProfile } from '../services/demoData';
 
@@ -53,7 +53,7 @@ function Toggle({ checked, label, hint, onChange }) {
 }
 
 function Profile() {
-  const { currentUser, updateProfile, loginAsPersona } = useAuth();
+  const { currentUser, updateProfile } = useAuth();
 
   const [form, setForm] = useState({
     ...demoProfile,
@@ -171,43 +171,6 @@ function Profile() {
               onChange={(event) => setField('address', event.target.value)}
             />
           </div>
-        </div>
-      </section>
-
-      {/* Role Switcher Section for Testing */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-          <div>
-            <p className="eyebrow">Testing Role Switcher</p>
-            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 500 }}>
-              Switch Active Role Persona
-            </h2>
-          </div>
-        </div>
-
-        <p className="sm faint" style={{ marginBottom: 'var(--s4)' }}>
-          Quickly switch your active session role to test different user dashboards and navigation permissions:
-        </p>
-
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
-          {SAMPLE_USERS.map((u) => (
-            <button
-              key={u.id}
-              type="button"
-              className="btn"
-              style={{
-                borderColor: currentUser?.role === u.role ? 'var(--signal)' : 'var(--line-hi)',
-                backgroundColor: currentUser?.role === u.role ? 'var(--signal-wash)' : 'transparent',
-              }}
-              onClick={() => {
-                loginAsPersona(u.role);
-                setNotice(`Active persona switched to ${u.role} (${u.first_name} ${u.last_name}).`);
-                setTimeout(() => setNotice(''), 4000);
-              }}
-            >
-              {u.role} ({u.first_name})
-            </button>
-          ))}
         </div>
       </section>
 

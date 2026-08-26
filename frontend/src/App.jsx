@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import DevPersonaSwitcher from './components/DevPersonaSwitcher';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -39,6 +40,7 @@ function App() {
       <AuthProvider>
         <div className="app">
           <Navbar />
+          <DevPersonaSwitcher />
           <main className="view">
             <div className="shell">
               <Routes>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
 
@@ -127,6 +128,7 @@ function GuardhouseDashboard() {
   const [scansFeed, setScansFeed] = useState(INITIAL_SCANS);
   const [terminalNotice, setTerminalNotice] = useState('');
   const [clock, setClock] = useState(new Date().toLocaleTimeString());
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   // Live Terminal Clock
   useEffect(() => {
@@ -162,8 +164,13 @@ function GuardhouseDashboard() {
   };
 
   const handleScanQR = () => {
-    setPinInput('CK-492');
-    setTerminalNotice('QR Code scanned from optical scanner: CK-492 (Sipho Ndlovu - Contractor).');
+    setQrModalOpen(true);
+  };
+
+  const handleSimulateScan = (scannedCode) => {
+    setPinInput(scannedCode);
+    setQrModalOpen(false);
+    setTerminalNotice(`Optical QR Scanner: Code "${scannedCode}" captured from camera viewfinder.`);
     setTimeout(() => setTerminalNotice(''), 5000);
   };
 
@@ -308,7 +315,7 @@ function GuardhouseDashboard() {
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      VEHAVLE REGISTRATION
+                      VEHICLE REGISTRATION
                     </span>
                     <span className="mono" style={{ color: 'var(--paper)' }}>{matchedPass.vehicle}</span>
                   </div>
@@ -369,7 +376,21 @@ function GuardhouseDashboard() {
                 </p>
               </div>
             )
-          ) : null}
+          ) : (
+            <div
+              style={{
+                padding: 'var(--s4)',
+                backgroundColor: 'var(--panel-hi)',
+                border: '1px dashed var(--line-hi)',
+                borderRadius: '6px',
+                textAlign: 'center',
+              }}
+            >
+              <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
+                Awaiting visitor pass scan or manual PIN entry...
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -413,6 +434,79 @@ function GuardhouseDashboard() {
           </table>
         </div>
       </section>
+
+      {/* OPTICAL QR SCANNER MODAL */}
+      {qrModalOpen ? (
+        <Modal
+          title="Guardhouse Optical QR Scanner"
+          onClose={() => setQrModalOpen(false)}
+          footer={
+            <div className="cluster" style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
+                Hardware Optical Camera Feed
+              </span>
+              <button type="button" className="btn" onClick={() => setQrModalOpen(false)}>
+                Close Scanner
+              </button>
+            </div>
+          }
+        >
+          <div className="stack" style={{ gap: 'var(--s4)', textAlign: 'center' }}>
+            <p className="eyebrow" style={{ fontSize: '0.68rem', color: 'var(--signal)', margin: 0 }}>
+              CAMERA VIEWFINDER ACTIVE • MAIN GATE 01 SCANNER
+            </p>
+
+            {/* High-contrast camera viewfinder frame with reticle lines */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '200px',
+                backgroundColor: '#050707',
+                border: '2px solid var(--line-hi)',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Corner Bracket Guidelines */}
+              <div style={{ position: 'absolute', top: '20px', left: '20px', width: '30px', height: '30px', borderTop: '3px solid var(--signal)', borderLeft: '3px solid var(--signal)' }} />
+              <div style={{ position: 'absolute', top: '20px', right: '20px', width: '30px', height: '30px', borderTop: '3px solid var(--signal)', borderRight: '3px solid var(--signal)' }} />
+              <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '30px', height: '30px', borderBottom: '3px solid var(--signal)', borderLeft: '3px solid var(--signal)' }} />
+              <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '30px', height: '30px', borderBottom: '3px solid var(--signal)', borderRight: '3px solid var(--signal)' }} />
+
+              {/* Laser Scan Line */}
+              <div style={{ width: '80%', height: '2px', backgroundColor: 'var(--signal)', boxShadow: '0 0 8px var(--signal)' }} />
+
+              <span className="mono sm" style={{ position: 'absolute', bottom: '12px', color: 'var(--dim)', fontSize: '0.72rem' }}>
+                Position Visitor QR Code inside reticle
+              </span>
+            </div>
+
+            {/* Simulation Actions */}
+            <div className="cluster" style={{ justifyContent: 'center', gap: 'var(--s3)' }}>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => handleSimulateScan('CK-492')}
+                style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+              >
+                Simulate Scan (Valid Pass CK-492)
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => handleSimulateScan('999-000')}
+                style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', borderColor: '#e11d48', color: '#e11d48' }}
+              >
+                Simulate Scan (Invalid Pass)
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }

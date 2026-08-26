@@ -14,7 +14,7 @@ function DevPersonaSwitcher() {
         position: 'fixed',
         bottom: '20px',
         right: '20px',
-        zIndex: 9999,
+        zIndex: 80,
         backgroundColor: 'var(--panel)',
         border: '1px solid var(--line-hi)',
         borderRadius: '6px',

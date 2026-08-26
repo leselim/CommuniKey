@@ -8,7 +8,8 @@ const INITIAL_GUARD_LOGS = [
     eventId: 'EV-402',
     type: 'Tailgating breach',
     category: 'Gate Breaches',
-    details: 'Main Boom Gate 01 · Unregistered Silver Sedan',
+    location: 'Main Boom Gate 01',
+    details: 'Unregistered Silver Sedan',
     status: 'FLAGGED',
   },
   {
@@ -17,7 +18,8 @@ const INITIAL_GUARD_LOGS = [
     eventId: 'EV-388',
     type: 'Expired pass rejected',
     category: 'Access Denied',
-    details: 'Terminal 01 · Host: Unit 08',
+    location: 'Terminal 01',
+    details: 'Host: Unit 08',
     status: 'REJECTED',
   },
   {
@@ -26,7 +28,8 @@ const INITIAL_GUARD_LOGS = [
     eventId: 'EV-341',
     type: 'Manual gate release',
     category: 'Access Denied',
-    details: 'Gate 01 · Authorized by Marcus V.',
+    location: 'Gate 01',
+    details: 'Authorized by Marcus V.',
     status: 'RESOLVED',
   },
   {
@@ -35,7 +38,8 @@ const INITIAL_GUARD_LOGS = [
     eventId: 'EV-209',
     type: 'Perimeter sensor trigger',
     category: 'Perimeter',
-    details: 'Sector 4 East Fence · Inspected by Sarah J.',
+    location: 'Sector 4 East Fence',
+    details: 'Inspected by Sarah J.',
     status: 'RESOLVED',
   },
 ];
@@ -114,7 +118,8 @@ function GuardhouseIncidents() {
       eventId: `EV-${newIdNum}`,
       type: eventType,
       category: category,
-      details: `${gateLocation} · ${notesInput.trim()}${plateInput ? ` · Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
+      location: gateLocation,
+      details: `${notesInput.trim()}${plateInput ? ` (Plate: ${plateInput.trim().toUpperCase()})` : ''}`,
       status: 'FLAGGED',
     };
 
@@ -210,14 +215,15 @@ function GuardhouseIncidents() {
                 <th style={{ padding: '10px 8px' }}>TIMESTAMP</th>
                 <th style={{ padding: '10px 8px' }}>EVENT ID</th>
                 <th style={{ padding: '10px 8px' }}>INCIDENT TYPE</th>
-                <th style={{ padding: '10px 8px' }}>DETAILS & LOCATION</th>
+                <th style={{ padding: '10px 8px' }}>LOCATION</th>
+                <th style={{ padding: '10px 8px' }}>DETAILS</th>
                 <th style={{ padding: '10px 8px' }}>STATUS</th>
               </tr>
             </thead>
             <tbody>
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ padding: 'var(--s5)', textAlign: 'center', color: 'var(--dim)' }}>
+                  <td colSpan={6} style={{ padding: 'var(--s5)', textAlign: 'center', color: 'var(--dim)' }}>
                     No security events recorded in category "{activeTab}".
                   </td>
                 </tr>
@@ -227,7 +233,8 @@ function GuardhouseIncidents() {
                     <td className="mono" style={{ padding: '12px 8px', color: 'var(--paper)' }}>{item.timestamp}</td>
                     <td className="mono" style={{ padding: '12px 8px', color: 'var(--dim)', fontSize: '0.8rem' }}>{item.eventId}</td>
                     <td style={{ padding: '12px 8px', color: 'var(--paper)', fontWeight: 500 }}>{item.type}</td>
-                    <td style={{ padding: '12px 8px', color: 'var(--dim)' }}>{item.details}</td>
+                    <td style={{ padding: '12px 8px', color: 'var(--dim)', fontSize: '0.8rem' }}>{item.location}</td>
+                    <td style={{ padding: '12px 8px', color: 'var(--paper)', fontSize: '0.8rem' }}>{item.details}</td>
                     <td style={{ padding: '12px 8px' }}>{renderStatusCell(item.status)}</td>
                   </tr>
                 ))

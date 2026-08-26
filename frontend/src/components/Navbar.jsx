@@ -11,15 +11,13 @@ const ROLE_NAV = {
     { to: '/incidents', label: 'Incidents' },
     { to: '/announcements', label: 'Announcements' },
     { to: '/events', label: 'Events' },
-    { to: '/messages', label: 'Members & Messages' },
-    { to: '/profile', label: 'Profile' },
+    { to: '/messages', label: 'Communications' },
   ],
   'Safety Volunteer': [
     { to: '/volunteer/triage', label: 'Triage Feed' },
     { to: '/volunteer/alerts', label: 'Safety Alerts' },
     { to: '/volunteer/patrol', label: 'Patrol Ops' },
     { to: '/announcements', label: 'Announcements' },
-    { to: '/profile', label: 'Profile' },
   ],
   'Estate Administrator': [
     { to: '/admin', label: 'Admin Hub' },

@@ -111,6 +111,31 @@ const INITIAL_CHANNELS = [
       },
     ],
   },
+  {
+    id: 'ch_gate_dispatch',
+    name: '#gate-dispatch',
+    role: 'Guardhouse Resident Queries & Gate Dispatch',
+    type: 'group',
+    lastSeen: 'Direct Resident Gate Desk',
+    messages: [
+      {
+        id: 'gd1',
+        sender: 'Thabo Mokoena (Unit 14)',
+        role: 'Resident',
+        text: 'Hi Guardhouse, courier arriving with a delivery for Unit 14 shortly.',
+        time: new Date(Date.now() - 3600000).toISOString(),
+        isMe: false,
+      },
+      {
+        id: 'gd2',
+        sender: 'Sipho Dlamini',
+        role: 'Security Guard',
+        text: 'Received Mr. Mokoena. Will log courier pass and clear gate upon arrival.',
+        time: new Date(Date.now() - 1800000).toISOString(),
+        isMe: true,
+      },
+    ],
+  },
 ];
 
 const INITIAL_DIRECT = [
@@ -203,6 +228,13 @@ function Members() {
   // Role-based channel visibility filter
   const visibleConversations = useMemo(() => {
     return conversations.filter((c) => {
+      // Security Guard persona restriction: ONLY #safety-operations and #gate-dispatch, NO #estate-chat or #general-announcements
+      if (userRole === 'Security Guard') {
+        if (c.type === 'group') {
+          return c.id === 'ch_safety_ops' || c.id === 'ch_gate_dispatch';
+        }
+        return true;
+      }
       // Hide tactical #safety-operations from regular Residents
       if (c.id === 'ch_safety_ops' && userRole === 'Resident') return false;
       // Filter private direct chats
@@ -212,6 +244,13 @@ function Members() {
       return true;
     });
   }, [conversations, userRole, canAccessPrivateChat]);
+
+  // Set default active channel to #safety-operations for Security Guard
+  useEffect(() => {
+    if (userRole === 'Security Guard') {
+      setActiveConvId('ch_safety_ops');
+    }
+  }, [userRole]);
 
   const visibleMembers = useMemo(() => {
     const term = searchFilter.trim().toLowerCase();
@@ -340,11 +379,13 @@ function Members() {
           </p>
         </div>
 
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
-          <button type="button" className="btn btn-solid" onClick={() => setSupportModal(true)}>
-            New Support Request
-          </button>
-        </div>
+        {userRole !== 'Security Guard' ? (
+          <div className="cluster" style={{ gap: 'var(--s3)' }}>
+            <button type="button" className="btn btn-solid" onClick={() => setSupportModal(true)}>
+              New Support Request
+            </button>
+          </div>
+        ) : null}
       </header>
 
       {notice ? <p className="notice">{notice}</p> : null}

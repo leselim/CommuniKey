@@ -43,11 +43,11 @@ const INITIAL_GUARD_LOGS = [
 const FILTER_TABS = ['All Events', 'Gate Breaches', 'Access Denied', 'Perimeter'];
 
 const EVENT_TYPES = [
-  'Tailgating Breach',
-  'Expired Pass Rejected',
-  'Manual Gate Release',
-  'Perimeter Sensor Trigger',
-  'Suspicious Vehicle Flagged',
+  'Access Denial / Expired Credential',
+  'Gate Barrier Tailgating / Forced Entry',
+  'Suspicious Vehicle / Loitering',
+  'Perimeter Breach / Fence Line Trigger',
+  'Emergency Vehicle Rapid Dispatch',
 ];
 
 const renderStatusCell = (status) => {
@@ -68,7 +68,7 @@ function GuardhouseIncidents() {
 
   // Form State
   const [eventType, setEventType] = useState(EVENT_TYPES[0]);
-  const [locationInput, setLocationInput] = useState('Main Boom Gate 01');
+  const [gateLocation] = useState('Main Gate 01');
   const [plateInput, setPlateInput] = useState('');
   const [notesInput, setNotesInput] = useState('');
 
@@ -87,7 +87,7 @@ function GuardhouseIncidents() {
     if (!notesInput.trim()) return;
 
     let category = 'Access Denied';
-    if (eventType.includes('Tailgating')) category = 'Gate Breaches';
+    if (eventType.includes('Tailgating') || eventType.includes('Entry')) category = 'Gate Breaches';
     if (eventType.includes('Perimeter')) category = 'Perimeter';
 
     const newIdNum = 400 + Math.floor(Math.random() * 100);
@@ -97,7 +97,7 @@ function GuardhouseIncidents() {
       eventId: `EV-${newIdNum}`,
       type: eventType,
       category: category,
-      details: `${locationInput.trim()} · ${notesInput.trim()}${plateInput ? ` · Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
+      details: `${gateLocation} · ${notesInput.trim()}${plateInput ? ` · Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
       status: 'FLAGGED',
     };
 
@@ -105,7 +105,7 @@ function GuardhouseIncidents() {
     setModalOpen(false);
     setNotesInput('');
     setPlateInput('');
-    setNotice(`Security event "${eventType}" submitted successfully.`);
+    setNotice(`Security event "${eventType}" saved to gate ledger successfully.`);
     setTimeout(() => setNotice(''), 5000);
   };
 
@@ -212,7 +212,7 @@ function GuardhouseIncidents() {
       {/* LOG EVENT MODAL */}
       {modalOpen ? (
         <Modal
-          title="Log Event"
+          title="Log Security Event"
           onClose={() => setModalOpen(false)}
           footer={
             <div className="cluster" style={{ justifyContent: 'flex-end', gap: 'var(--s2)' }}>
@@ -220,7 +220,7 @@ function GuardhouseIncidents() {
                 Cancel
               </button>
               <button type="submit" form="sec-log-modal-form" className="btn btn-solid">
-                [ Submit Event Log ]
+                [ Save to Gate Ledger ]
               </button>
             </div>
           }
@@ -229,7 +229,7 @@ function GuardhouseIncidents() {
             <div className="stack" style={{ gap: 'var(--s3)' }}>
               <div className="field">
                 <label className="eyebrow" htmlFor="log-event-type">
-                  Event Type
+                  Event Category
                 </label>
                 <select
                   id="log-event-type"
@@ -245,29 +245,14 @@ function GuardhouseIncidents() {
               </div>
 
               <div className="field">
-                <label className="eyebrow" htmlFor="log-loc">
-                  Location / Gate
-                </label>
-                <input
-                  id="log-loc"
-                  type="text"
-                  className="control"
-                  placeholder="e.g. Main Boom Gate 01"
-                  value={locationInput}
-                  onChange={(e) => setLocationInput(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="field">
                 <label className="eyebrow" htmlFor="log-plate">
-                  License Plate / Vehicle Reg (Optional)
+                  Vehicle License Plate (Optional)
                 </label>
                 <input
                   id="log-plate"
                   type="text"
                   className="control"
-                  placeholder="e.g. GP 992 CP"
+                  placeholder="e.g. GP 88 YZ"
                   value={plateInput}
                   onChange={(e) => setPlateInput(e.target.value)}
                   style={{ textTransform: 'uppercase', fontFamily: 'monospace' }}
@@ -275,14 +260,28 @@ function GuardhouseIncidents() {
               </div>
 
               <div className="field">
+                <label className="eyebrow" htmlFor="log-loc">
+                  Access Point / Gate
+                </label>
+                <input
+                  id="log-loc"
+                  type="text"
+                  className="control"
+                  value={gateLocation}
+                  readOnly
+                  style={{ backgroundColor: 'var(--ink)', color: 'var(--dim)', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="field">
                 <label className="eyebrow" htmlFor="log-notes">
-                  Notes & Incident Description
+                  Operational Summary / Notes
                 </label>
                 <textarea
                   id="log-notes"
                   className="control"
                   rows={4}
-                  placeholder="Describe breach details, turned away visitor, or barrier issue..."
+                  placeholder="Describe physical security details, loitering vehicle, or barrier issue..."
                   value={notesInput}
                   onChange={(e) => setNotesInput(e.target.value)}
                   required

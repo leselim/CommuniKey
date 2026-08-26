@@ -33,9 +33,8 @@ function Announcements() {
     <div className="stack">
       <header className="masthead">
         <div>
-          <p className="eyebrow">Communication</p>
-          <h1>Announcements</h1>
-          <p className="masthead-meta">Official updates published by community administrators.</p>
+          <h1 style={{ margin: 0 }}>Announcements</h1>
+          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>Official updates published by community administrators.</p>
         </div>
         <p className="mono">{items.length} published</p>
       </header>

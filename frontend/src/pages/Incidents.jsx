@@ -88,9 +88,8 @@ function GeneralIncidentsHub() {
     <div className="stack">
       <header className="masthead">
         <div>
-          <p className="eyebrow">Safety</p>
-          <h1>Incidents</h1>
-          <p className="masthead-meta">
+          <h1 style={{ margin: 0 }}>Incidents</h1>
+          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
             Report suspicious activity and follow the status of your reports.
           </p>
         </div>

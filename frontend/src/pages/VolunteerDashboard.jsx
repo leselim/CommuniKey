@@ -51,11 +51,8 @@ function VolunteerDashboard() {
       {/* SECTION 1: Masthead */}
       <header className="masthead">
         <div>
-          <p className="eyebrow">
-            Safety Volunteer Operations
-          </p>
-          <h1>Emergency Dispatch & Patrol Triage</h1>
-          <p className="masthead-meta">
+          <h1 style={{ margin: 0 }}>Emergency Dispatch & Patrol Triage</h1>
+          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
             Logged in as {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Safety Volunteer'} ({community.community_name})
           </p>
         </div>
@@ -82,10 +79,7 @@ function VolunteerDashboard() {
       >
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
           <div>
-            <p className="eyebrow" style={{ color: emergencyState.includes('Resolved') ? 'var(--dim)' : 'var(--signal)' }}>
-              Live Emergency Triage Queue
-            </p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--paper)' }}>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
               {emergencyState.includes('Resolved')
                 ? 'SOS at 14 Riverside Drive, Section A (Resolved)'
                 : 'SOS Triggered at 14 Riverside Drive, Section A'}

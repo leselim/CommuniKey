@@ -94,11 +94,10 @@ function Profile() {
     <form className="stack" onSubmit={submit}>
       <header className="masthead">
         <div>
-          <p className="eyebrow">Account Profile</p>
-          <h1>
+          <h1 style={{ margin: 0 }}>
             {form.first_name} {form.last_name}
           </h1>
-          <p className="masthead-meta">
+          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
             {form.role || 'Resident'}, {community.community_name}
           </p>
         </div>
@@ -111,7 +110,7 @@ function Profile() {
 
       <section className="section">
         <div className="section-head">
-          <p className="eyebrow">Personal details</p>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>Personal Details</h2>
           <StatusBadge status={`Verified (${form.role || 'Resident'})`} />
         </div>
 

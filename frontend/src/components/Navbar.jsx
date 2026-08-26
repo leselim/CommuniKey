@@ -76,8 +76,8 @@ function Navbar() {
   };
 
   const displayName = currentUser
-    ? `${currentUser.first_name || 'Marcus'} ${currentUser.last_name ? currentUser.last_name.charAt(0) + '.' : ''}`
-    : 'Admin';
+    ? `${currentUser.first_name || 'Resident'} ${currentUser.last_name ? currentUser.last_name.charAt(0) + '.' : ''}`
+    : 'Resident Member';
 
   return (
     <header className="topbar">
@@ -156,13 +156,13 @@ function Navbar() {
               >
                 <div style={{ paddingBottom: 'var(--s2)', marginBottom: 'var(--s2)', borderBottom: '1px solid var(--line-hi)' }}>
                   <p className="sm" style={{ fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                    {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Marcus Vance'}
+                    {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Resident Member'}
                   </p>
                   <p className="mono sm faint" style={{ color: 'var(--signal)', fontSize: '0.7rem', margin: '2px 0 0 0' }}>
-                    {userRole || 'Estate Administrator'}
+                    {userRole || 'Resident'}
                   </p>
                   <p className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem', margin: '4px 0 0 0' }}>
-                    {currentUser?.email || 'admin@riverside.co.za'}
+                    {currentUser?.email || 'resident@riverside.co.za'}
                   </p>
                 </div>
 

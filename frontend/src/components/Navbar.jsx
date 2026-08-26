@@ -98,18 +98,6 @@ function Navbar() {
               {label}
             </NavLink>
           ))}
-
-          {/* Mobile Drawer Sign Out Option */}
-          <div className="show-mobile" style={{ marginTop: 'var(--s3)', paddingTop: 'var(--s3)', borderTop: '1px solid var(--line-hi)' }}>
-            <button
-              type="button"
-              className="btn btn-solid"
-              style={{ width: '100%', fontSize: '0.82rem' }}
-              onClick={handleLogout}
-            >
-              Sign Out ({displayName})
-            </button>
-          </div>
         </nav>
 
         <div className="bar-end" style={{ gap: 'var(--s3)' }}>

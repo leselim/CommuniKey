@@ -7,7 +7,9 @@ const KNOWN_PASSES = {
   '492-801': {
     code: 'CK-492',
     pin: '492-801',
-    visitor: 'Sipho Ndlovu (Contractor - Plumbing)',
+    name: 'Sipho Ndlovu',
+    category: 'Contractor',
+    visitor: 'Sipho Ndlovu',
     host: 'Thabo Mokoena (Unit 14)',
     vehicle: 'GP 88 YZ (White Ford Ranger)',
     validity: 'Valid Today until 18:00',
@@ -16,7 +18,9 @@ const KNOWN_PASSES = {
   '492801': {
     code: 'CK-492',
     pin: '492-801',
-    visitor: 'Sipho Ndlovu (Contractor - Plumbing)',
+    name: 'Sipho Ndlovu',
+    category: 'Contractor',
+    visitor: 'Sipho Ndlovu',
     host: 'Thabo Mokoena (Unit 14)',
     vehicle: 'GP 88 YZ (White Ford Ranger)',
     validity: 'Valid Today until 18:00',
@@ -25,7 +29,9 @@ const KNOWN_PASSES = {
   'CK-492': {
     code: 'CK-492',
     pin: '492-801',
-    visitor: 'Sipho Ndlovu (Contractor - Plumbing)',
+    name: 'Sipho Ndlovu',
+    category: 'Contractor',
+    visitor: 'Sipho Ndlovu',
     host: 'Thabo Mokoena (Unit 14)',
     vehicle: 'GP 88 YZ (White Ford Ranger)',
     validity: 'Valid Today until 18:00',
@@ -34,7 +40,9 @@ const KNOWN_PASSES = {
   '108-942': {
     code: 'CK-108',
     pin: '108-942',
-    visitor: 'Elena Rostova (Guest)',
+    name: 'Elena Rostova',
+    category: 'Guest',
+    visitor: 'Elena Rostova',
     host: 'Sarah Jenkins (Unit 42)',
     vehicle: 'CA 492 101 (Silver VW Polo)',
     validity: 'Valid Tomorrow until 12:00',
@@ -43,7 +51,9 @@ const KNOWN_PASSES = {
   '108942': {
     code: 'CK-108',
     pin: '108-942',
-    visitor: 'Elena Rostova (Guest)',
+    name: 'Elena Rostova',
+    category: 'Guest',
+    visitor: 'Elena Rostova',
     host: 'Sarah Jenkins (Unit 42)',
     vehicle: 'CA 492 101 (Silver VW Polo)',
     validity: 'Valid Tomorrow until 12:00',
@@ -52,7 +62,9 @@ const KNOWN_PASSES = {
   '771-304': {
     code: 'CK-771',
     pin: '771-304',
-    visitor: 'Kabelo Dlamini (Courier - DHL)',
+    name: 'Kabelo Dlamini',
+    category: 'Courier',
+    visitor: 'Kabelo Dlamini',
     host: 'Marcus Vance (Unit 07)',
     vehicle: 'NP 123 456 (Blue Hyundai H100)',
     validity: 'Valid Today until 20:00',
@@ -61,7 +73,9 @@ const KNOWN_PASSES = {
   '771304': {
     code: 'CK-771',
     pin: '771-304',
-    visitor: 'Kabelo Dlamini (Courier - DHL)',
+    name: 'Kabelo Dlamini',
+    category: 'Courier',
+    visitor: 'Kabelo Dlamini',
     host: 'Marcus Vance (Unit 07)',
     vehicle: 'NP 123 456 (Blue Hyundai H100)',
     validity: 'Valid Today until 20:00',
@@ -73,7 +87,8 @@ const INITIAL_SCANS = [
   {
     id: 'scan-1',
     timestamp: '17:32:10',
-    visitor: 'Sipho Ndlovu (Contractor)',
+    name: 'Sipho Ndlovu',
+    category: 'Contractor',
     host: 'Thabo Mokoena (Unit 14)',
     vehicle: 'GP 88 YZ',
     code: 'CK-492',
@@ -83,7 +98,8 @@ const INITIAL_SCANS = [
   {
     id: 'scan-2',
     timestamp: '16:45:00',
-    visitor: 'Elena Rostova (Guest)',
+    name: 'Elena Rostova',
+    category: 'Guest',
     host: 'Sarah Jenkins (Unit 42)',
     vehicle: 'CA 492 101',
     code: 'CK-108',
@@ -93,7 +109,8 @@ const INITIAL_SCANS = [
   {
     id: 'scan-3',
     timestamp: '15:10:42',
-    visitor: 'Johan Smith (Resident Guest)',
+    name: 'Johan Smith',
+    category: 'Guest',
     host: 'Leseli Morakile (Unit 22)',
     vehicle: 'GP 482 CP',
     code: 'CK-304',
@@ -103,7 +120,8 @@ const INITIAL_SCANS = [
   {
     id: 'scan-4',
     timestamp: '14:05:18',
-    visitor: 'Kabelo Dlamini (Courier)',
+    name: 'Kabelo Dlamini',
+    category: 'Courier',
     host: 'Marcus Vance (Unit 07)',
     vehicle: 'NP 123 456',
     code: 'CK-771',
@@ -113,7 +131,8 @@ const INITIAL_SCANS = [
   {
     id: 'scan-5',
     timestamp: '12:20:05',
-    visitor: 'City Power Dispatcher',
+    name: 'City Power Dispatcher',
+    category: 'Utility / Service',
     host: 'Estate Management Office',
     vehicle: 'B329 GP',
     code: 'CK-901',
@@ -156,7 +175,8 @@ function GuardhouseDashboard() {
     const newScan = {
       id: `scan-${Date.now()}`,
       timestamp: timeStr,
-      visitor: matchedPass.visitor,
+      name: matchedPass.name || matchedPass.visitor,
+      category: matchedPass.category || 'Guest',
       host: matchedPass.host,
       vehicle: matchedPass.vehicle.split(' (')[0],
       code: matchedPass.code,
@@ -165,7 +185,7 @@ function GuardhouseDashboard() {
     };
 
     setScansFeed((prev) => [newScan, ...prev.slice(0, 4)]);
-    setTerminalNotice(`BOOM GATE RAISED • Entry authorized for ${matchedPass.visitor} (${matchedPass.vehicle}) at ${timeStr}.`);
+    setTerminalNotice(`BOOM GATE RAISED • Entry authorized for ${matchedPass.name || matchedPass.visitor} (${matchedPass.vehicle}) at ${timeStr}.`);
     setPinInput('');
     setSubmittedCode('');
     setTimeout(() => setTerminalNotice(''), 6000);
@@ -440,7 +460,27 @@ function GuardhouseDashboard() {
                 <tr key={scan.id} style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{scan.timestamp}</td>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--signal)', fontWeight: 600 }}>{scan.code}</td>
-                  <td style={{ padding: '10px 8px', color: 'var(--paper)', fontWeight: 500 }}>{scan.visitor}</td>
+                  <td style={{ padding: '10px 8px' }}>
+                    <div style={{ fontWeight: 500, color: 'var(--paper)', fontSize: '0.82rem' }}>
+                      {scan.name || scan.visitor}
+                    </div>
+                    <div style={{ marginTop: '2px' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '1px 6px',
+                          borderRadius: '3px',
+                          backgroundColor: 'var(--ink)',
+                          border: '1px solid var(--line-hi)',
+                          color: 'var(--dim)',
+                          fontSize: '0.68rem',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        {scan.category || 'Guest'}
+                      </span>
+                    </div>
+                  </td>
                   <td style={{ padding: '10px 8px', color: 'var(--dim)' }}>{scan.host}</td>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{scan.vehicle}</td>
                   <td style={{ padding: '10px 8px' }}>

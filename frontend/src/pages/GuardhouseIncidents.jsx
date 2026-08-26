@@ -1,117 +1,127 @@
 import React, { useState } from 'react';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
-import { formatClock } from '../utils/format';
 
-const INITIAL_GUARD_INCIDENTS = [
+const INITIAL_GUARD_LOGS = [
   {
-    id: 'sec-101',
-    event_type: 'Unauthorized Tailgating Attempt',
-    location: 'Main Gate 01 Boom Barrier',
-    status: 'Resolved',
-    date_reported: new Date(Date.now() - 3600000).toISOString(),
-    reported_by: 'Sipho Dlamini (Gate 01 Guard)',
-    license_plate: 'GP 992 CP',
-    description: 'Silver SUV attempted tailgating behind Unit 14 visitor vehicle. Boom gate auto-dropped sensor. License plate logged: GP 992 CP. Vehicle turned away at gate entrance.',
+    id: 'g-log-1',
+    title: 'Tailgating Attempt Flagged',
+    category: 'Gate Breaches',
+    location: 'Main Boom Gate 01',
+    vehicle: 'Unregistered Silver Sedan',
+    outcome: 'Flagged & Intercepted',
+    timestamp: '20 mins ago',
+    details: 'Main Boom Gate 01 • Vehicle: Unregistered Silver Sedan',
+    reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
   },
   {
-    id: 'sec-102',
-    event_type: 'Expired Pass Access Denied',
-    location: 'Main Entrance Guardhouse 01',
-    status: 'Resolved',
-    date_reported: new Date(Date.now() - 14400000).toISOString(),
-    reported_by: 'Sipho Dlamini (Gate 01 Guard)',
-    license_plate: 'CA 102 901',
-    description: 'Visitor code CK-109 presented 4 hours past expiration time. System denied entry. Resident host notified and visitor requested to turn around.',
+    id: 'g-log-2',
+    title: 'Expired Pass Rejected',
+    category: 'Access Denied',
+    location: 'Terminal 01',
+    code: '771-304',
+    host: 'Unit 08',
+    outcome: 'Turned Away',
+    timestamp: '1 hour ago',
+    details: 'Visitor code 771-304 rejected at Terminal 01 • Host: Unit 08',
+    reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
   },
   {
-    id: 'sec-103',
-    event_type: 'Perimeter Sensor Trigger',
-    location: 'North Fence Line (Beam 04)',
-    status: 'Resolved',
-    date_reported: new Date(Date.now() - 28800000).toISOString(),
-    reported_by: 'Sarah Jenkins (Safety Patrol)',
-    license_plate: 'N/A',
-    description: 'Infrared perimeter beam sensor 04 tripped at 02:15. Checked and cleared by Night Patrol Officer Sarah Jenkins. Stray animal confirmed along boundary fence.',
+    id: 'g-log-3',
+    title: 'Manual Override Logged',
+    category: 'Access Denied',
+    pass: '492-801',
+    authorizer: 'Admin Marcus',
+    outcome: 'Approved',
+    timestamp: '2 hours ago',
+    details: 'Resident pass 492-801 manually authorized by Admin Marcus',
+    reportedBy: 'Marcus Vance (Estate Administrator)',
   },
   {
-    id: 'sec-104',
-    event_type: 'Barrier Gate Override Manual Operation',
-    location: 'Main Gate 01 Entrance',
-    status: 'Resolved',
-    date_reported: new Date(Date.now() - 86400000).toISOString(),
-    reported_by: 'Sipho Dlamini (Gate 01 Guard)',
-    license_plate: 'EMS Unit 04',
-    description: 'Manual key override engaged for emergency medical ambulance dispatch (EMS Unit 4). Resumed automatic barcode scanner control at 03:40.',
+    id: 'g-log-4',
+    title: 'Perimeter Sensor Trigger',
+    category: 'Perimeter',
+    location: 'Sector 4 East Fence',
+    inspector: 'Patrol Volunteer Sarah',
+    outcome: 'Cleared / False Alarm',
+    timestamp: 'Yesterday',
+    details: 'Sector 4 East Fence • Inspected by Patrol Volunteer Sarah',
+    reportedBy: 'Sarah Jenkins (Safety Volunteer)',
   },
 ];
 
+const FILTER_TABS = ['All Events', 'Gate Breaches', 'Access Denied', 'Perimeter'];
+
 const EVENT_TYPES = [
-  'Unauthorized Tailgating Attempt',
-  'Expired Pass Access Denied',
-  'Perimeter Sensor Trigger',
-  'Barrier Gate Override Manual Operation',
-  'Suspicious Vehicle / Loitering',
+  'Tailgating',
+  'Invalid Access Attempt',
+  'Physical Barrier Issue',
+  'Suspicious Vehicle',
 ];
 
 function GuardhouseIncidents() {
-  const [incidents, setIncidents] = useState(INITIAL_GUARD_INCIDENTS);
-  const [logModalOpen, setLogModalOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [logs, setLogs] = useState(INITIAL_GUARD_LOGS);
+  const [activeTab, setActiveTab] = useState('All Events');
+  const [modalOpen, setModalOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
   // Form State
   const [eventType, setEventType] = useState(EVENT_TYPES[0]);
-  const [location, setLocation] = useState('Main Gate 01 Boom Barrier');
-  const [licensePlate, setLicensePlate] = useState('');
-  const [description, setDescription] = useState('');
+  const [locationInput, setLocationInput] = useState('Main Boom Gate 01');
+  const [plateInput, setPlateInput] = useState('');
+  const [notesInput, setNotesInput] = useState('');
 
-  const filteredIncidents = incidents.filter((item) => {
-    const term = query.trim().toLowerCase();
-    if (!term) return true;
-    return (
-      item.event_type.toLowerCase().includes(term) ||
-      item.location.toLowerCase().includes(term) ||
-      item.description.toLowerCase().includes(term) ||
-      item.license_plate.toLowerCase().includes(term)
-    );
+  const countByTab = (tab) => {
+    if (tab === 'All Events') return logs.length;
+    return logs.filter((l) => l.category === tab).length;
+  };
+
+  const filteredLogs = logs.filter((l) => {
+    if (activeTab === 'All Events') return true;
+    return l.category === activeTab;
   });
 
-  const handleCreateLog = (e) => {
+  const handleSubmitLog = (e) => {
     e.preventDefault();
-    if (!description.trim()) return;
+    if (!notesInput.trim()) return;
 
-    const newLog = {
-      id: `sec-${Date.now()}`,
-      event_type: eventType,
-      location: location.trim() || 'Main Gate 01',
-      status: 'Resolved',
-      date_reported: new Date().toISOString(),
-      reported_by: 'Sipho Dlamini (Gate 01 Guard)',
-      license_plate: licensePlate.trim().toUpperCase() || 'N/A',
-      description: description.trim(),
+    let category = 'Access Denied';
+    if (eventType === 'Tailgating') category = 'Gate Breaches';
+    if (eventType === 'Physical Barrier Issue') category = 'Perimeter';
+
+    const newEntry = {
+      id: `g-log-${Date.now()}`,
+      title: `${eventType} Event Logged`,
+      category: category,
+      location: locationInput.trim() || 'Main Gate 01',
+      vehicle: plateInput.trim() ? plateInput.trim().toUpperCase() : 'N/A',
+      outcome: 'Flagged & Under Review',
+      timestamp: 'Just now',
+      details: `${locationInput.trim()} • ${notesInput.trim()}${plateInput ? ` • Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
+      reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
     };
 
-    setIncidents([newLog, ...incidents]);
-    setLogModalOpen(false);
-    setDescription('');
-    setLicensePlate('');
-    setNotice(`Security event "${eventType}" logged into Guardhouse Security Ledger.`);
+    setLogs([newEntry, ...logs]);
+    setModalOpen(false);
+    setNotesInput('');
+    setPlateInput('');
+    setNotice(`Security event "${eventType}" submitted successfully.`);
     setTimeout(() => setNotice(''), 5000);
   };
 
   return (
     <div className="stack" style={{ gap: 'var(--s5)' }}>
+      {/* HEADER */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
-          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--dim)' }}>
-            Station 01 Security & Access Control • Riverside Estate
+          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--dim)', margin: '0 0 var(--s1) 0' }}>
+            Station 01 — Security Ops • Riverside Estate
           </p>
-          <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 'var(--s1) 0' }}>
-            Guardhouse Security & Access Incidents
+          <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
+            Guardhouse Incident & Gate Breach Log
           </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)' }}>
-            Log and review gate breaches, unauthorized tailgating attempts, and perimeter alerts.
+          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
+            Review security events, access denials, and perimeter flags for Main Gate 01.
           </p>
         </div>
 
@@ -119,105 +129,134 @@ function GuardhouseIncidents() {
           <button
             type="button"
             className="btn btn-solid"
-            onClick={() => setLogModalOpen(true)}
+            onClick={() => setModalOpen(true)}
             style={{ fontWeight: 600, padding: '0.45rem 0.85rem' }}
           >
-            [ + Log Security Event / Gate Breach ]
+            [ + Log Security Event ]
           </button>
         </div>
       </header>
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
-        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)', flexWrap: 'wrap', gap: 'var(--s3)' }}>
-          <div>
-            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
-              SECURITY LOG REPOSITORY ({filteredIncidents.length} RECORDS)
-            </p>
+      {/* FILTER TABS */}
+      <div className="cluster" style={{ gap: 'var(--s2)', borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s2)' }}>
+        {FILTER_TABS.map((tab) => {
+          const isActive = activeTab === tab;
+          const count = countByTab(tab);
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.8rem',
+                fontWeight: isActive ? 600 : 400,
+                border: 'none',
+                borderRadius: '4px',
+                backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
+                color: isActive ? 'var(--paper)' : 'var(--dim)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* LOG FEED CARDS */}
+      <section className="stack" style={{ gap: 'var(--s3)' }}>
+        {filteredLogs.length === 0 ? (
+          <div className="panel" style={{ padding: 'var(--s5)', textAlign: 'center', color: 'var(--dim)' }}>
+            No security logs recorded in category "{activeTab}".
           </div>
-          <input
-            type="search"
-            className="searchbar"
-            placeholder="Search security log by event, plate, or location..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={{ maxWidth: '320px' }}
-          />
-        </div>
-
-        <ul className="ledger" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {filteredIncidents.length === 0 ? (
-            <li className="blank" style={{ padding: 'var(--s4)', textAlignment: 'center' }}>
-              No security events match that query.
-            </li>
-          ) : (
-            filteredIncidents.map((item) => (
-              <li
-                key={item.id}
-                style={{
-                  padding: 'var(--s4) 0',
-                  borderBottom: '1px solid var(--line-hi)',
-                  display: 'block',
-                }}
-              >
-                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
-                  <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                      {item.event_type}
-                    </h3>
-                    <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.75rem' }}>
-                      {item.location}
-                    </span>
-                  </div>
-                  <StatusBadge status={item.status} />
+        ) : (
+          filteredLogs.map((item) => (
+            <article
+              key={item.id}
+              className="panel"
+              style={{
+                padding: 'var(--s4)',
+                border: '1px solid var(--line-hi)',
+                backgroundColor: 'var(--panel-hi)',
+                borderRadius: '6px',
+              }}
+            >
+              <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--s2)' }}>
+                <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                    {item.title}
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontFamily: 'monospace',
+                      color: 'var(--dim)',
+                      backgroundColor: 'var(--ink)',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      border: '1px solid var(--line-hi)',
+                    }}
+                  >
+                    {item.category}
+                  </span>
                 </div>
 
-                <p style={{ color: 'var(--paper)', fontSize: '0.88rem', margin: '0 0 var(--s2) 0', lineHeight: 1.5 }}>
-                  {item.description}
-                </p>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: item.outcome.includes('Flagged') || item.outcome.includes('Turned Away') ? '#e11d48' : '#10b981',
+                    backgroundColor: 'var(--ink)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--line-hi)',
+                  }}
+                >
+                  * {item.outcome}
+                </span>
+              </div>
 
-                <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--dim)' }}>
-                  <div>
-                    <span>Logged {formatClock(item.date_reported)}</span>
-                    <span style={{ margin: '0 8px' }}>•</span>
-                    <span>Operator: {item.reported_by}</span>
-                  </div>
-                  <div>
-                    <strong style={{ color: 'var(--paper)' }}>Plate: </strong>
-                    <span className="mono" style={{ color: 'var(--paper)' }}>{item.license_plate}</span>
-                  </div>
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
+              <p style={{ color: 'var(--paper)', fontSize: '0.88rem', margin: '0 0 var(--s2) 0', lineHeight: 1.5 }}>
+                {item.details}
+              </p>
+
+              <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--dim)' }}>
+                <span>Logged {item.timestamp}</span>
+                <span>Reporter: {item.reportedBy}</span>
+              </div>
+            </article>
+          ))
+        )}
       </section>
 
       {/* LOG SECURITY EVENT MODAL */}
-      {logModalOpen ? (
+      {modalOpen ? (
         <Modal
-          title="Log Security Event / Gate Breach"
-          onClose={() => setLogModalOpen(false)}
+          title="Log Security Event"
+          onClose={() => setModalOpen(false)}
           footer={
             <div className="cluster" style={{ justifyContent: 'flex-end', gap: 'var(--s2)' }}>
-              <button type="button" className="btn" onClick={() => setLogModalOpen(false)}>
+              <button type="button" className="btn" onClick={() => setModalOpen(false)}>
                 Cancel
               </button>
-              <button type="submit" form="security-log-form" className="btn btn-solid">
-                Record Event Entry
+              <button type="submit" form="sec-log-modal-form" className="btn btn-solid">
+                [ Submit Log Entry ]
               </button>
             </div>
           }
         >
-          <form id="security-log-form" onSubmit={handleCreateLog}>
+          <form id="sec-log-modal-form" onSubmit={handleSubmitLog}>
             <div className="stack" style={{ gap: 'var(--s3)' }}>
               <div className="field">
-                <label className="eyebrow" htmlFor="sec-event-type">
-                  Security Event Category *
+                <label className="eyebrow" htmlFor="log-event-type">
+                  Event Type *
                 </label>
                 <select
-                  id="sec-event-type"
+                  id="log-event-type"
                   className="control"
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
@@ -230,46 +269,46 @@ function GuardhouseIncidents() {
               </div>
 
               <div className="field">
-                <label className="eyebrow" htmlFor="sec-loc">
-                  Station / Location *
+                <label className="eyebrow" htmlFor="log-loc">
+                  Location / Gate *
                 </label>
                 <input
-                  id="sec-loc"
+                  id="log-loc"
                   type="text"
                   className="control"
-                  placeholder="e.g. Main Gate 01 Boom Barrier"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Main Boom Gate 01"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
                   required
                 />
               </div>
 
               <div className="field">
-                <label className="eyebrow" htmlFor="sec-plate">
-                  License Plate / Reg Number (Optional)
+                <label className="eyebrow" htmlFor="log-plate">
+                  License Plate / Vehicle Reg (Optional)
                 </label>
                 <input
-                  id="sec-plate"
+                  id="log-plate"
                   type="text"
                   className="control"
                   placeholder="e.g. GP 992 CP"
-                  value={licensePlate}
-                  onChange={(e) => setLicensePlate(e.target.value)}
+                  value={plateInput}
+                  onChange={(e) => setPlateInput(e.target.value)}
                   style={{ textTransform: 'uppercase', fontFamily: 'monospace' }}
                 />
               </div>
 
               <div className="field">
-                <label className="eyebrow" htmlFor="sec-desc">
-                  Event Incident Details *
+                <label className="eyebrow" htmlFor="log-notes">
+                  Notes & Incident Description *
                 </label>
                 <textarea
-                  id="sec-desc"
+                  id="log-notes"
                   className="control"
                   rows={4}
-                  placeholder="Provide precise details of breach, gate override, or turned-away vehicle..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe breach details, turned away visitor, or barrier issue..."
+                  value={notesInput}
+                  onChange={(e) => setNotesInput(e.target.value)}
                   required
                 />
               </div>

@@ -188,14 +188,11 @@ function GuardhouseDashboard() {
       {/* GUARDHOUSE TERMINAL HEADER */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
-          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--dim)', margin: '0 0 var(--s1) 0' }}>
-            Station 01 — Main Entrance Guardhouse • Riverside Estate
-          </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
-            Main Guardhouse Terminal 01
+            Main Gate Terminal
           </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
-            Operator: {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Sipho Dlamini'} (Security Guard)
+          <p className="masthead-meta" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0' }}>
+            Station 01 / On Duty: {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Sipho Dlamini'}
           </p>
         </div>
 

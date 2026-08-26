@@ -215,14 +215,59 @@ function AdminDashboard() {
 
   const metrics = analyticsData?.metrics || METRICS_BY_PERIOD[datePeriod] || METRICS_BY_PERIOD['30d'];
 
-  const timeline = analyticsData?.activity_timeline || [
-    { label: 'Aug 01', incidents: 4, announcements: 1, sos_alerts: 0, total_activity: 5 },
-    { label: 'Aug 06', incidents: 8, announcements: 2, sos_alerts: 1, total_activity: 11 },
-    { label: 'Aug 11', incidents: 5, announcements: 1, sos_alerts: 0, total_activity: 6 },
-    { label: 'Aug 16', incidents: 12, announcements: 3, sos_alerts: 1, total_activity: 16 },
-    { label: 'Aug 21', incidents: 9, announcements: 2, sos_alerts: 0, total_activity: 11 },
-    { label: 'Aug 26', incidents: 7, announcements: 1, sos_alerts: 0, total_activity: 8 },
-  ];
+  const TIMELINE_BY_GRANULARITY = {
+    hourly: Array.from({ length: 24 }, (_, i) => {
+      const hourStr = String(i).padStart(2, '0') + ':00';
+      const gateVolume = Math.round(
+        15 + Math.sin((i - 7) / 2.2) * 22 + Math.sin((i - 17) / 2.2) * 32 + (i % 2 === 0 ? 10 : 4)
+      );
+      const incidents = i >= 8 && i <= 22 ? (i % 4 === 0 ? 2 : i % 5 === 0 ? 1 : 0) : 0;
+      return {
+        label: i % 3 === 0 ? hourStr : '',
+        fullLabel: hourStr,
+        gate_volume: Math.max(8, gateVolume),
+        incidents,
+      };
+    }),
+
+    daily: [
+      { label: 'Mon', fullLabel: 'Monday', gate_volume: 340, incidents: 4 },
+      { label: 'Tue', fullLabel: 'Tuesday', gate_volume: 410, incidents: 6 },
+      { label: 'Wed', fullLabel: 'Wednesday', gate_volume: 380, incidents: 3 },
+      { label: 'Thu', fullLabel: 'Thursday', gate_volume: 460, incidents: 8 },
+      { label: 'Fri', fullLabel: 'Friday', gate_volume: 520, incidents: 5 },
+      { label: 'Sat', fullLabel: 'Saturday', gate_volume: 590, incidents: 9 },
+      { label: 'Sun', fullLabel: 'Sunday', gate_volume: 480, incidents: 2 },
+    ],
+
+    weekly: [
+      { label: 'Wk 1', fullLabel: 'Week 1', gate_volume: 2450, incidents: 18 },
+      { label: 'Wk 2', fullLabel: 'Week 2', gate_volume: 2680, incidents: 24 },
+      { label: 'Wk 3', fullLabel: 'Week 3', gate_volume: 2910, incidents: 19 },
+      { label: 'Wk 4', fullLabel: 'Week 4', gate_volume: 3100, incidents: 31 },
+      { label: 'Wk 5', fullLabel: 'Week 5', gate_volume: 2850, incidents: 22 },
+      { label: 'Wk 6', fullLabel: 'Week 6', gate_volume: 3240, incidents: 27 },
+      { label: 'Wk 7', fullLabel: 'Week 7', gate_volume: 3410, incidents: 15 },
+      { label: 'Wk 8', fullLabel: 'Week 8', gate_volume: 3580, incidents: 21 },
+    ],
+
+    monthly: [
+      { label: 'Jan', fullLabel: 'January', gate_volume: 11200, incidents: 84 },
+      { label: 'Feb', fullLabel: 'February', gate_volume: 10800, incidents: 76 },
+      { label: 'Mar', fullLabel: 'March', gate_volume: 12400, incidents: 92 },
+      { label: 'Apr', fullLabel: 'April', gate_volume: 11900, incidents: 68 },
+      { label: 'May', fullLabel: 'May', gate_volume: 13100, incidents: 88 },
+      { label: 'Jun', fullLabel: 'June', gate_volume: 12800, incidents: 74 },
+      { label: 'Jul', fullLabel: 'July', gate_volume: 13600, incidents: 95 },
+      { label: 'Aug', fullLabel: 'August', gate_volume: 14200, incidents: 82 },
+      { label: 'Sep', fullLabel: 'September', gate_volume: 14500, incidents: 78 },
+      { label: 'Oct', fullLabel: 'October', gate_volume: 14900, incidents: 85 },
+      { label: 'Nov', fullLabel: 'November', gate_volume: 15200, incidents: 90 },
+      { label: 'Dec', fullLabel: 'December', gate_volume: 16800, incidents: 110 },
+    ],
+  };
+
+  const activeTimelineData = TIMELINE_BY_GRANULARITY[granularity] || TIMELINE_BY_GRANULARITY.daily;
 
   const telemetry = analyticsData?.telemetry || {
     api_request_volume: '14,280 requests/day',
@@ -542,14 +587,14 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* SECTION 5: Visual Analytics Grid (Activity Chart + Side Widgets) */}
+      {/* SECTION 5: Visual Analytics Grid (Activity & Traffic Trends Chart + Side Widgets) */}
       <div className="grid-2" style={{ gap: 'var(--s5)', gridTemplateColumns: '1.6fr 1fr' }}>
         {/* Main Time-Series Chart */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
           <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)' }}>
             <div>
               <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600 }}>
-                PLATFORM ACTIVITY OVER TIME
+                ESTATE ACTIVITY & TRAFFIC TRENDS
               </p>
               <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                 Operational Volume ({granularity.toUpperCase()} View)
@@ -557,10 +602,10 @@ function AdminDashboard() {
             </div>
             <div className="cluster" style={{ gap: 'var(--s3)', fontSize: '0.75rem' }}>
               <span className="cluster" style={{ gap: '4px', color: 'var(--dim)' }}>
-                <span style={{ width: '10px', height: '10px', backgroundColor: 'var(--signal)', borderRadius: '2px', display: 'inline-block' }} /> Total Activity
+                <span style={{ width: '10px', height: '10px', backgroundColor: 'var(--signal)', borderRadius: '2px', display: 'inline-block' }} /> Gate Access Volume
               </span>
               <span className="cluster" style={{ gap: '4px', color: 'var(--dim)' }}>
-                <span style={{ width: '10px', height: '10px', backgroundColor: '#929894', borderRadius: '2px', display: 'inline-block' }} /> Incidents
+                <span style={{ width: '10px', height: '10px', backgroundColor: '#d97706', borderRadius: '2px', display: 'inline-block' }} /> Incidents Reported
               </span>
             </div>
           </div>
@@ -571,62 +616,74 @@ function AdminDashboard() {
             </div>
           ) : (
             <div style={{ width: '100%', overflowX: 'auto' }}>
-              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: '190px' }}>
-                {[0, 0.33, 0.66, 1].map((pct, idx) => (
-                  <line
-                    key={idx}
-                    x1="40"
-                    y1={chartHeight - 30 - pct * (chartHeight - 50)}
-                    x2={chartWidth - 10}
-                    y2={chartHeight - 30 - pct * (chartHeight - 50)}
-                    stroke="var(--line-hi)"
-                    strokeDasharray="3 3"
-                    strokeWidth="1"
-                  />
-                ))}
+              {(() => {
+                const dataset = activeTimelineData;
+                const maxGateVal = Math.max(...dataset.map((d) => d.gate_volume || 1), 10);
+                const maxIncVal = Math.max(...dataset.map((d) => d.incidents || 1), 5);
 
-                {timeline.map((item, idx) => {
-                  const xStep = (chartWidth - 60) / Math.max(1, timeline.length);
-                  const x = 50 + idx * xStep;
-                  const barWidth = Math.min(30, xStep * 0.45);
-
-                  const totalH = ((item.total_activity || 0) / maxActivityVal) * (chartHeight - 50);
-                  const incH = ((item.incidents || 0) / maxActivityVal) * (chartHeight - 50);
-
-                  return (
-                    <g key={idx}>
-                      <rect
-                        x={x}
-                        y={chartHeight - 30 - totalH}
-                        width={barWidth}
-                        height={totalH}
-                        fill="var(--signal)"
-                        rx="3"
-                        opacity="0.85"
+                return (
+                  <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: '190px' }}>
+                    {[0, 0.33, 0.66, 1].map((pct, idx) => (
+                      <line
+                        key={idx}
+                        x1="35"
+                        y1={chartHeight - 30 - pct * (chartHeight - 50)}
+                        x2={chartWidth - 10}
+                        y2={chartHeight - 30 - pct * (chartHeight - 50)}
+                        stroke="var(--line-hi)"
+                        strokeDasharray="3 3"
+                        strokeWidth="1"
                       />
-                      <rect
-                        x={x + barWidth + 4}
-                        y={chartHeight - 30 - incH}
-                        width={Math.max(4, barWidth * 0.5)}
-                        height={incH}
-                        fill="#929894"
-                        rx="2"
-                        opacity="0.6"
-                      />
-                      <text
-                        x={x + barWidth / 2}
-                        y={chartHeight - 10}
-                        fontSize="10"
-                        fill="var(--dim)"
-                        textAnchor="middle"
-                        fontFamily="monospace"
-                      >
-                        {item.label}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
+                    ))}
+
+                    {dataset.map((item, idx) => {
+                      const xStep = (chartWidth - 45) / Math.max(1, dataset.length);
+                      const x = 40 + idx * xStep;
+                      const barW = Math.min(18, Math.max(3, xStep * 0.38));
+
+                      const gateH = ((item.gate_volume || 0) / maxGateVal) * (chartHeight - 55);
+                      const incH = ((item.incidents || 0) / maxIncVal) * (chartHeight - 55);
+
+                      return (
+                        <g key={idx}>
+                          {/* Gate Access Volume Bar (Brand Blue) */}
+                          <rect
+                            x={x}
+                            y={chartHeight - 30 - gateH}
+                            width={barW}
+                            height={Math.max(2, gateH)}
+                            fill="var(--signal)"
+                            rx="2"
+                            opacity="0.9"
+                          />
+                          {/* Incidents Reported Bar (Muted Amber) */}
+                          <rect
+                            x={x + barW + 1}
+                            y={chartHeight - 30 - incH}
+                            width={barW}
+                            height={Math.max(2, incH)}
+                            fill="#d97706"
+                            rx="2"
+                            opacity="0.85"
+                          />
+                          {item.label ? (
+                            <text
+                              x={x + barW}
+                              y={chartHeight - 10}
+                              fontSize="9"
+                              fill="var(--dim)"
+                              textAnchor="middle"
+                              fontFamily="monospace"
+                            >
+                              {item.label}
+                            </text>
+                          ) : null}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                );
+              })()}
             </div>
           )}
         </section>

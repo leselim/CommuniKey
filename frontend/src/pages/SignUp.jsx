@@ -51,8 +51,8 @@ function SignUp() {
     <div className="stack" style={{ maxWidth: '580px', margin: '0 auto' }}>
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-            CommuniKey Resident Registration
+          <p className="eyebrow">
+            CommuniKey Registration
           </p>
           <h1>Create Resident Account</h1>
           <p className="masthead-meta">

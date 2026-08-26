@@ -24,7 +24,7 @@ function SysAdminDashboard() {
       {/* SECTION 1: Masthead */}
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+          <p className="eyebrow">
             System Infrastructure & Security
           </p>
           <h1>Platform Health & Audit Gateway</h1>
@@ -60,7 +60,7 @@ function SysAdminDashboard() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+            <p className="eyebrow">
               Infrastructure Status
             </p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>

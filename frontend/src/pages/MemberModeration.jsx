@@ -69,7 +69,7 @@ function MemberModeration() {
       {/* Masthead Header */}
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+          <p className="eyebrow">
             Estate Administration
           </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Member Moderation & Approvals</h1>
@@ -85,7 +85,7 @@ function MemberModeration() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
               PENDING VERIFICATION QUEUE
             </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
@@ -156,7 +156,7 @@ function MemberModeration() {
           style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
         >
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
               VERIFIED RESIDENT ROSTER
             </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>

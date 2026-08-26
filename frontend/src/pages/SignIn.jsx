@@ -35,7 +35,7 @@ function SignIn() {
       {/* Masthead Header */}
       <header className="masthead" style={{ borderBottom: 'none', paddingBottom: 0 }}>
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+          <p className="eyebrow">
             CommuniKey Security
           </p>
           <h1 style={{ fontSize: 'var(--fs-xl)' }}>Sign In</h1>

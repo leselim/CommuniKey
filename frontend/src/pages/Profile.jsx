@@ -94,7 +94,7 @@ function Profile() {
     <form className="stack" onSubmit={submit}>
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>Account Profile</p>
+          <p className="eyebrow">Account Profile</p>
           <h1>
             {form.first_name} {form.last_name}
           </h1>

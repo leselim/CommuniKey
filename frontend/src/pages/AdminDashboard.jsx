@@ -219,7 +219,7 @@ function AdminDashboard() {
       {/* SECTION 1: Clean Administrator Header */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
+          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em' }}>
             {community.community_name.toUpperCase()}
           </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 'var(--s1) 0' }}>
@@ -236,7 +236,7 @@ function AdminDashboard() {
       {/* SECTION 2: Dedicated Quick Actions Bar */}
       <section className="panel" style={{ padding: 'var(--s3) var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel-hi)' }}>
         <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--s3)' }}>
-          <span className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+          <span className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             QUICK ACTIONS
           </span>
           <div className="cluster" style={{ gap: 'var(--s2)', flexWrap: 'wrap' }}>
@@ -345,7 +345,7 @@ function AdminDashboard() {
           style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
           onClick={() => navigate('/admin/moderation')}
         >
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+          <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             TOTAL REGISTERED USERS
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -367,7 +367,7 @@ function AdminDashboard() {
           style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
           onClick={() => navigate('/admin/incidents')}
         >
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+          <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             INCIDENT RESOLUTION RATE
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -389,7 +389,7 @@ function AdminDashboard() {
           style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
           onClick={() => navigate('/volunteer/triage')}
         >
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+          <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             EMERGENCY SOS STATUS
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -411,7 +411,7 @@ function AdminDashboard() {
           style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
           onClick={() => navigate('/admin/moderation')}
         >
-          <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+          <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             VERIFICATION QUEUE
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
@@ -434,7 +434,7 @@ function AdminDashboard() {
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
           <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)' }}>
             <div>
-              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600 }}>
+              <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600 }}>
                 PLATFORM ACTIVITY OVER TIME
               </p>
               <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
@@ -521,7 +521,7 @@ function AdminDashboard() {
         <div className="stack" style={{ gap: 'var(--s4)' }}>
           {/* User Role Distribution */}
           <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', marginBottom: 'var(--s2)' }}>
+            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', marginBottom: 'var(--s2)' }}>
               COMMUNITY ROLE BREAKDOWN
             </p>
             <div className="stack" style={{ gap: 'var(--s2)' }}>
@@ -544,7 +544,7 @@ function AdminDashboard() {
           {/* Cloud Telemetry Indicators */}
           <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
             <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
-              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
+              <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
                 CLOUD & TELEMETRY HEALTH
               </p>
               <span className="mono sm" style={{ fontSize: '0.68rem', color: 'var(--affirm)' }}>
@@ -599,7 +599,7 @@ function AdminDashboard() {
         {/* Administrative Audit Ledger Table */}
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)', flexWrap: 'wrap', gap: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
               ADMINISTRATIVE AUDIT LEDGER
             </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>

@@ -45,8 +45,8 @@ function VolunteerDashboard() {
       {/* SECTION 1: Masthead */}
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-            Safety Volunteer & First Responder Hub
+          <p className="eyebrow">
+            Safety Volunteer Operations
           </p>
           <h1>Emergency Dispatch & Patrol Triage</h1>
           <p className="masthead-meta">

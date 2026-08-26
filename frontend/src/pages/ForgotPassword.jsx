@@ -21,7 +21,7 @@ function ForgotPassword() {
     <div className="stack" style={{ maxWidth: '520px', margin: '0 auto' }}>
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+          <p className="eyebrow">
             Account Recovery
           </p>
           <h1>Password Reset</h1>

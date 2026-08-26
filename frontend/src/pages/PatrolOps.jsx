@@ -45,7 +45,7 @@ function PatrolOps() {
       {/* Masthead Header */}
       <header className="masthead">
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+          <p className="eyebrow">
             Safety Volunteer Operations
           </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Patrol Operations & Guardhouse Coordination</h1>
@@ -71,7 +71,7 @@ function PatrolOps() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
               PATROL SECTORS & PERIMETER STATUS
             </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
@@ -112,7 +112,7 @@ function PatrolOps() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
               GUARDHOUSE COORDINATION LOG
             </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>

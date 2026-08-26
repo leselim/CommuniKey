@@ -39,9 +39,10 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_estate',
     name: '#estate-chat',
-    role: 'Public Community Channel',
+    headerSubtitle: 'Resident discussion and community support',
+    sidebarSubtitle: 'Resident discussion & support',
+    role: 'Resident discussion & support',
     type: 'group',
-    lastSeen: 'Public Discussion Channel',
     messages: [
       {
         id: 'cm1',
@@ -72,9 +73,10 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_announcements',
     name: '#general-announcements',
-    role: 'Official Broadcast Channel',
+    headerSubtitle: 'Official estate notices and community broadcasts',
+    sidebarSubtitle: 'Official estate notices',
+    role: 'Official estate notices',
     type: 'group',
-    lastSeen: 'Official Notices Only',
     readOnlyForResidents: true,
     messages: [
       {
@@ -90,9 +92,10 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_safety_ops',
     name: '#safety-operations',
-    role: 'Active Emergency Dispatch & Perimeter Coordination',
+    headerSubtitle: 'Tactical dispatch and perimeter patrol',
+    sidebarSubtitle: 'Tactical dispatch & patrol',
+    role: 'Tactical dispatch & patrol',
     type: 'group',
-    lastSeen: 'Responders & Patrol Only',
     messages: [
       {
         id: 'so1',
@@ -115,9 +118,10 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_gate_dispatch',
     name: '#gate-dispatch',
-    role: 'Operational Gate Inquiries, Delivery Drops & Arrival Clearances',
+    headerSubtitle: 'Gate inquiries, delivery drops, and arrival clearances',
+    sidebarSubtitle: 'Gate inquiries & deliveries',
+    role: 'Gate inquiries & deliveries',
     type: 'group',
-    lastSeen: 'Direct Resident Gate Desk',
     messages: [
       {
         id: 'gd1',
@@ -651,8 +655,8 @@ function Members() {
                 <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)' }}>
                   {activeConv.name}
                 </h3>
-                <p className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem', margin: 0 }}>
-                  {activeConv.role} • {activeConv.lastSeen}
+                <p style={{ color: 'var(--dim)', fontSize: '0.75rem', fontWeight: 400, marginTop: '2px', margin: 0 }}>
+                  {activeConv.headerSubtitle || activeConv.role}
                 </p>
               </div>
 

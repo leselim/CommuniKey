@@ -21,7 +21,7 @@ const EMPTY_DRAFT = {
   image_url: '',
 };
 
-function Incidents() {
+function GeneralIncidentsHub() {
   const { userRole } = useAuth();
   const { items, loading, create, update } = useCollection('/incidents', demoIncidents);
   const [filter, setFilter] = useState('All');
@@ -30,10 +30,6 @@ function Incidents() {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState('');
-
-  if (userRole === 'Security Guard') {
-    return <GuardhouseIncidents />;
-  }
 
   useEffect(() => {
     if (!receipt) return undefined;
@@ -269,6 +265,16 @@ function Incidents() {
       ) : null}
     </div>
   );
+}
+
+function Incidents() {
+  const { userRole } = useAuth();
+
+  if (userRole === 'Security Guard') {
+    return <GuardhouseIncidents />;
+  }
+
+  return <GeneralIncidentsHub />;
 }
 
 export default Incidents;

@@ -32,12 +32,22 @@ function Modal({ title, onClose, children, footer }) {
           </h2>
           <button
             type="button"
-            className="link sm"
             onClick={onClose}
-            style={{ color: 'var(--dim)', textDecoration: 'none', cursor: 'pointer', fontSize: '0.85rem' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--dim)',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              padding: '0.2rem 0.4rem',
+              borderRadius: '4px',
+              lineHeight: 1,
+              opacity: 0.8,
+              transition: 'opacity 0.15s ease',
+            }}
             aria-label="Close modal dialog"
           >
-            ✕ Close
+            ✕
           </button>
         </div>
         <div className="dialog-body">{children}</div>

@@ -166,6 +166,24 @@ const INITIAL_DIRECT = [
     ],
   },
   {
+    id: 'd_sarah',
+    name: 'Sarah Jenkins (Safety Patrol Volunteer)',
+    role: 'Safety Volunteer',
+    online: true,
+    lastSeen: 'Online • Sector 4 Patrol',
+    type: 'direct',
+    messages: [
+      {
+        id: 'sj1',
+        sender: 'Sarah Jenkins',
+        role: 'Safety Volunteer',
+        text: 'Hi Sipho, South Gate perimeter inspection complete.',
+        time: new Date(Date.now() - 3600000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
+  {
     id: 'd_admin',
     name: 'Marcus Vance (Admin Support)',
     role: 'Community Administrator',
@@ -254,18 +272,29 @@ function Members() {
   // Role-based channel visibility filter
   const visibleConversations = useMemo(() => {
     return conversations.filter((c) => {
-      // Security Guard persona restriction: ONLY #safety-operations and #gate-dispatch, NO #estate-chat or #general-announcements
+      // Security Guard persona restriction:
+      // 1. Group channels: ONLY #safety-operations and #gate-dispatch
+      // 2. Direct messages: Remove self (d_guardhouse), keep Marcus Vance and Sarah Jenkins
       if (userRole === 'Security Guard') {
         if (c.type === 'group') {
           return c.id === 'ch_safety_ops' || c.id === 'ch_gate_dispatch';
+        }
+        if (c.type === 'direct') {
+          if (c.id === 'd_guardhouse' || c.name.includes('Guardhouse')) {
+            return false;
+          }
+          return c.id === 'd_admin' || c.id === 'd_sarah' || c.name.includes('Marcus') || c.name.includes('Sarah');
         }
         return true;
       }
       // Hide tactical #safety-operations from regular Residents
       if (c.id === 'ch_safety_ops' && userRole === 'Resident') return false;
       // Filter private direct chats
-      if (c.type === 'direct' && canAccessPrivateChat) {
-        return canAccessPrivateChat('Resident', c.name);
+      if (c.type === 'direct') {
+        if (c.id === 'd_guardhouse') return true;
+        if (canAccessPrivateChat) {
+          return canAccessPrivateChat('Resident', c.name);
+        }
       }
       return true;
     });
@@ -274,7 +303,7 @@ function Members() {
   // Set default active channel to #safety-operations for Security Guard
   useEffect(() => {
     if (userRole === 'Security Guard') {
-      setActiveConvId('ch_safety_ops');
+      setActiveConvId((prev) => (prev === 'ch_estate' || prev === 'ch_announcements' || prev === 'd_guardhouse' ? 'ch_safety_ops' : prev));
     }
   }, [userRole]);
 
@@ -617,7 +646,7 @@ function Members() {
           </div>
 
           {/* MAIN CHAT STREAM & HEADER */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ink)' }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ink)' }}>
             {/* Header */}
             <div
               className="cluster"
@@ -626,6 +655,7 @@ function Members() {
                 padding: 'var(--s3) var(--s4)',
                 borderBottom: '1px solid var(--line)',
                 backgroundColor: 'var(--panel)',
+                flexShrink: 0,
               }}
             >
               <div>
@@ -656,6 +686,7 @@ function Members() {
             <div
               style={{
                 flex: 1,
+                minHeight: 0,
                 padding: 'var(--s4)',
                 overflowY: 'auto',
                 display: 'flex',
@@ -699,6 +730,7 @@ function Members() {
                   borderTop: '1px solid var(--line)',
                   backgroundColor: 'var(--panel-hi)',
                   textAlign: 'center',
+                  flexShrink: 0,
                 }}
               >
                 <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
@@ -715,6 +747,7 @@ function Members() {
                   display: 'flex',
                   gap: 'var(--s2)',
                   alignItems: 'center',
+                  flexShrink: 0,
                 }}
               >
                 <input

@@ -541,25 +541,30 @@ function Members() {
                     key={conv.id}
                     type="button"
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       width: '100%',
                       textAlign: 'left',
                       padding: 'var(--s3)',
                       marginBottom: 'var(--s2)',
                       backgroundColor: activeConvId === conv.id ? 'var(--panel-hi)' : 'transparent',
                       borderLeft: activeConvId === conv.id ? '3px solid var(--signal)' : '3px solid transparent',
-                      borderRadius: '3px',
+                      borderRadius: '6px',
                       border: '1px solid var(--line)',
                       cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
                     }}
                     onClick={() => setActiveConvId(conv.id)}
                   >
-                    <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', display: 'block' }}>
-                      {conv.name}
-                    </strong>
-                    <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
-                      {conv.role}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, paddingRight: 'var(--s2)' }}>
+                      <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {conv.name}
+                      </strong>
+                      <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {conv.role}
+                      </span>
+                    </div>
                   </button>
                 ))}
 
@@ -590,37 +595,40 @@ function Members() {
                     key={conv.id}
                     type="button"
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       width: '100%',
                       textAlign: 'left',
                       padding: 'var(--s3)',
                       marginBottom: 'var(--s2)',
                       backgroundColor: activeConvId === conv.id ? 'var(--panel-hi)' : 'transparent',
                       borderLeft: activeConvId === conv.id ? '3px solid var(--signal)' : '3px solid transparent',
-                      borderRadius: '3px',
+                      borderRadius: '6px',
                       border: '1px solid var(--line)',
                       cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
                     }}
                     onClick={() => setActiveConvId(conv.id)}
                   >
-                    <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '2px' }}>
-                      <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, paddingRight: 'var(--s2)' }}>
+                      <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {conv.name}
                       </strong>
-                      <span
-                        style={{
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '50%',
-                          backgroundColor: conv.online ? 'var(--signal)' : 'var(--dim)',
-                          display: 'inline-block',
-                        }}
-                        title={conv.online ? 'Online' : 'Offline'}
-                      />
+                      <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {conv.role}
+                      </span>
                     </div>
-                    <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
-                      {conv.role}
-                    </span>
+                    <span
+                      style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: conv.online ? 'var(--signal)' : 'var(--dim)',
+                        flexShrink: 0,
+                      }}
+                      title={conv.online ? 'Online' : 'Offline'}
+                    />
                   </button>
                 ))}
             </div>

@@ -92,6 +92,10 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpState, setRsvpState] = useState({});
 
+  const announcements = useCollection('/announcements', demoAnnouncements);
+  const incidents = useCollection('/incidents', demoIncidents);
+  const events = useCollection('/events', demoEvents);
+
   if (userRole === 'Estate Administrator') {
     return <AdminDashboard />;
   }
@@ -100,9 +104,9 @@ function Dashboard() {
     return <VolunteerDashboard />;
   }
 
-  const announcements = useCollection('/announcements', demoAnnouncements);
-  const incidents = useCollection('/incidents', demoIncidents);
-  const events = useCollection('/events', demoEvents);
+  if (userRole === 'System Administrator') {
+    return <SysAdminDashboard />;
+  }
 
   const upcomingEvents = events.items
     .filter((item) => new Date(item.event_date) >= new Date())

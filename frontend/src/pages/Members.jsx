@@ -89,23 +89,23 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_safety_ops',
     name: '#safety-operations',
-    role: 'Safety Responder Tactical Channel',
+    role: 'Active Emergency Dispatch & Perimeter Coordination',
     type: 'group',
     lastSeen: 'Responders & Patrol Only',
     messages: [
       {
         id: 'so1',
-        sender: 'Sarah Jenkins',
+        sender: 'Sarah Jenkins (Safety Patrol)',
         role: 'Safety Volunteer',
-        text: 'Patrol Round 3 complete. Section A & C perimeter fences secure.',
+        text: 'Patrol Round 3 complete. Sector A and C perimeter fences secure.',
         time: new Date(Date.now() - 1800000).toISOString(),
         isMe: false,
       },
       {
         id: 'so2',
-        sender: 'Gate Guardhouse',
-        role: 'Security Patrol',
-        text: 'SOS alert from Unit 14 acknowledged. Patrol officer en route.',
+        sender: 'Gate 01 Guardhouse (Sipho D.)',
+        role: 'Security Guard',
+        text: 'EMS vehicle en route to Unit 14. Main Gate entry lane cleared and locked open.',
         time: new Date(Date.now() - 600000).toISOString(),
         isMe: false,
       },
@@ -114,7 +114,7 @@ const INITIAL_CHANNELS = [
   {
     id: 'ch_gate_dispatch',
     name: '#gate-dispatch',
-    role: 'Guardhouse Resident Queries & Gate Dispatch',
+    role: 'Operational Gate Inquiries, Delivery Drops & Arrival Clearances',
     type: 'group',
     lastSeen: 'Direct Resident Gate Desk',
     messages: [
@@ -122,15 +122,15 @@ const INITIAL_CHANNELS = [
         id: 'gd1',
         sender: 'Thabo Mokoena (Unit 14)',
         role: 'Resident',
-        text: 'Hi Sipho, plumber arriving in 10 mins in a White Ford Ranger (GP 88 YZ). Pass CK-492 is active.',
+        text: 'Hi Sipho, courier arriving in ~10 mins with a parcel for Unit 14. They are authorized to drop it at the gatehouse desk.',
         time: new Date(Date.now() - 3600000).toISOString(),
         isMe: false,
       },
       {
         id: 'gd2',
-        sender: 'Sipho Dlamini',
+        sender: 'Gate 01 Guardhouse (Sipho D.)',
         role: 'Security Guard',
-        text: 'Noted Thabo, will verify and authorize entry at Boom 01 upon arrival.',
+        text: 'Understood Thabo. Will sign for receipt and log at Station 01.',
         time: new Date(Date.now() - 1800000).toISOString(),
         isMe: true,
       },
@@ -138,9 +138,17 @@ const INITIAL_CHANNELS = [
         id: 'gd3',
         sender: 'Leseli Morakile (Unit 22)',
         role: 'Resident',
-        text: 'Expecting Takealot delivery shortly.',
+        text: 'Visitor PIN expired for guest in Silver Polo (GP 482 CP). Verbal clearance granted for entry.',
         time: new Date(Date.now() - 600000).toISOString(),
         isMe: false,
+      },
+      {
+        id: 'gd4',
+        sender: 'Gate 01 Guardhouse (Sipho D.)',
+        role: 'Security Guard',
+        text: 'Cleared and boom raised. Welcome to Riverside Estate.',
+        time: new Date(Date.now() - 300000).toISOString(),
+        isMe: true,
       },
     ],
   },
@@ -149,15 +157,15 @@ const INITIAL_CHANNELS = [
 const INITIAL_DIRECT = [
   {
     id: 'd_guardhouse',
-    name: 'Main Gate Guardhouse (Sipho)',
-    role: 'Security Guard / Gate 01',
+    name: 'Main Gate Guardhouse (Gate 01 Desk)',
+    role: 'Active Guard: Sipho Dlamini',
     online: true,
-    lastSeen: 'Online • Main Guardhouse Terminal 01',
+    lastSeen: 'Online • Main Gate 01 Terminal',
     type: 'direct',
     messages: [
       {
         id: 'g1',
-        sender: 'Sipho Dlamini (Security Guard)',
+        sender: 'Gate 01 Guardhouse (Sipho D.)',
         role: 'Security Guard',
         text: 'Main Entrance Guardhouse Terminal 01 online. Send direct pass notifications or gate arrival inquiries here.',
         time: new Date(Date.now() - 86400000).toISOString(),
@@ -369,10 +377,10 @@ function Members() {
     e.preventDefault();
     if (!inputMessage.trim() && !attachment) return;
 
-    const myName = currentUser
+    const myName = userRole === 'Security Guard'
+      ? 'Gate 01 Guardhouse (Sipho D.)'
+      : currentUser
       ? `${currentUser.first_name} ${currentUser.last_name}`
-      : userRole === 'Security Guard'
-      ? 'Sipho Dlamini'
       : 'Resident Member';
 
     const newMsg = {
@@ -738,18 +746,60 @@ function Members() {
                 </p>
               </div>
             ) : (
-              <form
-                onSubmit={handleSendMessage}
-                style={{
-                  padding: 'var(--s3)',
-                  borderTop: '1px solid var(--line)',
-                  backgroundColor: 'var(--panel)',
-                  display: 'flex',
-                  gap: 'var(--s2)',
-                  alignItems: 'center',
-                  flexShrink: 0,
-                }}
-              >
+              <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                {(activeConv.id === 'd_guardhouse' || activeConv.id === 'ch_gate_dispatch') && userRole !== 'Security Guard' ? (
+                  <div
+                    className="cluster"
+                    style={{
+                      gap: 'var(--s2)',
+                      padding: 'var(--s2) var(--s4)',
+                      backgroundColor: 'var(--panel-hi)',
+                      borderTop: '1px solid var(--line-hi)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span className="eyebrow" style={{ fontSize: '0.68rem', color: 'var(--dim)', margin: 0 }}>
+                      Gate Intercom Quick Prompts:
+                    </span>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ padding: '0.15rem 0.55rem', fontSize: '0.72rem', borderColor: 'var(--line-hi)', color: 'var(--paper)' }}
+                      onClick={() => setInputMessage('Announcing delivery drop for Unit ')}
+                    >
+                      [ Announce Delivery ]
+                    </button>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ padding: '0.15rem 0.55rem', fontSize: '0.72rem', borderColor: 'var(--line-hi)', color: 'var(--paper)' }}
+                      onClick={() => setInputMessage('Guest arrival clearance needed at Gate 01 for ')}
+                    >
+                      [ Guest Arrival Issue ]
+                    </button>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ padding: '0.15rem 0.55rem', fontSize: '0.72rem', borderColor: 'var(--line-hi)', color: 'var(--paper)' }}
+                      onClick={() => setInputMessage('Contacting Gate Desk regarding ')}
+                    >
+                      [ Contact Gate Desk ]
+                    </button>
+                  </div>
+                ) : null}
+
+                <form
+                  onSubmit={handleSendMessage}
+                  style={{
+                    padding: 'var(--s3)',
+                    borderTop: '1px solid var(--line)',
+                    backgroundColor: 'var(--panel)',
+                    display: 'flex',
+                    gap: 'var(--s2)',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                  }}
+                >
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -789,6 +839,7 @@ function Members() {
                   Send
                 </button>
               </form>
+            </div>
             )}
           </div>
         </div>

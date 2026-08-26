@@ -218,14 +218,18 @@ function AdminDashboard() {
   const TIMELINE_BY_GRANULARITY = {
     hourly: Array.from({ length: 24 }, (_, i) => {
       const hourStr = String(i).padStart(2, '0') + ':00';
-      const gateVolume = Math.round(
-        15 + Math.sin((i - 7) / 2.2) * 22 + Math.sin((i - 17) / 2.2) * 32 + (i % 2 === 0 ? 10 : 4)
-      );
-      const incidents = i >= 8 && i <= 22 ? (i % 4 === 0 ? 2 : i % 5 === 0 ? 1 : 0) : 0;
+      // Morning commute (07:00-09:00) and evening commute (17:00-19:00) traffic volume peaks
+      let gateVolume = 12;
+      if (i >= 7 && i <= 9) gateVolume = 68 + (i % 2) * 12;
+      else if (i >= 17 && i <= 19) gateVolume = 84 + (i % 2) * 8;
+      else if (i >= 10 && i <= 16) gateVolume = 32 + (i % 3) * 6;
+      else if (i >= 20 || i <= 5) gateVolume = 8 + (i % 2) * 4;
+
+      const incidents = i === 8 || i === 14 || i === 18 ? 1 : 0;
       return {
-        label: i % 3 === 0 ? hourStr : '',
+        label: i % 4 === 0 ? hourStr : '',
         fullLabel: hourStr,
-        gate_volume: Math.max(8, gateVolume),
+        gate_volume: gateVolume,
         incidents,
       };
     }),
@@ -241,29 +245,21 @@ function AdminDashboard() {
     ],
 
     weekly: [
-      { label: 'Wk 1', fullLabel: 'Week 1', gate_volume: 2450, incidents: 18 },
-      { label: 'Wk 2', fullLabel: 'Week 2', gate_volume: 2680, incidents: 24 },
-      { label: 'Wk 3', fullLabel: 'Week 3', gate_volume: 2910, incidents: 19 },
-      { label: 'Wk 4', fullLabel: 'Week 4', gate_volume: 3100, incidents: 31 },
-      { label: 'Wk 5', fullLabel: 'Week 5', gate_volume: 2850, incidents: 22 },
-      { label: 'Wk 6', fullLabel: 'Week 6', gate_volume: 3240, incidents: 27 },
-      { label: 'Wk 7', fullLabel: 'Week 7', gate_volume: 3410, incidents: 15 },
-      { label: 'Wk 8', fullLabel: 'Week 8', gate_volume: 3580, incidents: 21 },
+      { label: 'Week 1', fullLabel: 'Week 1', gate_volume: 2450, incidents: 18 },
+      { label: 'Week 2', fullLabel: 'Week 2', gate_volume: 2680, incidents: 24 },
+      { label: 'Week 3', fullLabel: 'Week 3', gate_volume: 2910, incidents: 19 },
+      { label: 'Week 4', fullLabel: 'Week 4', gate_volume: 3100, incidents: 31 },
     ],
 
     monthly: [
-      { label: 'Jan', fullLabel: 'January', gate_volume: 11200, incidents: 84 },
-      { label: 'Feb', fullLabel: 'February', gate_volume: 10800, incidents: 76 },
-      { label: 'Mar', fullLabel: 'March', gate_volume: 12400, incidents: 92 },
-      { label: 'Apr', fullLabel: 'April', gate_volume: 11900, incidents: 68 },
-      { label: 'May', fullLabel: 'May', gate_volume: 13100, incidents: 88 },
-      { label: 'Jun', fullLabel: 'June', gate_volume: 12800, incidents: 74 },
-      { label: 'Jul', fullLabel: 'July', gate_volume: 13600, incidents: 95 },
-      { label: 'Aug', fullLabel: 'August', gate_volume: 14200, incidents: 82 },
-      { label: 'Sep', fullLabel: 'September', gate_volume: 14500, incidents: 78 },
-      { label: 'Oct', fullLabel: 'October', gate_volume: 14900, incidents: 85 },
-      { label: 'Nov', fullLabel: 'November', gate_volume: 15200, incidents: 90 },
-      { label: 'Dec', fullLabel: 'December', gate_volume: 16800, incidents: 110 },
+      { label: 'Jan', fullLabel: 'January 2026', gate_volume: 11200, incidents: 84 },
+      { label: 'Feb', fullLabel: 'February 2026', gate_volume: 10800, incidents: 76 },
+      { label: 'Mar', fullLabel: 'March 2026', gate_volume: 12400, incidents: 92 },
+      { label: 'Apr', fullLabel: 'April 2026', gate_volume: 11900, incidents: 68 },
+      { label: 'May', fullLabel: 'May 2026', gate_volume: 13100, incidents: 88 },
+      { label: 'Jun', fullLabel: 'June 2026', gate_volume: 12800, incidents: 74 },
+      { label: 'Jul', fullLabel: 'July 2026', gate_volume: 13600, incidents: 95 },
+      { label: 'Aug', fullLabel: 'August 2026', gate_volume: 14200, incidents: 82 },
     ],
   };
 

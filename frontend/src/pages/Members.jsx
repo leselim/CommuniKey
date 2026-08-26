@@ -28,6 +28,13 @@ function playPingChime() {
   } catch (e) {}
 }
 
+export const SUPPORT_CATEGORIES = [
+  { id: 'gate', label: 'Gate & Access Control' },
+  { id: 'security', label: 'Security & Patrol' },
+  { id: 'maintenance', label: 'Estate Maintenance' },
+  { id: 'admin', label: 'Management & Billing' },
+];
+
 const HEADER_CONFIG = {
   resident: {
     title: 'Communications',
@@ -292,7 +299,7 @@ function Members() {
   // Support Request & New Chat Modals
   const [supportModal, setSupportModal] = useState(false);
   const [newChatModal, setNewChatModal] = useState(false);
-  const [supportCategory, setSupportCategory] = useState(SUPPORT_CATEGORIES[0]);
+  const [supportCategory, setSupportCategory] = useState(SUPPORT_CATEGORIES[0].label);
   const [supportBody, setSupportBody] = useState('');
   const [profileModalMember, setProfileModalMember] = useState(null);
   const [notice, setNotice] = useState('');
@@ -1110,8 +1117,8 @@ function Members() {
                 style={{ color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
               >
                 {SUPPORT_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                  <option key={typeof cat === 'string' ? cat : cat.id} value={typeof cat === 'string' ? cat : cat.label}>
+                    {typeof cat === 'string' ? cat : cat.label}
                   </option>
                 ))}
               </select>

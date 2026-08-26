@@ -366,7 +366,7 @@ function AdminDashboard() {
   const currentLogs = filteredLogs.slice((logPage - 1) * PAGE_SIZE, logPage * PAGE_SIZE);
 
   // SVG Activity Chart Dimensions
-  const maxActivityVal = Math.max(...timeline.map((t) => t.total_activity || 1), 15);
+  const maxActivityVal = Math.max(...(activeTimelineData || []).map((t) => t.gate_volume || t.total_activity || 1), 15);
   const chartHeight = 160;
   const chartWidth = 520;
 

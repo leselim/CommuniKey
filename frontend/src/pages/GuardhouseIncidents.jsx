@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Modal from '../components/Modal';
+import StatusBadge from '../components/StatusBadge';
 
 const INITIAL_GUARD_LOGS = [
   {
@@ -235,7 +236,7 @@ function GuardhouseIncidents() {
                     <td style={{ padding: '12px 8px', color: 'var(--paper)', fontWeight: 500 }}>{item.type}</td>
                     <td style={{ padding: '12px 8px', color: 'var(--dim)', fontSize: '0.8rem' }}>{item.location}</td>
                     <td style={{ padding: '12px 8px', color: 'var(--paper)', fontSize: '0.8rem' }}>{item.details}</td>
-                    <td style={{ padding: '12px 8px' }}>{renderStatusCell(item.status)}</td>
+                    <td style={{ padding: '12px 8px' }}><StatusBadge status={item.status} /></td>
                   </tr>
                 ))
               )}

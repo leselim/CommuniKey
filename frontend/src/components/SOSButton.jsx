@@ -78,7 +78,7 @@ function SOSButton() {
       <section className="sos live" aria-live="assertive">
         <div className="sos-copy">
           <p className="eyebrow">
-            <span className="live-dot" aria-hidden="true" /> SOS Dispatched • Live Alert Active
+            <span className="live-dot" aria-hidden="true" /> SOS Dispatched · Live Alert Active
           </p>
           <h2 style={{ fontSize: 'var(--fs-lg)', color: 'var(--paper)', margin: '4px 0' }}>
             Responders & Patrol Officers Have Been Notified

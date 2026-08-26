@@ -5,10 +5,25 @@ import React from 'react';
  * 1. Active / In Progress / Open / Dispatched (Brand Blue: var(--signal))
  * 2. Under Review / Pending / Awaiting Approval (Warm Amber: #d97706)
  * 3. Resolved / Completed / Closed / Expired / Approved (Muted Neutral Grey: var(--dim))
- * 4. Critical / Urgent / Failed / Emergency (Muted Rose: #e11d48)
+ * 4. Critical / Urgent / Failed / Emergency / Flagged / Rejected (Muted Rose: #e11d48)
  */
 export function getStatusClass(status = '') {
-  const norm = String(status).toLowerCase().trim();
+  const norm = String(status).toLowerCase().replace(/[•·]/g, '').trim();
+
+  if (
+    norm.includes('flagged') ||
+    norm.includes('rejected') ||
+    norm.includes('urgent') ||
+    norm.includes('critical') ||
+    norm.includes('failed') ||
+    norm.includes('emergency') ||
+    norm.includes('sos') ||
+    norm.includes('declined') ||
+    norm.includes('priority') ||
+    norm.includes('denied')
+  ) {
+    return 'status-critical';
+  }
 
   if (
     norm.includes('active') ||
@@ -17,7 +32,8 @@ export function getStatusClass(status = '') {
     norm.includes('dispatched') ||
     norm.includes('reported') ||
     norm.includes('on shift') ||
-    norm.includes('patrolling')
+    norm.includes('patrolling') ||
+    norm.includes('valid')
   ) {
     return 'status-active';
   }
@@ -47,42 +63,24 @@ export function getStatusClass(status = '') {
     return 'status-resolved';
   }
 
-  if (
-    norm.includes('urgent') ||
-    norm.includes('critical') ||
-    norm.includes('failed') ||
-    norm.includes('emergency') ||
-    norm.includes('sos') ||
-    norm.includes('declined') ||
-    norm.includes('priority')
-  ) {
-    return 'status-critical';
-  }
-
   return 'status-resolved';
 }
 
-export function getStatusTooltip(cls, status = '') {
-  switch (cls) {
-    case 'status-active':
-      return `Brand Blue (ACTIVE): Live gate pass, active incident response, or ongoing patrol operation (${status}).`;
-    case 'status-pending':
-      return `Warm Amber (UNDER REVIEW / PENDING): Request awaiting administrator review or scheduled ticket (${status}).`;
-    case 'status-resolved':
-      return `Muted Neutral (RESOLVED): Resolved incident, verified resident account, or completed operation (${status}).`;
-    case 'status-critical':
-      return `Muted Rose (CRITICAL): Urgent emergency, active SOS dispatch, or high-priority security issue (${status}).`;
-    default:
-      return `Status: ${status}`;
-  }
+function formatSentenceCase(str = '') {
+  const clean = String(str).replace(/[•·]/g, '').trim();
+  if (!clean) return '';
+  const words = clean.replace(/_/g, ' ').toLowerCase().split(' ');
+  return words
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ''))
+    .join(' ');
 }
 
 function StatusBadge({ status }) {
   const cls = getStatusClass(status);
-  const tooltip = getStatusTooltip(cls, status);
+  const cleanText = formatSentenceCase(status);
   return (
-    <span className={`status ${cls}`} title={tooltip} aria-label={tooltip}>
-      {status}
+    <span className={`status ${cls}`} title={`Status: ${cleanText}`}>
+      {cleanText}
     </span>
   );
 }

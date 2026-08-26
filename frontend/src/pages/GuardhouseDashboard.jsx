@@ -125,6 +125,7 @@ const INITIAL_SCANS = [
 function GuardhouseDashboard() {
   const { currentUser } = useAuth();
   const [pinInput, setPinInput] = useState('');
+  const [submittedCode, setSubmittedCode] = useState('');
   const [scansFeed, setScansFeed] = useState(INITIAL_SCANS);
   const [terminalNotice, setTerminalNotice] = useState('');
   const [clock, setClock] = useState(new Date().toLocaleTimeString());
@@ -138,9 +139,15 @@ function GuardhouseDashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const cleanPin = pinInput.trim().toUpperCase();
-  const matchedPass = KNOWN_PASSES[cleanPin] || KNOWN_PASSES[cleanPin.replace('-', '')];
-  const isInputEntered = cleanPin.length >= 3;
+  const cleanSubmitted = submittedCode.trim().toUpperCase();
+  const matchedPass = KNOWN_PASSES[cleanSubmitted] || KNOWN_PASSES[cleanSubmitted.replace('-', '')];
+  const hasSubmitted = cleanSubmitted.length > 0;
+
+  const handleVerify = (e) => {
+    if (e) e.preventDefault();
+    if (!pinInput.trim()) return;
+    setSubmittedCode(pinInput.trim().toUpperCase());
+  };
 
   const handleAuthorizeEntry = () => {
     if (!matchedPass) return;
@@ -160,6 +167,7 @@ function GuardhouseDashboard() {
     setScansFeed((prev) => [newScan, ...prev.slice(0, 4)]);
     setTerminalNotice(`BOOM GATE RAISED • Entry authorized for ${matchedPass.visitor} (${matchedPass.vehicle}) at ${timeStr}.`);
     setPinInput('');
+    setSubmittedCode('');
     setTimeout(() => setTerminalNotice(''), 6000);
   };
 
@@ -169,6 +177,7 @@ function GuardhouseDashboard() {
 
   const handleSimulateScan = (scannedCode) => {
     setPinInput(scannedCode);
+    setSubmittedCode(scannedCode.trim().toUpperCase());
     setQrModalOpen(false);
     setTerminalNotice(`Optical QR Scanner: Code "${scannedCode}" captured from camera viewfinder.`);
     setTimeout(() => setTerminalNotice(''), 5000);
@@ -215,36 +224,48 @@ function GuardhouseDashboard() {
           </div>
 
           <div>
-            <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
-              <input
-                type="text"
-                className="control"
-                placeholder="Enter PIN (e.g. 492-801)"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                style={{
-                  flex: 1,
-                  fontSize: '1.2rem',
-                  fontFamily: 'monospace',
-                  letterSpacing: '0.08em',
-                  fontWeight: 600,
-                  textAlign: 'left',
-                  padding: 'var(--s3) var(--s4)',
-                  backgroundColor: 'var(--panel-hi)',
-                  borderColor: 'var(--line-hi)',
-                  textTransform: 'uppercase',
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                className="btn"
-                onClick={handleScanQR}
-                style={{ padding: 'var(--s3) var(--s4)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
-              >
-                Scan QR Code
-              </button>
-            </div>
+            <form onSubmit={handleVerify}>
+              <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  className="control"
+                  placeholder="Enter PIN (e.g. 492-801)"
+                  value={pinInput}
+                  onChange={(e) => {
+                    setPinInput(e.target.value);
+                    setSubmittedCode('');
+                  }}
+                  style={{
+                    flex: 1,
+                    fontSize: '1.2rem',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.08em',
+                    fontWeight: 600,
+                    textAlign: 'left',
+                    padding: 'var(--s3) var(--s4)',
+                    backgroundColor: 'var(--panel-hi)',
+                    borderColor: 'var(--line-hi)',
+                    textTransform: 'uppercase',
+                  }}
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="btn btn-solid"
+                  style={{ padding: 'var(--s3) var(--s4)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+                >
+                  Verify
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={handleScanQR}
+                  style={{ padding: 'var(--s3) var(--s4)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+                >
+                  Scan QR Code
+                </button>
+              </div>
+            </form>
 
             <div className="cluster" style={{ justifyContent: 'center', gap: 'var(--s2)', marginTop: 'var(--s2)' }}>
               <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Test active PINs:</span>
@@ -262,7 +283,10 @@ function GuardhouseDashboard() {
                     color: 'var(--paper)',
                     cursor: 'pointer',
                   }}
-                  onClick={() => setPinInput(code)}
+                  onClick={() => {
+                    setPinInput(code);
+                    setSubmittedCode(code.trim().toUpperCase());
+                  }}
                 >
                   {code}
                 </button>
@@ -271,7 +295,7 @@ function GuardhouseDashboard() {
           </div>
 
           {/* VERIFICATION LIFECYCLE RESULT */}
-          {isInputEntered ? (
+          {hasSubmitted ? (
             matchedPass ? (
               <div
                 style={{
@@ -369,7 +393,7 @@ function GuardhouseDashboard() {
                   • Access Denied
                 </span>
                 <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.82rem' }}>
-                  Access code "{cleanPin}" was not found in active gate ledger or has expired. Please request host resident to generate a new pass.
+                  Access code "{cleanSubmitted}" was not found in active gate ledger or has expired. Please request host resident to generate a new pass.
                 </p>
               </div>
             )

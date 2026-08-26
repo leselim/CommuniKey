@@ -41,7 +41,8 @@ export function getStatusClass(status = '') {
     norm.includes('success') ||
     norm.includes('standby') ||
     norm.includes('off duty') ||
-    norm.includes('clear')
+    norm.includes('clear') ||
+    norm.includes('operational')
   ) {
     return 'status-resolved';
   }

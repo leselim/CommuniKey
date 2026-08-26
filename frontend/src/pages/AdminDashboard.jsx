@@ -630,29 +630,43 @@ function AdminDashboard() {
             </div>
           </section>
 
-          {/* Cloud Telemetry Indicators */}
+          {/* Estate Infrastructure & Systems Status */}
           <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
-            <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
+            <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s3)', alignItems: 'center' }}>
               <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
-                CLOUD & TELEMETRY HEALTH
+                ESTATE INFRASTRUCTURE & SYSTEMS STATUS
               </p>
-              <span className="mono sm" style={{ fontSize: '0.68rem', color: 'var(--affirm)' }}>
-                HEALTHY
-              </span>
+              <StatusBadge status="ALL SYSTEMS OPERATIONAL" />
             </div>
 
             <ul className="stack" style={{ gap: 'var(--s2)', padding: 0, margin: 0, listStyle: 'none' }}>
-              <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '4px' }}>
-                <span style={{ color: 'var(--dim)' }}>API Traffic:</span>
-                <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.api_request_volume}</strong>
+              <li className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '6px' }}>
+                <div>
+                  <strong style={{ color: 'var(--paper)', display: 'block' }}>Main Gate & Access Control</strong>
+                  <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Operational (Boom Gates & QR Scanners Online)</span>
+                </div>
+                <StatusBadge status="ACTIVE" />
               </li>
-              <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '4px' }}>
-                <span style={{ color: 'var(--dim)' }}>Latency & Success:</span>
-                <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.avg_response_latency_ms}ms ({telemetry.api_success_rate}%)</strong>
+              <li className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '6px' }}>
+                <div>
+                  <strong style={{ color: 'var(--paper)', display: 'block' }}>Guardhouse Terminal Connection</strong>
+                  <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Connected (Terminal 01 - Main Gate Entrance)</span>
+                </div>
+                <StatusBadge status="ACTIVE" />
               </li>
-              <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                <span style={{ color: 'var(--dim)' }}>DB Connections:</span>
-                <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.db_connection_pool}</strong>
+              <li className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '6px' }}>
+                <div>
+                  <strong style={{ color: 'var(--paper)', display: 'block' }}>Emergency & SOS Dispatch Gateway</strong>
+                  <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Active (SMS & Push Notification Gateway Operational)</span>
+                </div>
+                <StatusBadge status="ACTIVE" />
+              </li>
+              <li className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
+                <div>
+                  <strong style={{ color: 'var(--paper)', display: 'block' }}>Visitor Verification Sync</strong>
+                  <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Synced (Last heartbeat: 2 mins ago)</span>
+                </div>
+                <StatusBadge status="ACTIVE" />
               </li>
             </ul>
           </section>

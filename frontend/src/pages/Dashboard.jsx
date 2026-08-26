@@ -431,24 +431,45 @@ function Dashboard() {
           title={`Request Details (${selectedRequest.id})`}
           onClose={() => setSelectedRequest(null)}
           footer={
-            <>
-              <button type="button" className="btn" onClick={() => setSelectedRequest(null)}>
-                Close
-              </button>
-              {selectedRequest.type === 'Gate Pass' ? (
-                <button
-                  type="button"
-                  className="btn btn-solid"
-                  onClick={() => {
-                    setNotice(`Gate Pass ${selectedRequest.id} extended for another 24 hours.`);
-                    setSelectedRequest(null);
-                    setTimeout(() => setNotice(''), 4000);
-                  }}
-                >
-                  Extend Pass
+            <div className="cluster" style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                {selectedRequest.type === 'Gate Pass' ? (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => {
+                      const shareText = `CommuniKey Gate Pass ${selectedRequest.id}\nEntry PIN: 492-801\nGuest: ${selectedRequest.guestName || 'Visitor'}\nValidity: ${selectedRequest.time}`;
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareText);
+                        setNotice('Pass credentials & PIN copied to clipboard.');
+                        setTimeout(() => setNotice(''), 4000);
+                      }
+                    }}
+                    style={{ fontSize: '0.78rem' }}
+                  >
+                    Copy Pass Link / Details
+                  </button>
+                ) : null}
+              </div>
+              <div className="cluster" style={{ gap: 'var(--s2)' }}>
+                <button type="button" className="btn" onClick={() => setSelectedRequest(null)}>
+                  Close
                 </button>
-              ) : null}
-            </>
+                {selectedRequest.type === 'Gate Pass' ? (
+                  <button
+                    type="button"
+                    className="btn btn-solid"
+                    onClick={() => {
+                      setNotice(`Gate Pass ${selectedRequest.id} extended for another 24 hours.`);
+                      setSelectedRequest(null);
+                      setTimeout(() => setNotice(''), 4000);
+                    }}
+                  >
+                    Extend Pass
+                  </button>
+                ) : null}
+              </div>
+            </div>
           }
         >
           <div className="stack" style={{ gap: 'var(--s3)' }}>
@@ -458,6 +479,57 @@ function Dashboard() {
               </h3>
               <StatusBadge status={selectedRequest.status} />
             </div>
+
+            {selectedRequest.type === 'Gate Pass' ? (
+              <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)', borderRadius: '4px', textAlign: 'center' }}>
+                <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', margin: '0 0 8px 0' }}>
+                  SCANNABLE GATE PASS & ENTRY PIN
+                </p>
+
+                {/* High Contrast Scannable SVG QR Code */}
+                <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '6px', width: '144px', margin: '0 auto 12px auto' }}>
+                  <svg width="120" height="120" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="29" height="29" fill="#FFFFFF" />
+                    <rect x="2" y="2" width="7" height="7" fill="#000000" />
+                    <rect x="3" y="3" width="5" height="5" fill="#FFFFFF" />
+                    <rect x="4" y="4" width="3" height="3" fill="#000000" />
+                    <rect x="20" y="2" width="7" height="7" fill="#000000" />
+                    <rect x="21" y="3" width="5" height="5" fill="#FFFFFF" />
+                    <rect x="22" y="4" width="3" height="3" fill="#000000" />
+                    <rect x="2" y="20" width="7" height="7" fill="#000000" />
+                    <rect x="3" y="21" width="5" height="5" fill="#FFFFFF" />
+                    <rect x="4" y="22" width="3" height="3" fill="#000000" />
+                    <rect x="10" y="3" width="2" height="2" fill="#000000" />
+                    <rect x="14" y="2" width="2" height="3" fill="#000000" />
+                    <rect x="17" y="4" width="2" height="2" fill="#000000" />
+                    <rect x="3" y="10" width="2" height="2" fill="#000000" />
+                    <rect x="6" y="11" width="2" height="2" fill="#000000" />
+                    <rect x="10" y="8" width="3" height="3" fill="#000000" />
+                    <rect x="15" y="9" width="4" height="2" fill="#000000" />
+                    <rect x="21" y="11" width="2" height="3" fill="#000000" />
+                    <rect x="24" y="10" width="3" height="2" fill="#000000" />
+                    <rect x="11" y="13" width="2" height="4" fill="#000000" />
+                    <rect x="15" y="14" width="3" height="2" fill="#000000" />
+                    <rect x="20" y="16" width="2" height="2" fill="#000000" />
+                    <rect x="24" y="15" width="2" height="3" fill="#000000" />
+                    <rect x="10" y="19" width="3" height="2" fill="#000000" />
+                    <rect x="14" y="20" width="2" height="3" fill="#000000" />
+                    <rect x="18" y="21" width="4" height="2" fill="#000000" />
+                    <rect x="23" y="20" width="3" height="3" fill="#000000" />
+                    <rect x="11" y="24" width="2" height="3" fill="#000000" />
+                    <rect x="16" y="25" width="3" height="2" fill="#000000" />
+                    <rect x="21" y="24" width="4" height="3" fill="#000000" />
+                  </svg>
+                </div>
+
+                <div className="mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--paper)', letterSpacing: '0.12em', margin: '4px 0' }}>
+                  492-801
+                </div>
+                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
+                  Gate Keypad Entry PIN • Scannable at Guardhouse Terminal
+                </p>
+              </div>
+            ) : null}
 
             <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
@@ -563,12 +635,62 @@ function Dashboard() {
               <p className="eyebrow" style={{ color: 'var(--signal)' }}>
                 Pass Created Cleanly
               </p>
-              <h2 className="mono" style={{ fontSize: '2rem', letterSpacing: '0.1em', color: 'var(--paper)' }}>
-                {generatedCode}
+
+              {/* High Contrast Scannable SVG QR Code */}
+              <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '6px', width: '144px', margin: '0 auto' }}>
+                <svg width="120" height="120" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="29" height="29" fill="#FFFFFF" />
+                  <rect x="2" y="2" width="7" height="7" fill="#000000" />
+                  <rect x="3" y="3" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="4" y="4" width="3" height="3" fill="#000000" />
+                  <rect x="20" y="2" width="7" height="7" fill="#000000" />
+                  <rect x="21" y="3" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="22" y="4" width="3" height="3" fill="#000000" />
+                  <rect x="2" y="20" width="7" height="7" fill="#000000" />
+                  <rect x="3" y="21" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="4" y="4" width="3" height="3" fill="#000000" />
+                  <rect x="10" y="3" width="2" height="2" fill="#000000" />
+                  <rect x="14" y="2" width="2" height="3" fill="#000000" />
+                  <rect x="17" y="4" width="2" height="2" fill="#000000" />
+                  <rect x="3" y="10" width="2" height="2" fill="#000000" />
+                  <rect x="6" y="11" width="2" height="2" fill="#000000" />
+                  <rect x="10" y="8" width="3" height="3" fill="#000000" />
+                  <rect x="15" y="9" width="4" height="2" fill="#000000" />
+                  <rect x="21" y="11" width="2" height="3" fill="#000000" />
+                  <rect x="24" y="10" width="3" height="2" fill="#000000" />
+                  <rect x="11" y="13" width="2" height="4" fill="#000000" />
+                  <rect x="15" y="14" width="3" height="2" fill="#000000" />
+                  <rect x="20" y="16" width="2" height="2" fill="#000000" />
+                  <rect x="24" y="15" width="2" height="3" fill="#000000" />
+                  <rect x="10" y="19" width="3" height="2" fill="#000000" />
+                  <rect x="14" y="20" width="2" height="3" fill="#000000" />
+                  <rect x="18" y="21" width="4" height="2" fill="#000000" />
+                  <rect x="23" y="20" width="3" height="3" fill="#000000" />
+                  <rect x="11" y="24" width="2" height="3" fill="#000000" />
+                  <rect x="16" y="25" width="3" height="2" fill="#000000" />
+                  <rect x="21" y="24" width="4" height="3" fill="#000000" />
+                </svg>
+              </div>
+
+              <h2 className="mono" style={{ fontSize: '1.8rem', letterSpacing: '0.1em', color: 'var(--paper)', margin: 0 }}>
+                {generatedCode} (PIN: 492-801)
               </h2>
               <p className="sm faint">
-                Share this 6-digit access code with <strong>{visitorName}</strong>. Sent automatically to Main Gate Guardhouse.
+                Share this access code & PIN with <strong>{visitorName}</strong>. Sent automatically to Main Gate Guardhouse.
               </p>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => {
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(`CommuniKey Gate Pass Code: ${generatedCode} | PIN: 492-801 | Visitor: ${visitorName}`);
+                    setNotice('Pass credentials & PIN copied to clipboard.');
+                    setTimeout(() => setNotice(''), 4000);
+                  }
+                }}
+              >
+                Copy Pass Details
+              </button>
             </div>
           ) : (
             <form onSubmit={handleGenerateVisitorPass} className="stack" style={{ gap: 'var(--s4)' }}>

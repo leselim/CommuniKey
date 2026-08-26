@@ -262,6 +262,31 @@ function AdminDashboard() {
     setTimeout(() => setNotice(''), 4000);
   };
 
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Timestamp', 'User', 'Role', 'Action', 'Category', 'Status', 'Details'];
+    const rows = filteredLogs.map((l) => [
+      l.id,
+      `"${l.timestamp}"`,
+      `"${l.user_name}"`,
+      `"${l.role}"`,
+      `"${l.action}"`,
+      `"${l.category}"`,
+      `"${l.status}"`,
+      `"${l.details}"`,
+    ]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `audit_ledger_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setNotice('Audit ledger exported to CSV successfully.');
+    setTimeout(() => setNotice(''), 4000);
+  };
+
   const handlePublishAnnouncement = async (e) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
@@ -688,11 +713,20 @@ function AdminDashboard() {
                     <strong style={{ fontSize: '0.82rem', color: 'var(--paper)' }}>{item.title}</strong>
                     <span className="sm faint" style={{ color: 'var(--dim)', marginLeft: '8px' }}>{item.description}</span>
                   </div>
-                  {item.link ? (
-                    <button type="button" className="btn" style={{ padding: '0.2rem 0.5rem', fontSize: '0.72rem' }} onClick={() => navigate(item.link)}>
-                      Review Now
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.72rem' }}
+                    onClick={() => {
+                      if (item.type === 'Pending Verification' && pendingQueue.length > 0) {
+                        setReviewDocModal(pendingQueue[0]);
+                      } else if (item.link) {
+                        navigate(item.link);
+                      }
+                    }}
+                  >
+                    Review Now
+                  </button>
                 </div>
               ))}
             </div>
@@ -729,6 +763,14 @@ function AdminDashboard() {
               <option value="Resident">Resident</option>
               <option value="Safety Volunteer">Safety Volunteer</option>
             </select>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleExportCSV}
+              style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem' }}
+            >
+              Export CSV
+            </button>
           </div>
         </div>
 

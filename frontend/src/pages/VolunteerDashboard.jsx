@@ -26,13 +26,17 @@ function VolunteerDashboard() {
   const { currentUser } = useAuth();
   const { items: incidentList, update: updateIncident } = useCollection('/incidents', demoIncidents);
 
-  const [emergencyState, setEmergencyState] = useState('Dispatched');
+  const [emergencyState, setEmergencyState] = useState('Dispatched'); // Dispatched | Acknowledged | En Route | On Scene | Resolved
   const [notice, setNotice] = useState('');
   const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   const handleResponderAction = (actionName) => {
     setEmergencyState(actionName);
-    setNotice(`Responder status updated to ${actionName}. Security dispatch notified.`);
+    if (actionName === 'Resolved' || actionName === 'Resolved & Clear') {
+      setNotice('Emergency incident resolved & cleared. Logged in resolved incident feed.');
+    } else {
+      setNotice(`Responder status updated to ${actionName}. Security dispatch notified.`);
+    }
     setTimeout(() => setNotice(''), 4000);
   };
 
@@ -69,7 +73,7 @@ function VolunteerDashboard() {
         className="panel"
         style={{
           padding: 'var(--s5)',
-          borderLeft: '3px solid var(--signal)',
+          borderLeft: emergencyState.includes('Resolved') ? '3px solid var(--dim)' : '3px solid var(--signal)',
           borderTop: '1px solid var(--line-hi)',
           borderRight: '1px solid var(--line-hi)',
           borderBottom: '1px solid var(--line-hi)',
@@ -78,29 +82,36 @@ function VolunteerDashboard() {
       >
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)' }}>
+            <p className="eyebrow" style={{ color: emergencyState.includes('Resolved') ? 'var(--dim)' : 'var(--signal)' }}>
               Live Emergency Triage Queue
             </p>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--paper)' }}>
-              SOS Triggered at 14 Riverside Drive, Section A
+              {emergencyState.includes('Resolved')
+                ? 'SOS at 14 Riverside Drive, Section A (Resolved)'
+                : 'SOS Triggered at 14 Riverside Drive, Section A'}
             </h2>
           </div>
-          <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
+          <span className="mono sm" style={{ color: emergencyState.includes('Resolved') ? 'var(--dim)' : 'var(--signal)', fontWeight: 600 }}>
             Triage Status: {emergencyState}
           </span>
         </div>
 
         <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s4)' }}>
-          SOS Alert triggered from resident app. Patrol officer Sipho Dlamini notified.
+          {emergencyState.includes('Resolved')
+            ? 'SOS Alert resolved by responder team. Area cleared and secured.'
+            : 'SOS Alert triggered from resident app. Patrol officer Sipho Dlamini notified.'}
         </p>
 
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+        {/* Step-by-Step Interactive Response Lifecycle Buttons */}
+        <div className="cluster" style={{ gap: 'var(--s3)', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn"
             style={{
-              backgroundColor: emergencyState === 'Acknowledged' ? 'var(--signal)' : 'transparent',
-              color: 'var(--paper)',
+              backgroundColor: emergencyState === 'Acknowledged' ? 'var(--signal)' : 'var(--panel-lo)',
+              borderColor: emergencyState === 'Acknowledged' ? 'var(--signal)' : 'var(--line-hi)',
+              color: emergencyState === 'Acknowledged' ? '#ffffff' : 'var(--paper)',
+              fontWeight: emergencyState === 'Acknowledged' ? 600 : 400,
             }}
             onClick={() => handleResponderAction('Acknowledged')}
           >
@@ -110,8 +121,10 @@ function VolunteerDashboard() {
             type="button"
             className="btn"
             style={{
-              backgroundColor: emergencyState === 'En Route' ? 'var(--signal)' : 'transparent',
-              color: 'var(--paper)',
+              backgroundColor: emergencyState === 'En Route' ? 'var(--signal)' : 'var(--panel-lo)',
+              borderColor: emergencyState === 'En Route' ? 'var(--signal)' : 'var(--line-hi)',
+              color: emergencyState === 'En Route' ? '#ffffff' : 'var(--paper)',
+              fontWeight: emergencyState === 'En Route' ? 600 : 400,
             }}
             onClick={() => handleResponderAction('En Route')}
           >
@@ -121,8 +134,10 @@ function VolunteerDashboard() {
             type="button"
             className="btn"
             style={{
-              backgroundColor: emergencyState === 'On Scene' ? 'var(--signal)' : 'transparent',
-              color: 'var(--paper)',
+              backgroundColor: emergencyState === 'On Scene' ? 'var(--signal)' : 'var(--panel-lo)',
+              borderColor: emergencyState === 'On Scene' ? 'var(--signal)' : 'var(--line-hi)',
+              color: emergencyState === 'On Scene' ? '#ffffff' : 'var(--paper)',
+              fontWeight: emergencyState === 'On Scene' ? 600 : 400,
             }}
             onClick={() => handleResponderAction('On Scene')}
           >
@@ -131,9 +146,14 @@ function VolunteerDashboard() {
           <button
             type="button"
             className="btn btn-solid"
-            onClick={() => handleResponderAction('Resolved & Clear')}
+            style={{
+              backgroundColor: emergencyState.includes('Resolved') ? 'var(--dim)' : 'var(--signal)',
+              borderColor: emergencyState.includes('Resolved') ? 'var(--dim)' : 'var(--signal)',
+              color: '#ffffff',
+            }}
+            onClick={() => handleResponderAction('Resolved')}
           >
-            Mark Incident Resolved
+            {emergencyState.includes('Resolved') ? 'Incident Resolved ✓' : 'Mark Incident Resolved'}
           </button>
         </div>
       </section>

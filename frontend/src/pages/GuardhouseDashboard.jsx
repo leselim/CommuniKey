@@ -206,11 +206,11 @@ function GuardhouseDashboard() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
         <div className="stack" style={{ gap: 'var(--s4)', maxWidth: '640px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center' }}>
-            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--signal)', margin: 0 }}>
-              VISITOR PASS VERIFICATION & BOOM GATE CONTROL
+            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--dim)', margin: 0 }}>
+              Visitor Gate Verification
             </p>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--paper)', margin: 'var(--s1) 0 0 0' }}>
-              Scan or Enter 6-Digit Visitor Access Code
+              Enter 6-Digit PIN or Scan Pass
             </h2>
           </div>
 
@@ -219,30 +219,30 @@ function GuardhouseDashboard() {
               <input
                 type="text"
                 className="control"
-                placeholder="E.G. 492-801 OR CK-492"
+                placeholder="Enter PIN (e.g. 492-801)"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
                 style={{
                   flex: 1,
-                  fontSize: '1.3rem',
+                  fontSize: '1.2rem',
                   fontFamily: 'monospace',
-                  letterSpacing: '0.1em',
-                  fontWeight: 700,
-                  textAlign: 'center',
+                  letterSpacing: '0.08em',
+                  fontWeight: 600,
+                  textAlign: 'left',
                   padding: 'var(--s3) var(--s4)',
                   backgroundColor: 'var(--panel-hi)',
-                  borderColor: matchedPass ? '#10b981' : isInputEntered && !matchedPass ? '#e11d48' : 'var(--line-hi)',
+                  borderColor: 'var(--line-hi)',
                   textTransform: 'uppercase',
                 }}
                 autoFocus
               />
               <button
                 type="button"
-                className="btn btn-solid"
+                className="btn"
                 onClick={handleScanQR}
                 style={{ padding: 'var(--s3) var(--s4)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
               >
-                [ Scan QR Code ]
+                Scan QR Code
               </button>
             </div>
 
@@ -277,7 +277,7 @@ function GuardhouseDashboard() {
                 style={{
                   padding: 'var(--s4)',
                   backgroundColor: 'var(--panel-hi)',
-                  border: '1px solid #10b981',
+                  border: '1px solid var(--line-hi)',
                   borderRadius: '6px',
                 }}
               >
@@ -285,15 +285,15 @@ function GuardhouseDashboard() {
                   <span
                     style={{
                       fontSize: '0.75rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: '#10b981',
-                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      backgroundColor: 'var(--ink)',
                       padding: '3px 10px',
                       borderRadius: '4px',
-                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      border: '1px solid var(--line-hi)',
                     }}
                   >
-                    • VALID PASS • ENTRY PERMITTED
+                    • Valid Pass
                   </span>
                   <span className="mono sm" style={{ color: 'var(--paper)', fontWeight: 600 }}>
                     {matchedPass.code} ({matchedPass.type})
@@ -303,15 +303,15 @@ function GuardhouseDashboard() {
                 <div className="grid-2" style={{ gap: 'var(--s3)', fontSize: '0.85rem' }}>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      RESIDENT HOST
+                      RESIDENT HOST & UNIT
                     </span>
-                    <strong style={{ color: 'var(--paper)', fontSize: '0.95rem' }}>{matchedPass.host}</strong>
+                    <strong style={{ color: 'var(--paper)', fontSize: '0.92rem' }}>{matchedPass.host}</strong>
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
                       VISITOR NAME
                     </span>
-                    <strong style={{ color: 'var(--paper)', fontSize: '0.95rem' }}>{matchedPass.visitor}</strong>
+                    <strong style={{ color: 'var(--paper)', fontSize: '0.92rem' }}>{matchedPass.visitor}</strong>
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
@@ -321,7 +321,7 @@ function GuardhouseDashboard() {
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      PASS VALIDITY
+                      PASS EXPIRY
                     </span>
                     <span style={{ color: 'var(--dim)' }}>{matchedPass.validity}</span>
                   </div>
@@ -334,15 +334,12 @@ function GuardhouseDashboard() {
                     style={{
                       width: '100%',
                       padding: 'var(--s3)',
-                      fontSize: '0.95rem',
-                      fontWeight: 700,
-                      backgroundColor: '#10b981',
-                      borderColor: '#10b981',
-                      color: '#ffffff',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
                     }}
                     onClick={handleAuthorizeEntry}
                   >
-                    [ Open Boom Gate & Authorize Entry ]
+                    [ Authorize Entry & Release Gate ]
                   </button>
                 </div>
               </div>
@@ -359,17 +356,17 @@ function GuardhouseDashboard() {
                 <span
                   style={{
                     fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     color: '#e11d48',
-                    backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                    backgroundColor: 'var(--ink)',
                     padding: '3px 10px',
                     borderRadius: '4px',
-                    border: '1px solid rgba(225, 29, 72, 0.3)',
+                    border: '1px solid var(--line-hi)',
                     display: 'inline-block',
                     marginBottom: 'var(--s2)',
                   }}
                 >
-                  • ENTRY DENIED • INVALID / EXPIRED PASS
+                  • Access Denied
                 </span>
                 <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.82rem' }}>
                   Access code "{cleanPin}" was not found in active gate ledger or has expired. Please request host resident to generate a new pass.
@@ -452,18 +449,18 @@ function GuardhouseDashboard() {
           }
         >
           <div className="stack" style={{ gap: 'var(--s4)', textAlign: 'center' }}>
-            <p className="eyebrow" style={{ fontSize: '0.68rem', color: 'var(--signal)', margin: 0 }}>
+            <p className="eyebrow" style={{ fontSize: '0.68rem', color: 'var(--dim)', margin: 0 }}>
               CAMERA VIEWFINDER ACTIVE • MAIN GATE 01 SCANNER
             </p>
 
-            {/* High-contrast camera viewfinder frame with reticle lines */}
+            {/* Clean dark viewfinder frame with minimal corner reticle guidelines */}
             <div
               style={{
                 position: 'relative',
                 width: '100%',
                 height: '200px',
-                backgroundColor: '#050707',
-                border: '2px solid var(--line-hi)',
+                backgroundColor: 'var(--ink)',
+                border: '1px solid var(--line-hi)',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',
@@ -471,17 +468,14 @@ function GuardhouseDashboard() {
                 overflow: 'hidden',
               }}
             >
-              {/* Corner Bracket Guidelines */}
-              <div style={{ position: 'absolute', top: '20px', left: '20px', width: '30px', height: '30px', borderTop: '3px solid var(--signal)', borderLeft: '3px solid var(--signal)' }} />
-              <div style={{ position: 'absolute', top: '20px', right: '20px', width: '30px', height: '30px', borderTop: '3px solid var(--signal)', borderRight: '3px solid var(--signal)' }} />
-              <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '30px', height: '30px', borderBottom: '3px solid var(--signal)', borderLeft: '3px solid var(--signal)' }} />
-              <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '30px', height: '30px', borderBottom: '3px solid var(--signal)', borderRight: '3px solid var(--signal)' }} />
+              {/* Thin Corner Brackets */}
+              <div style={{ position: 'absolute', top: '24px', left: '24px', width: '24px', height: '24px', borderTop: '2px solid var(--dim)', borderLeft: '2px solid var(--dim)' }} />
+              <div style={{ position: 'absolute', top: '24px', right: '24px', width: '24px', height: '24px', borderTop: '2px solid var(--dim)', borderRight: '2px solid var(--dim)' }} />
+              <div style={{ position: 'absolute', bottom: '24px', left: '24px', width: '24px', height: '24px', borderBottom: '2px solid var(--dim)', borderLeft: '2px solid var(--dim)' }} />
+              <div style={{ position: 'absolute', bottom: '24px', right: '24px', width: '24px', height: '24px', borderBottom: '2px solid var(--dim)', borderRight: '2px solid var(--dim)' }} />
 
-              {/* Laser Scan Line */}
-              <div style={{ width: '80%', height: '2px', backgroundColor: 'var(--signal)', boxShadow: '0 0 8px var(--signal)' }} />
-
-              <span className="mono sm" style={{ position: 'absolute', bottom: '12px', color: 'var(--dim)', fontSize: '0.72rem' }}>
-                Position Visitor QR Code inside reticle
+              <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
+                Position Visitor QR Code inside viewfinder
               </span>
             </div>
 
@@ -493,15 +487,15 @@ function GuardhouseDashboard() {
                 onClick={() => handleSimulateScan('CK-492')}
                 style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
               >
-                Simulate Scan (Valid Pass CK-492)
+                Simulate Valid Pass (CK-492)
               </button>
               <button
                 type="button"
                 className="btn"
                 onClick={() => handleSimulateScan('999-000')}
-                style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', borderColor: '#e11d48', color: '#e11d48' }}
+                style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
               >
-                Simulate Scan (Invalid Pass)
+                Simulate Expired Pass
               </button>
             </div>
           </div>

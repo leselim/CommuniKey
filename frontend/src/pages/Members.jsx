@@ -122,7 +122,7 @@ const INITIAL_CHANNELS = [
         id: 'gd1',
         sender: 'Thabo Mokoena (Unit 14)',
         role: 'Resident',
-        text: 'Hi Guardhouse, courier arriving with a delivery for Unit 14 shortly.',
+        text: 'Hi Sipho, plumber arriving in 10 mins in a White Ford Ranger (GP 88 YZ). Pass CK-492 is active.',
         time: new Date(Date.now() - 3600000).toISOString(),
         isMe: false,
       },
@@ -130,15 +130,41 @@ const INITIAL_CHANNELS = [
         id: 'gd2',
         sender: 'Sipho Dlamini',
         role: 'Security Guard',
-        text: 'Received Mr. Mokoena. Will log courier pass and clear gate upon arrival.',
+        text: 'Noted Thabo, will verify and authorize entry at Boom 01 upon arrival.',
         time: new Date(Date.now() - 1800000).toISOString(),
         isMe: true,
+      },
+      {
+        id: 'gd3',
+        sender: 'Leseli Morakile (Unit 22)',
+        role: 'Resident',
+        text: 'Expecting Takealot delivery shortly.',
+        time: new Date(Date.now() - 600000).toISOString(),
+        isMe: false,
       },
     ],
   },
 ];
 
 const INITIAL_DIRECT = [
+  {
+    id: 'd_guardhouse',
+    name: 'Main Gate Guardhouse (Sipho)',
+    role: 'Security Guard / Gate 01',
+    online: true,
+    lastSeen: 'Online • Main Guardhouse Terminal 01',
+    type: 'direct',
+    messages: [
+      {
+        id: 'g1',
+        sender: 'Sipho Dlamini (Security Guard)',
+        role: 'Security Guard',
+        text: 'Main Entrance Guardhouse Terminal 01 online. Send direct pass notifications or gate arrival inquiries here.',
+        time: new Date(Date.now() - 86400000).toISOString(),
+        isMe: false,
+      },
+    ],
+  },
   {
     id: 'd_admin',
     name: 'Marcus Vance (Admin Support)',
@@ -314,7 +340,12 @@ function Members() {
     e.preventDefault();
     if (!inputMessage.trim() && !attachment) return;
 
-    const myName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Resident Member';
+    const myName = currentUser
+      ? `${currentUser.first_name} ${currentUser.last_name}`
+      : userRole === 'Security Guard'
+      ? 'Sipho Dlamini'
+      : 'Resident Member';
+
     const newMsg = {
       id: `m_${Date.now()}`,
       sender: myName,
@@ -712,6 +743,8 @@ function Members() {
                   placeholder={
                     attachment
                       ? `Attached: ${attachment.name} - Write message...`
+                      : userRole === 'Security Guard'
+                      ? 'Type an operational update or reply...'
                       : `Message ${activeConv.name}...`
                   }
                   value={inputMessage}

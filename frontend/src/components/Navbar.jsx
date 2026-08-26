@@ -18,6 +18,7 @@ const ROLE_NAV = {
     { to: '/volunteer/alerts', label: 'Safety Alerts' },
     { to: '/volunteer/patrol', label: 'Patrol Ops' },
     { to: '/announcements', label: 'Announcements' },
+    { to: '/messages', label: 'Communications' },
   ],
   'Estate Administrator': [
     { to: '/admin', label: 'Admin Hub' },

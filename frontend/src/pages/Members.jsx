@@ -28,12 +28,35 @@ function playPingChime() {
   } catch (e) {}
 }
 
-const SUPPORT_CATEGORIES = [
-  'Maintenance & Repairs',
-  'Noise & Disturbance',
-  'Billing & Levy Inquiry',
-  'General Admin Question',
-];
+const HEADER_CONFIG = {
+  resident: {
+    title: 'Communications',
+    subtitle: 'Community channels, gate dispatch, and direct management support.',
+    primaryAction: '+ New Message',
+  },
+  guard: {
+    title: 'Guardhouse Dispatch',
+    subtitle: 'Gate inquiries, visitor clearances, and tactical patrol radio.',
+    primaryAction: '+ Quick Dispatch',
+  },
+  admin: {
+    title: 'Support & Communications',
+    subtitle: 'Resident inquiries, community broadcasts, and responder channels.',
+    primaryAction: '+ Post Notice',
+  },
+  patrol: {
+    title: 'Patrol Communications',
+    subtitle: 'Tactical dispatch, field reports, and responder coordination.',
+    primaryAction: '+ Field Report',
+  },
+};
+
+const getHeaderConfig = (role) => {
+  if (role === 'Security Guard') return HEADER_CONFIG.guard;
+  if (role === 'Community Administrator' || role === 'Estate Administrator') return HEADER_CONFIG.admin;
+  if (role === 'Safety Volunteer' || role === 'Security Patrol') return HEADER_CONFIG.patrol;
+  return HEADER_CONFIG.resident;
+};
 
 const INITIAL_CHANNELS = [
   {
@@ -410,27 +433,40 @@ function Members() {
     userRole !== 'Community Administrator' &&
     userRole !== 'System Administrator';
 
+  const headerInfo = getHeaderConfig(userRole);
+
   return (
     <div className="stack" style={{ gap: 'var(--s3)' }}>
       {/* PAGE HEADER */}
       <header className="masthead" style={{ paddingBottom: 'var(--s3)' }}>
         <div>
-          <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-            Communication Center
-          </p>
-          <h1 style={{ fontSize: 'var(--fs-xl)' }}>Estate Messaging & Member Hub</h1>
-          <p className="masthead-meta">
-            Private 1-on-1 support tickets, community discussion channels, and member directory.
+          <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
+            {headerInfo.title}
+          </h1>
+          <p className="masthead-meta" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.85rem' }}>
+            {headerInfo.subtitle}
           </p>
         </div>
 
-        {userRole !== 'Security Guard' ? (
-          <div className="cluster" style={{ gap: 'var(--s3)' }}>
-            <button type="button" className="btn btn-solid" onClick={() => setSupportModal(true)}>
-              New Support Request
-            </button>
-          </div>
-        ) : null}
+        <div className="cluster" style={{ gap: 'var(--s3)' }}>
+          <button
+            type="button"
+            className="btn btn-solid"
+            onClick={() => {
+              if (userRole === 'Security Guard') {
+                setActiveConvId('ch_gate_dispatch');
+              } else if (userRole === 'Community Administrator' || userRole === 'Estate Administrator') {
+                setActiveConvId('ch_announcements');
+              } else if (userRole === 'Safety Volunteer' || userRole === 'Security Patrol') {
+                setActiveConvId('ch_safety_ops');
+              } else {
+                setNewChatModal(true);
+              }
+            }}
+          >
+            {headerInfo.primaryAction}
+          </button>
+        </div>
       </header>
 
       {notice ? <p className="notice">{notice}</p> : null}

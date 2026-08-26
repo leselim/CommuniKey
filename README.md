@@ -1,6 +1,6 @@
 # CommuniKey
 
-A cloud-native community engagement platform designed to provide residents with a secure, centralised hub for communication, safety, emergency response, and neighbourhood collaboration.
+A production-ready, cloud-native community engagement platform designed to provide residents with a secure, centralised hub for communication, safety, emergency response, and neighbourhood collaboration.
 
 The platform replaces fragmented communication channels such as WhatsApp groups by providing structured announcements, emergency alerts, incident reporting, community events, and role-based administration.
 
@@ -8,72 +8,106 @@ The platform replaces fragmented communication channels such as WhatsApp groups 
 
 ## Project Status
 
-**Current Phase:** Planning and System Design
+**Current Phase:** Production-Ready MVP Complete
 
-## Vision
-
-To empower communities through a secure digital platform that improves communication, enhances public safety, and strengthens neighbourhood collaboration.
-
-## Problem Statement
-
-Many residential communities rely on messaging applications such as WhatsApp for communication. While convenient, these platforms become difficult to manage as communities grow and lack dedicated functionality for emergency response, incident management, announcements, and community administration.
-
-CommuniKey addresses these challenges by providing a purpose-built platform designed specifically for modern communities.
+---
 
 ## Core Features
 
-- Community announcements
-- Incident reporting
-- Emergency SOS alerts
-- Community events
-- Community discussion feed
-- User profiles
-- Notifications
-- Community administration
-- Role-based access control
+- **Emergency SOS Distress Button:** Real-time activation with location dispatch to neighbourhood patrol.
+- **Incident Reporting & Status Tracking:** Log suspicious activity, streetlight faults, or hazards with automated triage.
+- **Official Community Announcements:** Priority-sorted noticeboard for management alerts and municipality updates.
+- **Event Scheduling & RSVPs:** Community event calendar with attendance tracking.
+- **Role-Based Administration & Moderation:** Granular RBAC supporting Residents, Estate Administrators, Safety Volunteers, and System Administrators.
+- **Privacy-First Messaging & Profiling:** Redacted sensitive details (gate codes, emergency notes) based on persona permissions.
+
+---
 
 ## Technology Stack
 
-The MVP will be developed using:
+- **Frontend:** React 18, React Router v6, Axios, Modular Dark-Mode CSS Design Tokens.
+- **Backend:** Python 3.11+, Django 4.2, Django REST Framework, SimpleJWT Authentication.
+- **Database:** SQLite (local dev) / PostgreSQL (production).
+- **Testing:** Django TestCase suite (13 unit tests), React Testing Library / Jest.
+- **DevOps & Cloud:** Docker, Terraform, GitHub Actions, AWS Free Tier compatible.
 
-- Python
-- Django
-- Django REST Framework
-- React
-- PostgreSQL
-- Docker
-- Terraform
-- GitHub Actions
+---
 
-## Cloud Platform
+## Local Setup & Development
 
-The Community Cloud Platform is designed for deployment on **Amazon Web Services (AWS)**.
+### 1. Backend Setup
 
-The MVP will make use of AWS services where appropriate while prioritising services that are suitable for a student project and compatible with AWS Free Tier offerings where available.
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Run migrations and seed sample data
+python3 manage.py makemigrations authentication communities announcements incidents events emergency
+python3 manage.py migrate
+python3 manage.py seed_data
+
+# Start Django backend server
+python3 manage.py runserver
+```
+The Django REST API will be accessible at `http://localhost:8000/api/v1/`.
+
+### 2. Frontend Setup
+
+```bash
+cd frontend
+npm install
+
+# Start React development server
+npm start
+```
+The application UI will be accessible at `http://localhost:3000`.
+
+---
+
+## Running Automated Tests
+
+### Backend Unit Tests
+```bash
+cd backend
+python3 manage.py test
+```
+
+### Frontend Unit Tests
+```bash
+cd frontend
+npm test -- --watchAll=false
+```
+
+### Production Build
+```bash
+cd frontend
+npm run build
+```
+
+---
 
 ## Repository Structure
 
 ```text
-community-cloud-platform/
-│
-├── backend/
-├── frontend/
-├── infrastructure/
-├── docs/
+CommuniKey/
+├── backend/                  # Django REST Framework backend API
+│   ├── apps/                 # Modular Django apps (auth, communities, incidents, announcements, events, emergency)
+│   ├── config/               # Settings, WSGI, root URL routing
+│   └── manage.py
+├── frontend/                 # React 18 SPA frontend
+│   ├── src/
+│   │   ├── components/       # Reusable modular UI components
+│   │   ├── context/          # AuthContext and RBAC logic
+│   │   ├── pages/            # Views (Dashboard, Incidents, Announcements, Events, Members, Profile, etc.)
+│   │   └── services/         # API client & local demo data fallback
+│   └── package.json
+├── docs/                     # Full system architecture, ERD, and API design specifications
 └── README.md
 ```
 
-## Documentation
-
-Detailed project documentation is available in the `docs` directory.
-
-## Project Objectives
-
-- Improve community communication
-- Increase neighbourhood safety
-- Support emergency response
-- Centralise community information
-- Demonstrate cloud-native software engineering principles
+---
 
 ## License
 

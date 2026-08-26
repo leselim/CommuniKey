@@ -1,42 +1,12 @@
-# Backend
+# Backend - CommuniKey
 
 ## Overview
 
-The backend provides the business logic and REST APIs for the Community Cloud Platform. It is built with Django and Django REST Framework.
-
-It is responsible for:
-
-- User authentication & JWT session management
-- Community structure & membership roles
-- Incident reporting & triage tracking
-- Emergency SOS processing
-- Community announcements & discussion feeds
-- Event scheduling
-- Administrative management
+The backend provides the business logic and REST APIs for the CommuniKey platform. It is built with Django and Django REST Framework.
 
 ---
 
-## Technology Stack
-
-- **Framework:** Python 3.11 / Django 4.2 / Django REST Framework
-- **Database:** PostgreSQL 15
-- **Authentication:** JWT (JSON Web Tokens) via `djangorestframework-simplejwt`
-- **Server:** Gunicorn / Django Development Server
-
----
-
-## Module Structure
-
-- `apps/authentication/`: Authentication endpoints, JWT generation, user management
-- `apps/communities/`: Community creation, membership, user roles
-- `apps/announcements/`: Community announcements and push notifications
-- `apps/incidents/`: Incident logging, photo attachment, status tracking
-- `apps/emergency/`: Immediate SOS distress alert routing
-- `apps/events/`: Community event creation, RSVPs, calendars
-
----
-
-## Local Setup & Development
+## Getting Started
 
 1. Create a Python virtual environment:
    ```bash
@@ -49,8 +19,20 @@ It is responsible for:
    pip install -r requirements.txt
    ```
 
-3. Run migrations and start development server:
+3. Run migrations and seed sample data:
    ```bash
-   python manage.py migrate
-   python manage.py runserver
+   python3 manage.py makemigrations
+   python3 manage.py migrate
+   python3 manage.py seed_data
    ```
+
+4. Run unit test suite:
+   ```bash
+   python3 manage.py test
+   ```
+
+5. Start local server:
+   ```bash
+   python3 manage.py runserver
+   ```
+   Access API at `http://localhost:8000/api/v1/`.

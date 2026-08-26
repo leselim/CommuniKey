@@ -117,17 +117,103 @@ function AdminDashboard() {
     return () => { isMounted = false; };
   }, [logSearch, logRoleFilter]);
 
-  const metrics = analyticsData?.metrics || {
-    total_users: 248,
-    user_growth_pct: 12.4,
-    resolution_rate: 71.4,
-    total_incidents: incidentList.length || 7,
-    open_incidents: 2,
-    resolved_incidents: incidentList.filter((i) => i.status === 'Resolved').length || 5,
-    incident_change_pct: 4.2,
-    pending_verifications: pendingQueue.length,
-    active_sos_alerts: 0,
+  const PERIOD_LABELS = {
+    today: '26 Aug 2026',
+    yesterday: '25 Aug 2026',
+    '7d': '20 Aug 2026 – 26 Aug 2026',
+    '30d': '28 Jul 2026 – 26 Aug 2026',
+    '90d': '28 May 2026 – 26 Aug 2026',
+    year: '01 Jan 2026 – 26 Aug 2026',
   };
+
+  const METRICS_BY_PERIOD = {
+    today: {
+      total_users: 248,
+      user_subtitle: '4 new registrations today',
+      user_growth_pct: 1.8,
+      resolution_rate: 96.4,
+      incident_subtitle: '+1.8% resolved today',
+      incident_change_pct: 1.8,
+      active_sos_alerts: 0,
+      sos_subtitle: 'Night Patrol Response: 3.8 mins',
+      active_gate_passes: 18,
+      open_incidents: 1,
+      resolved_incidents: 6,
+      total_incidents: 7,
+    },
+    yesterday: {
+      total_users: 244,
+      user_subtitle: '6 new registrations yesterday',
+      user_growth_pct: 2.4,
+      resolution_rate: 94.2,
+      incident_subtitle: '+2.4% resolved yesterday',
+      incident_change_pct: 2.4,
+      active_sos_alerts: 1,
+      sos_subtitle: 'Night Patrol Response: 4.1 mins',
+      active_gate_passes: 24,
+      open_incidents: 2,
+      resolved_incidents: 8,
+      total_incidents: 10,
+    },
+    '7d': {
+      total_users: 248,
+      user_subtitle: '28 new registrations (7 days)',
+      user_growth_pct: 5.2,
+      resolution_rate: 95.8,
+      incident_subtitle: '+5.2% resolved (7d)',
+      incident_change_pct: 5.2,
+      active_sos_alerts: 1,
+      sos_subtitle: 'Avg Response Time: 4.2 mins',
+      active_gate_passes: 142,
+      open_incidents: 2,
+      resolved_incidents: 24,
+      total_incidents: 26,
+    },
+    '30d': {
+      total_users: 248,
+      user_subtitle: 'vs previous period • Verified Residents & Staff',
+      user_growth_pct: 12.4,
+      resolution_rate: 96.4,
+      incident_subtitle: '+12.4% resolved',
+      incident_change_pct: 12.4,
+      active_sos_alerts: 1,
+      sos_subtitle: 'Night Patrol Avg Response: 4.5 mins',
+      active_gate_passes: 580,
+      open_incidents: 2,
+      resolved_incidents: 52,
+      total_incidents: 54,
+    },
+    '90d': {
+      total_users: 215,
+      user_subtitle: '215 active members (90 days)',
+      user_growth_pct: 18.6,
+      resolution_rate: 91.2,
+      incident_subtitle: '+18.6% resolved',
+      incident_change_pct: 18.6,
+      active_sos_alerts: 2,
+      sos_subtitle: 'Avg Response Time: 5.4 mins',
+      active_gate_passes: 1840,
+      open_incidents: 5,
+      resolved_incidents: 112,
+      total_incidents: 117,
+    },
+    year: {
+      total_users: 248,
+      user_subtitle: '248 registered users (this year)',
+      user_growth_pct: 42.0,
+      resolution_rate: 88.2,
+      incident_subtitle: '+42.0% resolved (annual)',
+      incident_change_pct: 42.0,
+      active_sos_alerts: 4,
+      sos_subtitle: 'Annual Avg Response: 6.8 mins',
+      active_gate_passes: 4210,
+      open_incidents: 8,
+      resolved_incidents: 380,
+      total_incidents: 388,
+    },
+  };
+
+  const metrics = analyticsData?.metrics || METRICS_BY_PERIOD[datePeriod] || METRICS_BY_PERIOD['30d'];
 
   const timeline = analyticsData?.activity_timeline || [
     { label: 'Aug 01', incidents: 4, announcements: 1, sos_alerts: 0, total_activity: 5 },
@@ -158,9 +244,9 @@ function AdminDashboard() {
     { id: 2, type: 'Open Incidents', severity: 'low', title: `${metrics.open_incidents} Unresolved Incidents`, description: 'Incidents logged on Riverside Drive.', link: '/admin/incidents' },
   ];
 
-  const dateRangeDisplay = analyticsData?.date_range
-    ? `${analyticsData.date_range.start} – ${analyticsData.date_range.end}`
-    : 'Aug 01, 2026 – Aug 26, 2026';
+  const dateRangeDisplay = datePeriod === 'custom'
+    ? `${customRange.start} – ${customRange.end}`
+    : analyticsData?.date_range?.label || PERIOD_LABELS[datePeriod] || '28 Jul 2026 – 26 Aug 2026';
 
   const handleApproveMember = (memberId) => {
     setPendingQueue((prev) => prev.filter((m) => m.id !== memberId));
@@ -357,7 +443,7 @@ function AdminDashboard() {
             </span>
           </div>
           <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
-            vs previous period • Verified Residents & Staff
+            {metrics.user_subtitle || 'vs previous period • Verified Residents & Staff'}
           </p>
         </div>
 
@@ -381,6 +467,9 @@ function AdminDashboard() {
           <div style={{ height: '6px', width: '100%', backgroundColor: 'var(--ink)', borderRadius: '9999px', overflow: 'hidden', marginTop: 'var(--s2)' }}>
             <div style={{ width: `${metrics.resolution_rate}%`, height: '100%', backgroundColor: 'var(--signal)' }} />
           </div>
+          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
+            {metrics.incident_subtitle || 'Incidents logged & dispatched'}
+          </p>
         </div>
 
         {/* Card 3: Emergency SOS Status */}
@@ -401,29 +490,29 @@ function AdminDashboard() {
             </span>
           </div>
           <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
-            Night Patrol Avg Response: 4 mins
+            {metrics.sos_subtitle || 'Night Patrol Avg Response: 4.5 mins'}
           </p>
         </div>
 
-        {/* Card 4: Verification Queue */}
+        {/* Card 4: Active Gate Passes Issued */}
         <div
           className="panel"
           style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
           onClick={() => navigate('/admin/moderation')}
         >
           <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-            VERIFICATION QUEUE
+            ACTIVE GATE PASSES ISSUED
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
             <span className="mono" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--paper)' }}>
-              {pendingQueue.length} Pending
+              {(metrics.active_gate_passes || 580).toLocaleString()} Passes
             </span>
             <span className="mono sm faint" style={{ fontSize: '0.72rem', color: 'var(--dim)' }}>
-              Awaiting ID
+              {pendingQueue.length} Pending ID
             </span>
           </div>
           <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
-            Document review required
+            Validated at Main Guardhouse
           </p>
         </div>
       </div>

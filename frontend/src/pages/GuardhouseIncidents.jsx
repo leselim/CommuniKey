@@ -142,11 +142,19 @@ function GuardhouseIncidents() {
         <div>
           <button
             type="button"
-            className="btn btn-solid"
+            className="btn"
             onClick={() => setModalOpen(true)}
-            style={{ fontWeight: 600 }}
+            style={{
+              padding: '0.4rem 0.85rem',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              color: 'var(--paper)',
+              backgroundColor: 'var(--panel-hi)',
+              borderColor: 'var(--line-hi)',
+              borderRadius: '6px',
+            }}
           >
-            [ + Log Event ]
+            + Log Event
           </button>
         </div>
       </header>
@@ -240,7 +248,7 @@ function GuardhouseIncidents() {
                 Cancel
               </button>
               <button type="submit" form="sec-log-modal-form" className="btn btn-solid">
-                [ Save to Gate Ledger ]
+                Save to Gate Ledger
               </button>
             </div>
           }

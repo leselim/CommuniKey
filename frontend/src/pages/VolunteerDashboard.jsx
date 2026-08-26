@@ -216,12 +216,10 @@ function VolunteerDashboard() {
                 <div>
                   <h3 className="entry-title">{p.route}</h3>
                   <p className="entry-body" style={{ color: 'var(--dim)' }}>
-                    Status: {p.time}
+                    Check-in: {p.time}
                   </p>
                 </div>
-                <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-                  {p.status}
-                </span>
+                <StatusBadge status={p.status} />
               </li>
             ))}
           </ul>
@@ -244,9 +242,13 @@ function VolunteerDashboard() {
                 <div>
                   <h3 className="entry-title">{v.name}</h3>
                   <p className="entry-body">{v.role}</p>
-                  <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
+                  <a
+                    href={`tel:${v.phone.replace(/[^0-9+]/g, '')}`}
+                    className="link sm"
+                    style={{ color: 'var(--dim)', fontSize: '0.75rem', display: 'inline-block', marginTop: '4px' }}
+                  >
                     Contact: {v.phone}
-                  </p>
+                  </a>
                 </div>
                 <StatusBadge status={v.status} />
               </li>

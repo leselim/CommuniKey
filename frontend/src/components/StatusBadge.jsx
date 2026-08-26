@@ -15,7 +15,9 @@ export function getStatusClass(status = '') {
     norm.includes('in progress') ||
     norm.includes('open') ||
     norm.includes('dispatched') ||
-    norm.includes('reported')
+    norm.includes('reported') ||
+    norm.includes('on shift') ||
+    norm.includes('patrolling')
   ) {
     return 'status-active';
   }
@@ -23,7 +25,8 @@ export function getStatusClass(status = '') {
   if (
     norm.includes('pending') ||
     norm.includes('under review') ||
-    norm.includes('awaiting')
+    norm.includes('awaiting') ||
+    norm.includes('scheduled')
   ) {
     return 'status-pending';
   }
@@ -35,7 +38,10 @@ export function getStatusClass(status = '') {
     norm.includes('expired') ||
     norm.includes('approved') ||
     norm.includes('verified') ||
-    norm.includes('success')
+    norm.includes('success') ||
+    norm.includes('standby') ||
+    norm.includes('off duty') ||
+    norm.includes('clear')
   ) {
     return 'status-resolved';
   }

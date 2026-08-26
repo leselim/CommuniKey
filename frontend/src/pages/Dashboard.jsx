@@ -343,66 +343,50 @@ function Dashboard() {
         >
           <div
             className="panel-head"
-            style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+            style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
           >
-            <div>
-              <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-                COMMUNITY EVENTS
-              </p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                Upcoming Gatherings & Meetings
-              </h2>
-            </div>
-            <Link to="/events" className="link" style={{ color: 'var(--dim)', fontWeight: 500, fontSize: '0.8rem' }}>
+            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+              Upcoming Events
+            </h2>
+            <Link to="/events" className="link" style={{ color: 'var(--dim)', fontWeight: 500, fontSize: '0.75rem', textDecoration: 'none' }}>
               View calendar →
             </Link>
           </div>
 
-          <div className="stack" style={{ gap: 'var(--s3)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {upcomingEvents.map((evt) => {
               const title = evt.title || evt.event_name;
               const venue = evt.venue || evt.location || evt.event_location;
-              const organiser = evt.organiser || 'Safety Committee';
-              const statusText = rsvpState[evt.id]
-                ? 'Attending'
-                : `RSVP Open • ${evt.attendees_count || 14} Attending`;
+              const attendeesCount = evt.attendees_count || 14;
 
               return (
                 <div
                   key={evt.id}
                   style={{
-                    padding: 'var(--s3) var(--s4)',
-                    backgroundColor: 'var(--panel-hi)',
-                    border: '1px solid var(--line-hi)',
-                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 8px',
+                    borderBottom: '1px solid var(--line-hi)',
                     cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
                   }}
                   onClick={() => setSelectedEvent(evt)}
-                  className="interactive-card"
                 >
-                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, paddingRight: 'var(--s3)' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--paper)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {title}
-                    </h3>
-                    <span className="mono sm" style={{ color: 'var(--signal)', fontSize: '0.75rem', fontWeight: 600 }}>
-                      {formatDayDate(evt.event_date)}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                      {venue} · {attendeesCount} attending
                     </span>
                   </div>
 
-                  <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                    {venue} • Organised by {organiser}
-                  </p>
-
-                  <div className="cluster" style={{ justifyContent: 'space-between', marginTop: '6px' }}>
-                    <span
-                      className="mono sm"
-                      style={{ color: rsvpState[evt.id] ? 'var(--signal)' : 'var(--dim)', fontSize: '0.75rem' }}
-                    >
-                      {statusText}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s3)', flexShrink: 0 }}>
+                    <span className="mono" style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--signal)' }}>
+                      {formatDayDate(evt.event_date)}
                     </span>
-                    <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
-                      View Details →
-                    </span>
+                    <span style={{ color: 'var(--dim)', fontSize: '0.85rem' }}>→</span>
                   </div>
                 </div>
               );

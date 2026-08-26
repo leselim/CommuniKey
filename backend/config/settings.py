@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.announcements',
     'apps.events',
     'apps.emergency',
+    'apps.analytics',
 ]
 
 MIDDLEWARE = [

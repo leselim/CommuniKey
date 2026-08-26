@@ -148,4 +148,16 @@ class Command(BaseCommand):
         for ev in events:
             Event.objects.get_or_create(title=ev['title'], defaults={'community': community, **ev})
 
+        # Seed Audit Logs
+        from apps.analytics.models import AuditLog
+        audit_entries = [
+            {'user_name': 'Marcus Vance', 'role': 'Estate Administrator', 'action': 'ANNOUNCEMENT_PUBLISHED', 'category': 'Announcements', 'details': 'Published Neighbourhood Watch general meeting notice', 'status': 'Success'},
+            {'user_name': 'Thabo Mokoena', 'role': 'Resident', 'action': 'INCIDENT_REPORTED', 'category': 'Incidents', 'details': 'Reported suspicious vehicle on Riverside Drive', 'status': 'Under Review'},
+            {'user_name': 'Sarah Jenkins', 'role': 'Safety Volunteer', 'action': 'SOS_TRIGGERED', 'category': 'Emergency', 'details': 'Dispatched night patrol team to Section B', 'status': 'Resolved'},
+            {'user_name': 'Kobus van der Merwe', 'role': 'Resident', 'action': 'USER_REGISTRATION', 'category': 'Membership', 'details': 'Submitted ID & Municipal Water Bill verification', 'status': 'Pending Verification'},
+            {'user_name': 'Amina Patel', 'role': 'Resident', 'action': 'USER_REGISTRATION', 'category': 'Membership', 'details': 'Submitted Lease Agreement for 5 Riverside Dr', 'status': 'Pending Verification'},
+        ]
+        for log_data in audit_entries:
+            AuditLog.objects.get_or_create(details=log_data['details'], defaults=log_data)
+
         self.stdout.write(self.style.SUCCESS("Database seeding completed successfully."))

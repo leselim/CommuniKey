@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import AdminDashboard from './pages/AdminDashboard';
 import Announcements from './pages/Announcements';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
@@ -66,7 +67,7 @@ function App() {
                   path="/admin"
                   element={
                     <ProtectedRoute allowedRoles={['Estate Administrator']}>
-                      <Dashboard />
+                      <AdminDashboard />
                     </ProtectedRoute>
                   }
                 />

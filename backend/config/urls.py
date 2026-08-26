@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/v1/announcements/', include('apps.announcements.urls')),
     path('api/v1/events/', include('apps.events.urls')),
     path('api/v1/emergency/', include('apps.emergency.urls')),
+    path('api/v1/analytics/', include('apps.analytics.urls')),
 ]

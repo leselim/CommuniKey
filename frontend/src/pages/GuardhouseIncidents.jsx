@@ -6,7 +6,7 @@ const INITIAL_GUARD_LOGS = [
     id: 'g-log-1',
     timestamp: '18:32:10',
     eventId: 'EV-402',
-    type: 'Tailgating Breach',
+    type: 'Tailgating breach',
     category: 'Gate Breaches',
     details: 'Main Boom Gate 01 · Unregistered Silver Sedan',
     status: 'FLAGGED',
@@ -15,7 +15,7 @@ const INITIAL_GUARD_LOGS = [
     id: 'g-log-2',
     timestamp: '16:45:00',
     eventId: 'EV-388',
-    type: 'Expired Pass Rejected',
+    type: 'Expired pass rejected',
     category: 'Access Denied',
     details: 'Terminal 01 · Host: Unit 08',
     status: 'REJECTED',
@@ -24,7 +24,7 @@ const INITIAL_GUARD_LOGS = [
     id: 'g-log-3',
     timestamp: '15:10:42',
     eventId: 'EV-341',
-    type: 'Manual Gate Release',
+    type: 'Manual gate release',
     category: 'Access Denied',
     details: 'Gate 01 · Authorized by Marcus V.',
     status: 'RESOLVED',
@@ -33,31 +33,48 @@ const INITIAL_GUARD_LOGS = [
     id: 'g-log-4',
     timestamp: '12:20:05',
     eventId: 'EV-209',
-    type: 'Perimeter Sensor Trigger',
+    type: 'Perimeter sensor trigger',
     category: 'Perimeter',
     details: 'Sector 4 East Fence · Inspected by Sarah J.',
     status: 'RESOLVED',
   },
 ];
 
-const FILTER_TABS = ['All Events', 'Gate Breaches', 'Access Denied', 'Perimeter'];
+const FILTER_TABS = [
+  { key: 'All Events', label: 'All' },
+  { key: 'Gate Breaches', label: 'Gate Breaches' },
+  { key: 'Access Denied', label: 'Access Denied' },
+  { key: 'Perimeter', label: 'Perimeter' },
+];
 
 const EVENT_TYPES = [
-  'Access Denial / Expired Credential',
-  'Gate Barrier Tailgating / Forced Entry',
-  'Suspicious Vehicle / Loitering',
-  'Perimeter Breach / Fence Line Trigger',
-  'Emergency Vehicle Rapid Dispatch',
+  'Access denial / expired credential',
+  'Gate barrier tailgating / forced entry',
+  'Suspicious vehicle / loitering',
+  'Perimeter breach / fence line trigger',
+  'Emergency vehicle rapid dispatch',
 ];
 
 const renderStatusCell = (status) => {
   if (status === 'FLAGGED') {
-    return <span style={{ color: '#f87171', fontWeight: 600, fontSize: '0.78rem' }}>• FLAGGED</span>;
+    return (
+      <span className="mono sm" style={{ color: '#fb7185', fontWeight: 600, fontSize: '0.72rem', letterSpacing: '0.05em' }}>
+        • FLAGGED
+      </span>
+    );
   }
   if (status === 'REJECTED') {
-    return <span style={{ color: '#fbbf24', fontWeight: 600, fontSize: '0.78rem' }}>• REJECTED</span>;
+    return (
+      <span className="mono sm" style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.72rem', letterSpacing: '0.05em' }}>
+        • REJECTED
+      </span>
+    );
   }
-  return <span style={{ color: '#34d399', fontWeight: 600, fontSize: '0.78rem' }}>• RESOLVED</span>;
+  return (
+    <span className="mono sm" style={{ color: '#a3a3a3', fontWeight: 600, fontSize: '0.72rem', letterSpacing: '0.05em' }}>
+      • RESOLVED
+    </span>
+  );
 };
 
 function GuardhouseIncidents() {
@@ -72,9 +89,9 @@ function GuardhouseIncidents() {
   const [plateInput, setPlateInput] = useState('');
   const [notesInput, setNotesInput] = useState('');
 
-  const countByTab = (tab) => {
-    if (tab === 'All Events') return logs.length;
-    return logs.filter((l) => l.category === tab).length;
+  const countByTab = (tabKey) => {
+    if (tabKey === 'All Events') return logs.length;
+    return logs.filter((l) => l.category === tabKey).length;
   };
 
   const filteredLogs = logs.filter((l) => {
@@ -87,8 +104,8 @@ function GuardhouseIncidents() {
     if (!notesInput.trim()) return;
 
     let category = 'Access Denied';
-    if (eventType.includes('Tailgating') || eventType.includes('Entry')) category = 'Gate Breaches';
-    if (eventType.includes('Perimeter')) category = 'Perimeter';
+    if (eventType.toLowerCase().includes('tailgating') || eventType.toLowerCase().includes('entry')) category = 'Gate Breaches';
+    if (eventType.toLowerCase().includes('perimeter')) category = 'Perimeter';
 
     const newIdNum = 400 + Math.floor(Math.random() * 100);
     const newEntry = {
@@ -136,29 +153,32 @@ function GuardhouseIncidents() {
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* FILTER TABS */}
-      <div className="cluster" style={{ gap: 'var(--s2)', borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s2)' }}>
+      {/* FILTER TABS SUB-NAVIGATION */}
+      <div className="filter" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 0, gap: 'var(--s3)' }}>
         {FILTER_TABS.map((tab) => {
-          const isActive = activeTab === tab;
-          const count = countByTab(tab);
+          const isActive = activeTab === tab.key;
+          const count = countByTab(tab.key);
           return (
             <button
-              key={tab}
+              key={tab.key}
               type="button"
-              onClick={() => setActiveTab(tab)}
+              className={`filter-item${isActive ? ' on' : ''}`}
+              onClick={() => setActiveTab(tab.key)}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.8rem',
-                fontWeight: isActive ? 600 : 400,
-                border: 'none',
-                borderRadius: '4px',
-                backgroundColor: isActive ? 'var(--panel-hi)' : 'transparent',
+                borderRadius: 0,
+                backgroundColor: 'transparent',
+                borderBottom: isActive ? '2px solid var(--paper)' : '2px solid transparent',
+                paddingBottom: '0.5rem',
                 color: isActive ? 'var(--paper)' : 'var(--dim)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                fontWeight: isActive ? 600 : 400,
+                borderTop: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
+                boxShadow: 'none',
               }}
             >
-              {tab} ({count})
+              {tab.label}
+              <span className="mono"> {count}</span>
             </button>
           );
         })}
@@ -179,11 +199,11 @@ function GuardhouseIncidents() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--line-hi)', color: 'var(--dim)' }}>
-                <th style={{ padding: '8px' }}>TIMESTAMP</th>
-                <th style={{ padding: '8px' }}>EVENT ID</th>
-                <th style={{ padding: '8px' }}>INCIDENT TYPE</th>
-                <th style={{ padding: '8px' }}>DETAILS & LOCATION</th>
-                <th style={{ padding: '8px' }}>STATUS</th>
+                <th style={{ padding: '10px 8px' }}>TIMESTAMP</th>
+                <th style={{ padding: '10px 8px' }}>EVENT ID</th>
+                <th style={{ padding: '10px 8px' }}>INCIDENT TYPE</th>
+                <th style={{ padding: '10px 8px' }}>DETAILS & LOCATION</th>
+                <th style={{ padding: '10px 8px' }}>STATUS</th>
               </tr>
             </thead>
             <tbody>
@@ -196,11 +216,11 @@ function GuardhouseIncidents() {
               ) : (
                 filteredLogs.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid var(--line-hi)' }}>
-                    <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{item.timestamp}</td>
-                    <td className="mono" style={{ padding: '10px 8px', color: 'var(--signal)', fontWeight: 600, cursor: 'pointer' }}>{item.eventId}</td>
-                    <td style={{ padding: '10px 8px', color: 'var(--paper)', fontWeight: 500 }}>{item.type}</td>
-                    <td style={{ padding: '10px 8px', color: 'var(--dim)' }}>{item.details}</td>
-                    <td style={{ padding: '10px 8px' }}>{renderStatusCell(item.status)}</td>
+                    <td className="mono" style={{ padding: '12px 8px', color: 'var(--paper)' }}>{item.timestamp}</td>
+                    <td className="mono" style={{ padding: '12px 8px', color: 'var(--dim)', fontSize: '0.8rem' }}>{item.eventId}</td>
+                    <td style={{ padding: '12px 8px', color: 'var(--paper)', fontWeight: 500 }}>{item.type}</td>
+                    <td style={{ padding: '12px 8px', color: 'var(--dim)' }}>{item.details}</td>
+                    <td style={{ padding: '12px 8px' }}>{renderStatusCell(item.status)}</td>
                   </tr>
                 ))
               )}

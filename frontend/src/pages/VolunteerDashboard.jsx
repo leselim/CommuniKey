@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
+import PlatformGuideModal from '../components/PlatformGuideModal';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -27,6 +28,7 @@ function VolunteerDashboard() {
 
   const [emergencyState, setEmergencyState] = useState('Dispatched');
   const [notice, setNotice] = useState('');
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   const handleResponderAction = (actionName) => {
     setEmergencyState(actionName);
@@ -140,7 +142,31 @@ function VolunteerDashboard() {
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
         <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <div>
-            <p className="eyebrow">Triage Feed</p>
+            <div className="cluster" style={{ gap: '8px', alignItems: 'center' }}>
+              <p className="eyebrow" style={{ margin: 0 }}>Triage Feed</p>
+              <button
+                type="button"
+                className="link sm"
+                style={{
+                  color: 'var(--dim)',
+                  fontSize: '0.7rem',
+                  textDecoration: 'none',
+                  border: '1px solid var(--line-hi)',
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setGuideModalOpen(true)}
+                title="View Status & Role Guide"
+              >
+                ?
+              </button>
+            </div>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
               Incoming Incident Reports Requiring Dispatch
             </h2>
@@ -256,6 +282,8 @@ function VolunteerDashboard() {
           </ul>
         </section>
       </div>
+
+      <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
     </div>
   );
 }

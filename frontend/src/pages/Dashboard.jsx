@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 import SOSButton from '../components/SOSButton';
 import StatusBadge from '../components/StatusBadge';
+import PlatformGuideModal from '../components/PlatformGuideModal';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -91,6 +92,7 @@ function Dashboard() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpState, setRsvpState] = useState({});
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   const announcements = useCollection('/announcements', demoAnnouncements);
   const incidents = useCollection('/incidents', demoIncidents);
@@ -246,9 +248,33 @@ function Dashboard() {
         >
           <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
             <div>
-              <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-                MY ACTIVITY & REQUESTS
-              </p>
+              <div className="cluster" style={{ gap: '8px', alignItems: 'center' }}>
+                <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
+                  MY ACTIVITY & REQUESTS
+                </p>
+                <button
+                  type="button"
+                  className="link sm"
+                  style={{
+                    color: 'var(--dim)',
+                    fontSize: '0.7rem',
+                    textDecoration: 'none',
+                    border: '1px solid var(--line-hi)',
+                    borderRadius: '50%',
+                    width: '16px',
+                    height: '16px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setGuideModalOpen(true)}
+                  title="View Status & Role Guide"
+                >
+                  ?
+                </button>
+              </div>
               <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                 My Gate Passes & Maintenance Reports
               </h2>
@@ -580,6 +606,8 @@ function Dashboard() {
           )}
         </Modal>
       ) : null}
+
+      <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
     </div>
   );
 }

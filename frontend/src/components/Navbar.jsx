@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 import Notifications from './Notifications';
+import PlatformGuideModal from './PlatformGuideModal';
 
 const ROLE_NAV = {
   Resident: [
@@ -36,6 +37,7 @@ function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
   const menuRef = useRef(null);
 
   const isAuthPage = ['/signin', '/login', '/signup', '/forgot-password'].includes(
@@ -181,6 +183,18 @@ function Navbar() {
 
                   <button
                     type="button"
+                    className="btn"
+                    style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.78rem', padding: '0.35rem 0.5rem' }}
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      setGuideModalOpen(true);
+                    }}
+                  >
+                    Platform & Status Guide
+                  </button>
+
+                  <button
+                    type="button"
                     className="btn btn-solid"
                     style={{ width: '100%', justifyContent: 'center', fontSize: '0.78rem', padding: '0.35rem 0.5rem' }}
                     onClick={handleLogout}
@@ -203,6 +217,8 @@ function Navbar() {
           </button>
         </div>
       </div>
+
+      <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
     </header>
   );
 }

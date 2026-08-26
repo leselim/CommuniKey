@@ -397,9 +397,6 @@ function AdminDashboard() {
             <button type="button" className="btn btn-solid" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => setBroadcastModal(true)}>
               Draft & Publish Broadcast
             </button>
-            <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => setGuardhouseModalOpen(true)}>
-              Verify Gate Pass
-            </button>
             <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => navigate('/admin/incidents')}>
               Incident Triage
             </button>

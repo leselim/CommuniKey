@@ -28,6 +28,11 @@ const ROLE_NAV = {
     { to: '/admin/moderation', label: 'Moderation' },
     { to: '/admin/messages', label: 'Communications' },
   ],
+  'Security Guard': [
+    { to: '/', label: 'Terminal' },
+    { to: '/messages', label: 'Communications' },
+    { to: '/incidents', label: 'Incident Log' },
+  ],
 };
 
 function Navbar() {

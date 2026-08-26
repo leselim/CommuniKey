@@ -44,6 +44,20 @@ export const SAMPLE_USERS = [
     phone_number: '+27 83 456 7890',
     status: 'Verified',
   },
+  {
+    id: 4,
+    email: 'sipho@example.com',
+    aliases: ['guard@example.com', 'sipho@example.com', 'security@example.com'],
+    password: SEED_PASSWORD,
+    first_name: 'Sipho',
+    last_name: 'Dlamini',
+    role: 'Security Guard',
+    address: 'Main Guardhouse Terminal 01',
+    community_name: 'Riverside Estate',
+    phone_number: '+27 84 999 1122',
+    status: 'Verified',
+    station: 'Main Guardhouse Terminal 01',
+  },
 ];
 
 const AUTH_USER_KEY = 'ccp_auth_user';

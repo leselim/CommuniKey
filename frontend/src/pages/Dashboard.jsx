@@ -17,6 +17,7 @@ import { formatDayDate, formatRelative } from '../utils/format';
 import AdminDashboard from './AdminDashboard';
 import SysAdminDashboard from './SysAdminDashboard';
 import VolunteerDashboard from './VolunteerDashboard';
+import GuardhouseDashboard from './GuardhouseDashboard';
 
 const MY_REQUESTS = [
   {
@@ -106,6 +107,10 @@ function Dashboard() {
 
   if (userRole === 'Safety Volunteer') {
     return <VolunteerDashboard />;
+  }
+
+  if (userRole === 'Security Guard') {
+    return <GuardhouseDashboard />;
   }
 
   if (userRole === 'System Administrator') {

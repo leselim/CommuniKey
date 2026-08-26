@@ -132,7 +132,7 @@ const INITIAL_SCANS = [
     id: 'scan-5',
     timestamp: '12:20:05',
     name: 'City Power Dispatcher',
-    category: 'Utility / Service',
+    category: 'Utility',
     host: 'Estate Management Office',
     vehicle: 'B329 GP',
     code: 'CK-901',
@@ -449,7 +449,8 @@ function GuardhouseDashboard() {
               <tr style={{ borderBottom: '1px solid var(--line-hi)', color: 'var(--dim)' }}>
                 <th style={{ padding: '8px' }}>TIMESTAMP</th>
                 <th style={{ padding: '8px' }}>CODE</th>
-                <th style={{ padding: '8px' }}>VISITOR / CONTRACTOR</th>
+                <th style={{ padding: '8px' }}>VISITOR</th>
+                <th style={{ padding: '8px' }}>TYPE</th>
                 <th style={{ padding: '8px' }}>RESIDENT HOST</th>
                 <th style={{ padding: '8px' }}>VEHICLE REG</th>
                 <th style={{ padding: '8px' }}>STATUS</th>
@@ -460,27 +461,8 @@ function GuardhouseDashboard() {
                 <tr key={scan.id} style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{scan.timestamp}</td>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--signal)', fontWeight: 600 }}>{scan.code}</td>
-                  <td style={{ padding: '10px 8px' }}>
-                    <div style={{ fontWeight: 500, color: 'var(--paper)', fontSize: '0.82rem' }}>
-                      {scan.name || scan.visitor}
-                    </div>
-                    <div style={{ marginTop: '2px' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          padding: '1px 6px',
-                          borderRadius: '3px',
-                          backgroundColor: 'var(--ink)',
-                          border: '1px solid var(--line-hi)',
-                          color: 'var(--dim)',
-                          fontSize: '0.68rem',
-                          fontFamily: 'monospace',
-                        }}
-                      >
-                        {scan.category || 'Guest'}
-                      </span>
-                    </div>
-                  </td>
+                  <td style={{ padding: '10px 8px', color: 'var(--paper)', fontWeight: 500 }}>{scan.name || scan.visitor}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--dim)' }}>{scan.category || scan.type || 'Guest'}</td>
                   <td style={{ padding: '10px 8px', color: 'var(--dim)' }}>{scan.host}</td>
                   <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{scan.vehicle}</td>
                   <td style={{ padding: '10px 8px' }}>

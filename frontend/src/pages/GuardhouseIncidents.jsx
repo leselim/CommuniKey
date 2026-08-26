@@ -4,83 +4,60 @@ import Modal from '../components/Modal';
 const INITIAL_GUARD_LOGS = [
   {
     id: 'g-log-1',
-    title: 'Tailgating Attempt Flagged',
+    timestamp: '18:32:10',
+    eventId: 'EV-402',
+    type: 'Tailgating Breach',
     category: 'Gate Breaches',
-    details: 'Main Boom Gate 01 · Vehicle: Silver Sedan (Unregistered)',
-    outcome: 'Flagged & Intercepted',
-    timestamp: '20 mins ago',
-    reporterShort: 'Sipho D.',
+    details: 'Main Boom Gate 01 · Unregistered Silver Sedan',
+    status: 'FLAGGED',
   },
   {
     id: 'g-log-2',
-    title: 'Expired Pass Rejected',
+    timestamp: '16:45:00',
+    eventId: 'EV-388',
+    type: 'Expired Pass Rejected',
     category: 'Access Denied',
-    details: 'Visitor code 771-304 rejected at Terminal 01 · Host: Unit 08',
-    outcome: 'Turned Away',
-    timestamp: '1 hour ago',
-    reporterShort: 'Sipho D.',
+    details: 'Terminal 01 · Host: Unit 08',
+    status: 'REJECTED',
   },
   {
     id: 'g-log-3',
-    title: 'Manual Override Logged',
+    timestamp: '15:10:42',
+    eventId: 'EV-341',
+    type: 'Manual Gate Release',
     category: 'Access Denied',
-    details: 'Resident pass 492-801 manually authorized by Admin Marcus',
-    outcome: 'Approved',
-    timestamp: '2 hours ago',
-    reporterShort: 'Marcus V.',
+    details: 'Gate 01 · Authorized by Marcus V.',
+    status: 'RESOLVED',
   },
   {
     id: 'g-log-4',
-    title: 'Perimeter Sensor Trigger',
+    timestamp: '12:20:05',
+    eventId: 'EV-209',
+    type: 'Perimeter Sensor Trigger',
     category: 'Perimeter',
-    details: 'Sector 4 East Fence · Inspected by Patrol Volunteer Sarah',
-    outcome: 'Cleared',
-    timestamp: 'Yesterday',
-    reporterShort: 'Sarah J.',
+    details: 'Sector 4 East Fence · Inspected by Sarah J.',
+    status: 'RESOLVED',
   },
 ];
 
 const FILTER_TABS = ['All Events', 'Gate Breaches', 'Access Denied', 'Perimeter'];
 
 const EVENT_TYPES = [
-  'Tailgating',
-  'Invalid Access Attempt',
-  'Physical Barrier Issue',
-  'Suspicious Vehicle',
+  'Tailgating Breach',
+  'Expired Pass Rejected',
+  'Manual Gate Release',
+  'Perimeter Sensor Trigger',
+  'Suspicious Vehicle Flagged',
 ];
 
-const getStatusPillStyle = (outcome) => {
-  if (outcome === 'Flagged & Intercepted' || outcome.includes('Flagged')) {
-    return {
-      color: '#f87171',
-      backgroundColor: 'rgba(153, 27, 27, 0.25)',
-      border: '1px solid rgba(239, 68, 68, 0.3)',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      fontSize: '0.75rem',
-      fontWeight: 500,
-    };
+const renderStatusCell = (status) => {
+  if (status === 'FLAGGED') {
+    return <span style={{ color: '#f87171', fontWeight: 600, fontSize: '0.78rem' }}>• FLAGGED</span>;
   }
-  if (outcome === 'Turned Away' || outcome.includes('Denied') || outcome.includes('Rejected')) {
-    return {
-      color: '#fbbf24',
-      backgroundColor: 'rgba(146, 64, 14, 0.25)',
-      border: '1px solid rgba(245, 158, 11, 0.3)',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      fontSize: '0.75rem',
-      fontWeight: 500,
-    };
+  if (status === 'REJECTED') {
+    return <span style={{ color: '#fbbf24', fontWeight: 600, fontSize: '0.78rem' }}>• REJECTED</span>;
   }
-  return {
-    color: '#a3a3a3',
-    backgroundColor: 'rgba(38, 38, 38, 0.4)',
-    border: '1px solid rgba(64, 64, 64, 0.4)',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '0.75rem',
-    fontWeight: 500,
-  };
+  return <span style={{ color: '#34d399', fontWeight: 600, fontSize: '0.78rem' }}>• RESOLVED</span>;
 };
 
 function GuardhouseIncidents() {
@@ -110,17 +87,18 @@ function GuardhouseIncidents() {
     if (!notesInput.trim()) return;
 
     let category = 'Access Denied';
-    if (eventType === 'Tailgating') category = 'Gate Breaches';
-    if (eventType === 'Physical Barrier Issue') category = 'Perimeter';
+    if (eventType.includes('Tailgating')) category = 'Gate Breaches';
+    if (eventType.includes('Perimeter')) category = 'Perimeter';
 
+    const newIdNum = 400 + Math.floor(Math.random() * 100);
     const newEntry = {
       id: `g-log-${Date.now()}`,
-      title: `${eventType} Event Logged`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      eventId: `EV-${newIdNum}`,
+      type: eventType,
       category: category,
       details: `${locationInput.trim()} · ${notesInput.trim()}${plateInput ? ` · Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
-      outcome: 'Flagged & Intercepted',
-      timestamp: 'Just now',
-      reporterShort: 'Sipho D.',
+      status: 'FLAGGED',
     };
 
     setLogs([newEntry, ...logs]);
@@ -133,14 +111,14 @@ function GuardhouseIncidents() {
 
   return (
     <div className="stack" style={{ gap: 'var(--s5)' }}>
-      {/* HEADER */}
+      {/* PAGE HEADER */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
           <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
-            Security & Access Incidents
+            Security & Access Log
           </h1>
           <p className="masthead-meta" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0' }}>
-            Main Gate 01 operational activity and flagged events.
+            Operational records, flagged access attempts, and barrier events for Gate 01.
           </p>
         </div>
 
@@ -151,7 +129,7 @@ function GuardhouseIncidents() {
             onClick={() => setModalOpen(true)}
             style={{ fontWeight: 600 }}
           >
-            + Log Incident
+            [ + Log Event ]
           </button>
         </div>
       </header>
@@ -186,58 +164,55 @@ function GuardhouseIncidents() {
         })}
       </div>
 
-      {/* LOG FEED CARDS */}
-      <section className="stack" style={{ gap: 'var(--s3)' }}>
-        {filteredLogs.length === 0 ? (
-          <div className="panel" style={{ padding: 'var(--s5)', textAlign: 'center', color: 'var(--dim)' }}>
-            No security logs recorded in category "{activeTab}".
-          </div>
-        ) : (
-          filteredLogs.map((item) => (
-            <article
-              key={item.id}
-              className="panel"
-              style={{
-                padding: 'var(--s4)',
-                border: '1px solid var(--line-hi)',
-                backgroundColor: 'var(--panel-hi)',
-                borderRadius: '6px',
-              }}
-            >
-              {/* TOP ROW */}
-              <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--s2)' }}>
-                <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                    {item.title}
-                  </h3>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--dim)', fontWeight: 400 }}>
-                    {item.category}
-                  </span>
-                </div>
+      {/* RECENT SECURITY LOG DATA TABLE */}
+      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s3)' }}>
+          <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
+            RECENT SECURITY & ACCESS EVENTS (MAIN GATE 01)
+          </p>
+          <span className="mono sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>
+            Live Audit Stream
+          </span>
+        </div>
 
-                <span style={getStatusPillStyle(item.outcome)}>
-                  {item.outcome}
-                </span>
-              </div>
-
-              {/* MIDDLE ROW SUMMARY */}
-              <p style={{ color: 'var(--paper)', fontSize: '0.88rem', margin: '0 0 var(--s2) 0', lineHeight: 1.5 }}>
-                {item.details}
-              </p>
-
-              {/* BOTTOM ROW TIMESTAMP & REPORTER */}
-              <div className="cluster" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
-                <span>{item.timestamp} · Logged by {item.reporterShort || 'Sipho D.'}</span>
-              </div>
-            </article>
-          ))
-        )}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--line-hi)', color: 'var(--dim)' }}>
+                <th style={{ padding: '8px' }}>TIMESTAMP</th>
+                <th style={{ padding: '8px' }}>EVENT ID</th>
+                <th style={{ padding: '8px' }}>INCIDENT TYPE</th>
+                <th style={{ padding: '8px' }}>DETAILS & LOCATION</th>
+                <th style={{ padding: '8px' }}>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ padding: 'var(--s5)', textAlign: 'center', color: 'var(--dim)' }}>
+                    No security events recorded in category "{activeTab}".
+                  </td>
+                </tr>
+              ) : (
+                filteredLogs.map((item) => (
+                  <tr key={item.id} style={{ borderBottom: '1px solid var(--line-hi)' }}>
+                    <td className="mono" style={{ padding: '10px 8px', color: 'var(--paper)' }}>{item.timestamp}</td>
+                    <td className="mono" style={{ padding: '10px 8px', color: 'var(--signal)', fontWeight: 600, cursor: 'pointer' }}>{item.eventId}</td>
+                    <td style={{ padding: '10px 8px', color: 'var(--paper)', fontWeight: 500 }}>{item.type}</td>
+                    <td style={{ padding: '10px 8px', color: 'var(--dim)' }}>{item.details}</td>
+                    <td style={{ padding: '10px 8px' }}>{renderStatusCell(item.status)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      {/* LOG SECURITY EVENT MODAL */}
+      {/* LOG EVENT MODAL */}
       {modalOpen ? (
         <Modal
-          title="Log Incident"
+          title="Log Event"
           onClose={() => setModalOpen(false)}
           footer={
             <div className="cluster" style={{ justifyContent: 'flex-end', gap: 'var(--s2)' }}>
@@ -245,7 +220,7 @@ function GuardhouseIncidents() {
                 Cancel
               </button>
               <button type="submit" form="sec-log-modal-form" className="btn btn-solid">
-                Submit Log Entry
+                [ Submit Event Log ]
               </button>
             </div>
           }
@@ -254,7 +229,7 @@ function GuardhouseIncidents() {
             <div className="stack" style={{ gap: 'var(--s3)' }}>
               <div className="field">
                 <label className="eyebrow" htmlFor="log-event-type">
-                  Event Type *
+                  Event Type
                 </label>
                 <select
                   id="log-event-type"
@@ -271,7 +246,7 @@ function GuardhouseIncidents() {
 
               <div className="field">
                 <label className="eyebrow" htmlFor="log-loc">
-                  Location / Gate *
+                  Location / Gate
                 </label>
                 <input
                   id="log-loc"
@@ -301,7 +276,7 @@ function GuardhouseIncidents() {
 
               <div className="field">
                 <label className="eyebrow" htmlFor="log-notes">
-                  Notes & Incident Description *
+                  Notes & Incident Description
                 </label>
                 <textarea
                   id="log-notes"

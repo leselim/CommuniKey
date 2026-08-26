@@ -378,7 +378,7 @@ function Dashboard() {
                       {title}
                     </span>
                     <span style={{ fontSize: '0.7rem', color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                      {venue} · {attendeesCount} attending
+                      {venue} | {attendeesCount} attending
                     </span>
                   </div>
 

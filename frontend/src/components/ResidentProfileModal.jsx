@@ -140,7 +140,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
             </div>
 
             <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.78rem' }}>
-              {assignedArea} · Member since {member.joined_date || 'Jan 2024'}
+              {assignedArea} | Member since {member.joined_date || 'Jan 2024'}
             </p>
           </div>
         </div>

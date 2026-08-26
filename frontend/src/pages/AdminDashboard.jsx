@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +9,6 @@ import {
   announcements as demoAnnouncements,
   community,
   incidents as demoIncidents,
-  members as demoMembers,
 } from '../services/demoData';
 
 const PENDING_REGISTRATIONS = [
@@ -32,27 +32,6 @@ const PENDING_REGISTRATIONS = [
   },
 ];
 
-const FACILITY_BOOKINGS = [
-  {
-    id: 1,
-    facility: 'Clubhouse Hall',
-    bookedBy: 'Thabo Mokoena',
-    date: '28 AUG (14:00 - 18:00)',
-    time: '14:00 to 18:00',
-    purpose: 'Family Gathering & Birthday Event',
-    status: 'Approved',
-  },
-  {
-    id: 2,
-    facility: 'Tennis Court B',
-    bookedBy: 'Sarah Jenkins',
-    date: '25 AUG (09:00 - 11:00)',
-    time: '09:00 to 11:00',
-    purpose: 'Neighborhood Tournament Practice',
-    status: 'Approved',
-  },
-];
-
 const DEFAULT_AUDIT_LOGS = [
   { id: 1, timestamp: '2026-08-26 09:30', user_name: 'Marcus Vance', role: 'Estate Administrator', action: 'ANNOUNCEMENT_PUBLISHED', category: 'Announcements', status: 'Success', details: 'Published Neighbourhood Watch notice' },
   { id: 2, timestamp: '2026-08-26 08:15', user_name: 'Thabo Mokoena', role: 'Resident', action: 'INCIDENT_REPORTED', category: 'Incidents', status: 'Under Review', details: 'Reported streetlight fault on Mill Road' },
@@ -62,12 +41,17 @@ const DEFAULT_AUDIT_LOGS = [
 ];
 
 function AdminDashboard() {
-  const { currentUser, userRole } = useAuth();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const { items: incidentList } = useCollection('/incidents', demoIncidents);
   const { create: createAnnouncement } = useCollection('/announcements', demoAnnouncements);
 
   const [datePeriod, setDatePeriod] = useState('30d');
+  const [granularity, setGranularity] = useState('daily');
+  const [customRange, setCustomRange] = useState({ start: '2026-08-01', end: '2026-08-26' });
+  const [customModalOpen, setCustomModalOpen] = useState(false);
+
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [analyticsData, setAnalyticsData] = useState(null);
 
@@ -77,12 +61,10 @@ function AdminDashboard() {
   const [logPage, setLogPage] = useState(1);
 
   const [pendingQueue, setPendingQueue] = useState(PENDING_REGISTRATIONS);
-  const [bookingList, setBookingList] = useState(FACILITY_BOOKINGS);
 
   // Modals
   const [broadcastModal, setBroadcastModal] = useState(false);
   const [reviewDocModal, setReviewDocModal] = useState(null);
-  const [manageBookingModal, setManageBookingModal] = useState(null);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -95,10 +77,17 @@ function AdminDashboard() {
     async function loadAnalytics() {
       setLoadingAnalytics(true);
       try {
-        const res = await api.get(`/analytics/overview?period=${datePeriod}`);
+        let url = `/analytics/overview?period=${datePeriod}&granularity=${granularity}`;
+        if (datePeriod === 'custom') {
+          url += `&start_date=${customRange.start}&end_date=${customRange.end}`;
+        }
+        const res = await api.get(url);
         const data = unwrap(res);
         if (isMounted && data && data.metrics) {
           setAnalyticsData(data);
+          if (data.granularity && !granularity) {
+            setGranularity(data.granularity);
+          }
         }
       } catch (err) {
         // Fallback gracefully
@@ -108,7 +97,7 @@ function AdminDashboard() {
     }
     loadAnalytics();
     return () => { isMounted = false; };
-  }, [datePeriod]);
+  }, [datePeriod, granularity, customRange]);
 
   // Fetch Activity Logs
   useEffect(() => {
@@ -133,12 +122,11 @@ function AdminDashboard() {
     user_growth_pct: 12.4,
     resolution_rate: 71.4,
     total_incidents: incidentList.length || 7,
+    open_incidents: 2,
     resolved_incidents: incidentList.filter((i) => i.status === 'Resolved').length || 5,
     incident_change_pct: 4.2,
     pending_verifications: pendingQueue.length,
     active_sos_alerts: 0,
-    total_announcements: 3,
-    total_events: 3,
   };
 
   const timeline = analyticsData?.activity_timeline || [
@@ -154,11 +142,9 @@ function AdminDashboard() {
     api_request_volume: '14,280 requests/day',
     api_success_rate: 99.8,
     avg_response_latency_ms: 42,
-    error_rate_pct: 0.2,
     database_engine: 'PostgreSQL / SQLite Managed',
     db_connection_pool: '18 / 50 active',
-    background_jobs_status: 'Healthy (0 queued, 142 processed)',
-    data_pipeline_aggregation: 'Real-time server-side database view',
+    data_pipeline_aggregation: 'Server-side view query',
   };
 
   const roleDist = analyticsData?.role_distribution || [
@@ -166,6 +152,15 @@ function AdminDashboard() {
     { role: 'Safety Volunteers', count: 32, percentage: 12.9 },
     { role: 'Estate Admins', count: 6, percentage: 2.4 },
   ];
+
+  const attentionItems = analyticsData?.attention_items || [
+    { id: 1, type: 'Pending Verification', severity: 'medium', title: `${pendingQueue.length} Resident Applications`, description: 'Verification documents awaiting review.', link: '/admin/moderation' },
+    { id: 2, type: 'Open Incidents', severity: 'low', title: `${metrics.open_incidents} Unresolved Incidents`, description: 'Incidents logged on Riverside Drive.', link: '/admin/incidents' },
+  ];
+
+  const dateRangeDisplay = analyticsData?.date_range
+    ? `${analyticsData.date_range.start} – ${analyticsData.date_range.end}`
+    : 'Aug 01, 2026 – Aug 26, 2026';
 
   const handleApproveMember = (memberId) => {
     setPendingQueue((prev) => prev.filter((m) => m.id !== memberId));
@@ -214,81 +209,142 @@ function AdminDashboard() {
   const totalLogPages = Math.ceil(filteredLogs.length / PAGE_SIZE) || 1;
   const currentLogs = filteredLogs.slice((logPage - 1) * PAGE_SIZE, logPage * PAGE_SIZE);
 
-  // SVG Activity Chart Dimensions & Scaling
+  // SVG Activity Chart Dimensions
   const maxActivityVal = Math.max(...timeline.map((t) => t.total_activity || 1), 15);
   const chartHeight = 160;
   const chartWidth = 520;
 
   return (
     <div className="stack" style={{ gap: 'var(--s5)' }}>
-      {/* SECTION 1: Masthead & Controls */}
+      {/* SECTION 1: Clean Administrator Header */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
           <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
-            ESTATE OPERATIONS & ANALYTICS CONTROL
+            {community.community_name.toUpperCase()}
           </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 'var(--s1) 0' }}>
-            {community.community_name} Administrator Analytics
+            Administrator Dashboard
           </h1>
           <p className="masthead-meta" style={{ color: 'var(--dim)' }}>
-            Authenticated as <strong>{currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Marcus Vance'}</strong> ({userRole || 'Estate Administrator'})
+            Monitor operations, platform activity, and community performance.
           </p>
         </div>
+      </header>
 
-        {/* Date Filter & Action Cluster */}
+      {notice ? <p className="notice">{notice}</p> : null}
+
+      {/* SECTION 2: Dedicated Quick Actions Bar */}
+      <section className="panel" style={{ padding: 'var(--s3) var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel-hi)' }}>
+        <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--s3)' }}>
+          <span className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+            QUICK ACTIONS
+          </span>
+          <div className="cluster" style={{ gap: 'var(--s2)', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-solid" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => setBroadcastModal(true)}>
+              Draft & Publish Broadcast
+            </button>
+            <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => navigate('/admin/incidents')}>
+              Incident Triage
+            </button>
+            <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => navigate('/admin/moderation')}>
+              Member Verification
+            </button>
+            <button type="button" className="btn" style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }} onClick={() => navigate('/admin/events')}>
+              Schedule Event
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Analytics Controls (Date Range & Time Granularity) */}
+      <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--s3)', backgroundColor: 'var(--panel)', padding: 'var(--s3) var(--s4)', border: '1px solid var(--line-hi)', borderRadius: '4px' }}>
+        {/* Left: Active Date Range Label & Period Tabs */}
         <div className="cluster" style={{ gap: 'var(--s3)', alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Date Selector Pills */}
+          <span className="mono sm" style={{ color: 'var(--paper)', fontSize: '0.75rem', fontWeight: 600 }}>
+            {dateRangeDisplay}
+          </span>
+
           <div
             style={{
               display: 'inline-flex',
-              backgroundColor: 'var(--panel-hi)',
+              backgroundColor: 'var(--ink)',
               border: '1px solid var(--line-hi)',
-              borderRadius: '6px',
+              borderRadius: '4px',
               padding: '2px',
               gap: '2px',
             }}
           >
             {[
               { id: 'today', label: 'Today' },
+              { id: 'yesterday', label: 'Yesterday' },
               { id: '7d', label: 'Last 7 Days' },
               { id: '30d', label: 'Last 30 Days' },
               { id: '90d', label: 'Last 90 Days' },
               { id: 'year', label: 'This Year' },
+              { id: 'custom', label: 'Custom Range' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 className="btn"
                 style={{
-                  padding: '0.35rem 0.65rem',
-                  fontSize: '0.75rem',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.72rem',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: '3px',
                   backgroundColor: datePeriod === tab.id ? 'var(--signal)' : 'transparent',
                   color: datePeriod === tab.id ? '#ffffff' : 'var(--dim)',
                   fontWeight: datePeriod === tab.id ? 600 : 400,
                   cursor: 'pointer',
-                  transition: 'background-color 0.15s ease',
                 }}
-                onClick={() => setDatePeriod(tab.id)}
+                onClick={() => {
+                  setDatePeriod(tab.id);
+                  if (tab.id === 'custom') setCustomModalOpen(true);
+                }}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-
-          <button type="button" className="btn btn-solid" onClick={() => setBroadcastModal(true)}>
-            Draft & Publish Broadcast
-          </button>
         </div>
-      </header>
 
-      {notice ? <p className="notice">{notice}</p> : null}
+        {/* Right: Time Granularity Controls */}
+        <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
+          <span className="eyebrow faint" style={{ fontSize: '0.65rem', color: 'var(--dim)' }}>
+            GRANULARITY:
+          </span>
+          <div style={{ display: 'inline-flex', backgroundColor: 'var(--ink)', border: '1px solid var(--line-hi)', borderRadius: '4px', padding: '2px', gap: '2px' }}>
+            {['hourly', 'daily', 'weekly', 'monthly'].map((g) => (
+              <button
+                key={g}
+                type="button"
+                style={{
+                  padding: '0.2rem 0.45rem',
+                  fontSize: '0.7rem',
+                  border: 'none',
+                  borderRadius: '3px',
+                  backgroundColor: granularity === g ? 'var(--panel-hi)' : 'transparent',
+                  color: granularity === g ? 'var(--paper)' : 'var(--dim)',
+                  fontWeight: granularity === g ? 600 : 400,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setGranularity(g)}
+              >
+                {g.charAt(0).toUpperCase() + g.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-      {/* SECTION 2: Top Summary Metrics Grid (4 Stat Cards) */}
+      {/* SECTION 4: Compact Summary Metric Cards (Interactive Entry Points) */}
       <div className="grid-4" style={{ gap: 'var(--s4)' }}>
         {/* Card 1: Registered Users */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        <div
+          className="panel"
+          style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
+          onClick={() => navigate('/admin/moderation')}
+        >
           <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             TOTAL REGISTERED USERS
           </p>
@@ -296,17 +352,21 @@ function AdminDashboard() {
             <span className="mono" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--paper)' }}>
               {metrics.total_users}
             </span>
-            <span className="mono sm" style={{ fontSize: '0.75rem', color: 'var(--affirm)', fontWeight: 600 }}>
-              +{metrics.user_growth_pct}% vs prev period
+            <span className="mono sm" style={{ fontSize: '0.72rem', color: 'var(--affirm)', fontWeight: 600 }}>
+              +{metrics.user_growth_pct}%
             </span>
           </div>
-          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s2) 0 0 0', fontSize: '0.75rem' }}>
-            Verified Estate Residents & Personnel
+          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
+            vs previous period • Verified Residents & Staff
           </p>
-        </section>
+        </div>
 
         {/* Card 2: Incident Resolution */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        <div
+          className="panel"
+          style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
+          onClick={() => navigate('/admin/incidents')}
+        >
           <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             INCIDENT RESOLUTION RATE
           </p>
@@ -314,35 +374,21 @@ function AdminDashboard() {
             <span className="mono" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--paper)' }}>
               {metrics.resolution_rate}%
             </span>
-            <span className="mono sm" style={{ fontSize: '0.75rem', color: 'var(--affirm)', fontWeight: 600 }}>
+            <span className="mono sm" style={{ fontSize: '0.72rem', color: 'var(--affirm)', fontWeight: 600 }}>
               +{metrics.incident_change_pct}% resolved
             </span>
           </div>
-
-          <div
-            style={{
-              height: '8px',
-              width: '100%',
-              backgroundColor: 'var(--ink)',
-              border: '1px solid var(--line-hi)',
-              borderRadius: '9999px',
-              overflow: 'hidden',
-              marginTop: 'var(--s2)',
-            }}
-          >
-            <div
-              style={{
-                width: `${metrics.resolution_rate}%`,
-                height: '100%',
-                backgroundColor: 'var(--signal)',
-                borderRadius: '9999px',
-              }}
-            />
+          <div style={{ height: '6px', width: '100%', backgroundColor: 'var(--ink)', borderRadius: '9999px', overflow: 'hidden', marginTop: 'var(--s2)' }}>
+            <div style={{ width: `${metrics.resolution_rate}%`, height: '100%', backgroundColor: 'var(--signal)' }} />
           </div>
-        </section>
+        </div>
 
-        {/* Card 3: Active SOS Alerts */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        {/* Card 3: Emergency SOS Status */}
+        <div
+          className="panel"
+          style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
+          onClick={() => navigate('/volunteer/triage')}
+        >
           <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             EMERGENCY SOS STATUS
           </p>
@@ -350,45 +396,49 @@ function AdminDashboard() {
             <span className="mono" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--paper)' }}>
               {metrics.active_sos_alerts} Active
             </span>
-            <span className="mono sm faint" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
-              100% Patrol Coverage
+            <span className="mono sm" style={{ fontSize: '0.72rem', color: 'var(--affirm)' }}>
+              100% Coverage
             </span>
           </div>
-          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s2) 0 0 0', fontSize: '0.75rem' }}>
-            Night Patrol Response Window: 4 mins
+          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
+            Night Patrol Avg Response: 4 mins
           </p>
-        </section>
+        </div>
 
-        {/* Card 4: Pending Verification Queue */}
-        <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        {/* Card 4: Verification Queue */}
+        <div
+          className="panel"
+          style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)', cursor: 'pointer' }}
+          onClick={() => navigate('/admin/moderation')}
+        >
           <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
             VERIFICATION QUEUE
           </p>
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s1)' }}>
             <span className="mono" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--paper)' }}>
-              {pendingQueue.length} Applications
+              {pendingQueue.length} Pending
             </span>
-            <span className="mono sm faint" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
-              ID & Lease Verification
+            <span className="mono sm faint" style={{ fontSize: '0.72rem', color: 'var(--dim)' }}>
+              Awaiting ID
             </span>
           </div>
-          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s2) 0 0 0', fontSize: '0.75rem' }}>
-            Awaiting Admin document review
+          <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
+            Document review required
           </p>
-        </section>
+        </div>
       </div>
 
-      {/* SECTION 3: Main Visualizations Layout (2 Columns: Chart + Side Telemetry) */}
+      {/* SECTION 5: Visual Analytics Grid (Activity Chart + Side Widgets) */}
       <div className="grid-2" style={{ gap: 'var(--s5)', gridTemplateColumns: '1.6fr 1fr' }}>
-        {/* Main Chart Column: Platform Activity Bar & Trend Chart */}
+        {/* Main Time-Series Chart */}
         <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
           <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)' }}>
             <div>
               <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600 }}>
-                PLATFORM ACTIVITY ANALYTICS
+                PLATFORM ACTIVITY OVER TIME
               </p>
               <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                System Operations & Event Volume Over Time ({datePeriod.toUpperCase()})
+                Operational Volume ({granularity.toUpperCase()} View)
               </h2>
             </div>
             <div className="cluster" style={{ gap: 'var(--s3)', fontSize: '0.75rem' }}>
@@ -396,7 +446,7 @@ function AdminDashboard() {
                 <span style={{ width: '10px', height: '10px', backgroundColor: 'var(--signal)', borderRadius: '2px', display: 'inline-block' }} /> Total Activity
               </span>
               <span className="cluster" style={{ gap: '4px', color: 'var(--dim)' }}>
-                <span style={{ width: '10px', height: '10px', backgroundColor: '#929894', borderRadius: '2px', display: 'inline-block' }} /> Incidents Logged
+                <span style={{ width: '10px', height: '10px', backgroundColor: '#929894', borderRadius: '2px', display: 'inline-block' }} /> Incidents
               </span>
             </div>
           </div>
@@ -407,9 +457,7 @@ function AdminDashboard() {
             </div>
           ) : (
             <div style={{ width: '100%', overflowX: 'auto' }}>
-              {/* SVG Bar Chart Visualization */}
               <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: '190px' }}>
-                {/* Horizontal Grid lines */}
                 {[0, 0.33, 0.66, 1].map((pct, idx) => (
                   <line
                     key={idx}
@@ -423,18 +471,16 @@ function AdminDashboard() {
                   />
                 ))}
 
-                {/* Bars & Lines */}
                 {timeline.map((item, idx) => {
                   const xStep = (chartWidth - 60) / Math.max(1, timeline.length);
                   const x = 50 + idx * xStep;
-                  const barWidth = Math.min(32, xStep * 0.45);
+                  const barWidth = Math.min(30, xStep * 0.45);
 
                   const totalH = ((item.total_activity || 0) / maxActivityVal) * (chartHeight - 50);
                   const incH = ((item.incidents || 0) / maxActivityVal) * (chartHeight - 50);
 
                   return (
                     <g key={idx}>
-                      {/* Total Activity Bar */}
                       <rect
                         x={x}
                         y={chartHeight - 30 - totalH}
@@ -444,7 +490,6 @@ function AdminDashboard() {
                         rx="3"
                         opacity="0.85"
                       />
-                      {/* Incidents Sub-Bar */}
                       <rect
                         x={x + barWidth + 4}
                         y={chartHeight - 30 - incH}
@@ -454,8 +499,6 @@ function AdminDashboard() {
                         rx="2"
                         opacity="0.6"
                       />
-
-                      {/* X-Axis Label */}
                       <text
                         x={x + barWidth / 2}
                         y={chartHeight - 10}
@@ -474,12 +517,12 @@ function AdminDashboard() {
           )}
         </section>
 
-        {/* Side Column: Role Distribution & Data Engineering Telemetry */}
+        {/* Side Column: Role Distribution & Telemetry */}
         <div className="stack" style={{ gap: 'var(--s4)' }}>
-          {/* Widget 1: User Distribution by Role */}
+          {/* User Role Distribution */}
           <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
             <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', marginBottom: 'var(--s2)' }}>
-              USER ROLE DISTRIBUTION
+              COMMUNITY ROLE BREAKDOWN
             </p>
             <div className="stack" style={{ gap: 'var(--s2)' }}>
               {roleDist.map((r, idx) => (
@@ -490,170 +533,80 @@ function AdminDashboard() {
                       {r.count} ({r.percentage}%)
                     </span>
                   </div>
-                  <div
-                    style={{
-                      height: '6px',
-                      width: '100%',
-                      backgroundColor: 'var(--ink)',
-                      borderRadius: '9999px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${r.percentage}%`,
-                        height: '100%',
-                        backgroundColor: idx === 0 ? 'var(--signal)' : idx === 1 ? '#3b6a9c' : '#929894',
-                      }}
-                    />
+                  <div style={{ height: '6px', width: '100%', backgroundColor: 'var(--ink)', borderRadius: '9999px', overflow: 'hidden' }}>
+                    <div style={{ width: `${r.percentage}%`, height: '100%', backgroundColor: idx === 0 ? 'var(--signal)' : idx === 1 ? '#3b6a9c' : '#929894' }} />
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Widget 2: Operational Telemetry (Cloud & Data Engineering Readiness) */}
+          {/* Cloud Telemetry Indicators */}
           <section className="panel" style={{ padding: 'var(--s4)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
             <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
               <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
-                CLOUD & TELEMETRY INDICATORS
+                CLOUD & TELEMETRY HEALTH
               </p>
               <span className="mono sm" style={{ fontSize: '0.68rem', color: 'var(--affirm)' }}>
-                SYSTEM HEALTHY
+                HEALTHY
               </span>
             </div>
 
             <ul className="stack" style={{ gap: 'var(--s2)', padding: 0, margin: 0, listStyle: 'none' }}>
               <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '4px' }}>
-                <span style={{ color: 'var(--dim)' }}>API Request Volume:</span>
+                <span style={{ color: 'var(--dim)' }}>API Traffic:</span>
                 <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.api_request_volume}</strong>
               </li>
               <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '4px' }}>
-                <span style={{ color: 'var(--dim)' }}>API Latency & Success Rate:</span>
+                <span style={{ color: 'var(--dim)' }}>Latency & Success:</span>
                 <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.avg_response_latency_ms}ms ({telemetry.api_success_rate}%)</strong>
               </li>
-              <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid var(--line-hi)', paddingBottom: '4px' }}>
-                <span style={{ color: 'var(--dim)' }}>DB Connection Pool:</span>
-                <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.db_connection_pool}</strong>
-              </li>
               <li className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                <span style={{ color: 'var(--dim)' }}>Aggregation Pipeline:</span>
-                <strong className="mono" style={{ color: 'var(--signal)' }}>Server Database View</strong>
+                <span style={{ color: 'var(--dim)' }}>DB Connections:</span>
+                <strong className="mono" style={{ color: 'var(--paper)' }}>{telemetry.db_connection_pool}</strong>
               </li>
             </ul>
           </section>
         </div>
       </div>
 
-      {/* SECTION 4: Operations Grid (Resident Verification Queue & Venue Schedule) */}
-      <div className="grid-2" style={{ gap: 'var(--s5)' }}>
-        {/* Resident Verification */}
-        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
-          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-            <div>
-              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-                RESIDENT MODERATION
-              </p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                Pending Verification Queue ({pendingQueue.length})
-              </h2>
-            </div>
-          </div>
-
-          {pendingQueue.length === 0 ? (
-            <p className="blank">All resident verification applications processed.</p>
-          ) : (
-            <ul className="ledger">
-              {pendingQueue.map((m) => (
-                <li className="entry" key={m.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line-hi)' }}>
-                  <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
-                      {m.name}
-                    </strong>
-                    <div className="cluster" style={{ gap: 'var(--s2)' }}>
-                      <button
-                        type="button"
-                        className="btn"
-                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                        onClick={() => setReviewDocModal(m)}
-                      >
-                        Review Document
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-solid"
-                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                        onClick={() => handleApproveMember(m.id)}
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  </div>
-                  <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                    {m.address} • Document: <strong>{m.documentType}</strong>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Facility Schedule */}
-        <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
-          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-            <div>
-              <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-                FACILITY BOOKINGS
-              </p>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                Clubhouse & Venue Schedule
-              </h2>
-            </div>
-          </div>
-
-          <ul className="ledger">
-            {bookingList.map((b) => (
-              <li className="entry" key={b.id} style={{ display: 'block', padding: 'var(--s3) 0', borderBottom: '1px solid var(--line-hi)' }}>
-                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <div>
-                    <h3 className="entry-title" style={{ margin: 0, fontSize: 'var(--fs-sm)' }}>
-                      {b.facility}
-                    </h3>
-                    <p className="entry-body sm faint" style={{ color: 'var(--dim)', margin: '2px 0 0 0' }}>
-                      Booked by {b.bookedBy} • {b.date}
-                    </p>
-                  </div>
-                  <div className="cluster" style={{ gap: 'var(--s2)' }}>
-                    <StatusBadge status={b.status} />
-                    <button
-                      type="button"
-                      className="btn"
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                      onClick={() => setManageBookingModal(b)}
-                    >
-                      Manage Booking
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
-      {/* SECTION 5: Operational Administrative Activity Ledger Table */}
+      {/* SECTION 6: Attention Required & Audit Log Table */}
       <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+        {/* Attention Items Banner */}
+        {attentionItems.length > 0 ? (
+          <div style={{ marginBottom: 'var(--s4)', padding: 'var(--s3) var(--s4)', backgroundColor: 'var(--panel-hi)', borderLeft: '3px solid var(--signal)', borderRadius: '3px' }}>
+            <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
+              ATTENTION REQUIRED
+            </p>
+            <div className="stack" style={{ gap: 'var(--s2)', marginTop: 'var(--s2)' }}>
+              {attentionItems.map((item) => (
+                <div key={item.id} className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ fontSize: '0.82rem', color: 'var(--paper)' }}>{item.title}</strong>
+                    <span className="sm faint" style={{ color: 'var(--dim)', marginLeft: '8px' }}>{item.description}</span>
+                  </div>
+                  {item.link ? (
+                    <button type="button" className="btn" style={{ padding: '0.2rem 0.5rem', fontSize: '0.72rem' }} onClick={() => navigate(item.link)}>
+                      Review Now
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Administrative Audit Ledger Table */}
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s4)', flexWrap: 'wrap', gap: 'var(--s3)' }}>
           <div>
             <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-              ADMINISTRATIVE AUDIT LOG
+              ADMINISTRATIVE AUDIT LEDGER
             </p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-              Recent Platform Operations & Event Ledger
+            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+              Recent Administrative Operations
             </h2>
           </div>
 
-          {/* Filters & Search */}
           <div className="cluster" style={{ gap: 'var(--s3)' }}>
             <input
               className="control"
@@ -662,7 +615,6 @@ function AdminDashboard() {
               onChange={(e) => { setLogSearch(e.target.value); setLogPage(1); }}
               style={{ width: '180px', fontSize: '0.8rem', padding: '0.35rem 0.55rem' }}
             />
-
             <select
               className="control"
               value={logRoleFilter}
@@ -720,29 +672,16 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* Pagination Controls */}
         {totalLogPages > 1 ? (
           <div className="cluster" style={{ justifyContent: 'space-between', marginTop: 'var(--s3)', fontSize: '0.8rem' }}>
             <span className="mono faint" style={{ color: 'var(--dim)' }}>
               Page {logPage} of {totalLogPages} ({filteredLogs.length} total entries)
             </span>
             <div className="cluster" style={{ gap: 'var(--s2)' }}>
-              <button
-                type="button"
-                className="btn"
-                disabled={logPage === 1}
-                onClick={() => setLogPage((p) => Math.max(1, p - 1))}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-              >
+              <button type="button" className="btn" disabled={logPage === 1} onClick={() => setLogPage((p) => Math.max(1, p - 1))} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
                 Previous
               </button>
-              <button
-                type="button"
-                className="btn"
-                disabled={logPage === totalLogPages}
-                onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-              >
+              <button type="button" className="btn" disabled={logPage === totalLogPages} onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
                 Next
               </button>
             </div>
@@ -750,7 +689,57 @@ function AdminDashboard() {
         ) : null}
       </section>
 
-      {/* MODAL 1: REVIEW DOCUMENT MODAL */}
+      {/* MODAL 1: CUSTOM DATE RANGE PICKER MODAL */}
+      {customModalOpen ? (
+        <Modal
+          title="Select Custom Analytics Date Range"
+          onClose={() => setCustomModalOpen(false)}
+          footer={
+            <>
+              <button type="button" className="btn" onClick={() => setCustomModalOpen(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => {
+                  setDatePeriod('custom');
+                  setCustomModalOpen(false);
+                }}
+              >
+                Apply Custom Range
+              </button>
+            </>
+          }
+        >
+          <div className="stack" style={{ gap: 'var(--s4)' }}>
+            <div className="field">
+              <label className="eyebrow" htmlFor="start-date">Start Date</label>
+              <input
+                id="start-date"
+                type="date"
+                className="control"
+                value={customRange.start}
+                onChange={(e) => setCustomRange((prev) => ({ ...prev, start: e.target.value }))}
+                style={{ color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
+              />
+            </div>
+            <div className="field">
+              <label className="eyebrow" htmlFor="end-date">End Date</label>
+              <input
+                id="end-date"
+                type="date"
+                className="control"
+                value={customRange.end}
+                onChange={(e) => setCustomRange((prev) => ({ ...prev, end: e.target.value }))}
+                style={{ color: 'var(--paper)', backgroundColor: 'var(--ink)' }}
+              />
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {/* MODAL 2: REVIEW DOCUMENT MODAL */}
       {reviewDocModal ? (
         <Modal
           title={`Review Verification Documents (${reviewDocModal.name})`}
@@ -760,19 +749,10 @@ function AdminDashboard() {
               <button type="button" className="btn" onClick={() => setReviewDocModal(null)}>
                 Close Preview
               </button>
-              <button
-                type="button"
-                className="btn"
-                style={{ borderColor: 'var(--line-hi)' }}
-                onClick={() => handleDeclineMember(reviewDocModal.id)}
-              >
+              <button type="button" className="btn" style={{ borderColor: 'var(--line-hi)' }} onClick={() => handleDeclineMember(reviewDocModal.id)}>
                 Decline Application
               </button>
-              <button
-                type="button"
-                className="btn btn-solid"
-                onClick={() => handleApproveMember(reviewDocModal.id)}
-              >
+              <button type="button" className="btn btn-solid" onClick={() => handleApproveMember(reviewDocModal.id)}>
                 Approve Account
               </button>
             </>
@@ -788,49 +768,6 @@ function AdminDashboard() {
               </p>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
                 <strong>Uploaded Document:</strong> {reviewDocModal.documentType} ({reviewDocModal.fileName})
-              </p>
-              <p className="mono sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                Submission Timestamp: {reviewDocModal.uploadedTime}
-              </p>
-            </div>
-          </div>
-        </Modal>
-      ) : null}
-
-      {/* MODAL 2: MANAGE BOOKING MODAL */}
-      {manageBookingModal ? (
-        <Modal
-          title={`Manage Venue Booking (${manageBookingModal.facility})`}
-          onClose={() => setManageBookingModal(null)}
-          footer={
-            <>
-              <button type="button" className="btn" onClick={() => setManageBookingModal(null)}>
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-solid"
-                onClick={() => {
-                  setNotice(`Booking for ${manageBookingModal.facility} confirmed.`);
-                  setManageBookingModal(null);
-                  setTimeout(() => setNotice(''), 4000);
-                }}
-              >
-                Confirm Booking
-              </button>
-            </>
-          }
-        >
-          <div className="stack" style={{ gap: 'var(--s3)' }}>
-            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Facility:</strong> {manageBookingModal.facility}
-              </p>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Booked By:</strong> {manageBookingModal.bookedBy}
-              </p>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Time Window:</strong> {manageBookingModal.date}
               </p>
             </div>
           </div>
@@ -855,9 +792,7 @@ function AdminDashboard() {
         >
           <form id="broadcast-form" onSubmit={handlePublishAnnouncement} className="stack" style={{ gap: 'var(--s4)' }}>
             <div className="field">
-              <label className="eyebrow" htmlFor="anc-title">
-                Broadcast Title *
-              </label>
+              <label className="eyebrow" htmlFor="anc-title">Broadcast Title *</label>
               <input
                 id="anc-title"
                 className="control"
@@ -867,11 +802,8 @@ function AdminDashboard() {
                 required
               />
             </div>
-
             <div className="field">
-              <label className="eyebrow" htmlFor="anc-priority">
-                Priority Level
-              </label>
+              <label className="eyebrow" htmlFor="anc-priority">Priority Level</label>
               <select
                 id="anc-priority"
                 className="control"
@@ -883,11 +815,8 @@ function AdminDashboard() {
                 <option value="high">High Priority Alert</option>
               </select>
             </div>
-
             <div className="field">
-              <label className="eyebrow" htmlFor="anc-content">
-                Notice Content *
-              </label>
+              <label className="eyebrow" htmlFor="anc-content">Notice Content *</label>
               <textarea
                 id="anc-content"
                 className="control"

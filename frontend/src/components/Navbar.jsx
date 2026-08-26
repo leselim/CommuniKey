@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
@@ -22,26 +22,38 @@ const ROLE_NAV = {
   ],
   'Estate Administrator': [
     { to: '/admin', label: 'Admin Hub' },
-    { to: '/admin/incidents', label: 'Incident Triage' },
+    { to: '/admin/incidents', label: 'Incidents' },
     { to: '/admin/announcements', label: 'Announcements' },
     { to: '/admin/events', label: 'Events' },
-    { to: '/admin/moderation', label: 'Member Moderation' },
-    { to: '/admin/messages', label: 'Messages & Helpdesk' },
-    { to: '/profile', label: 'Profile' },
+    { to: '/admin/moderation', label: 'Moderation' },
+    { to: '/admin/messages', label: 'Helpdesk' },
   ],
 };
 
 function Navbar() {
-  const { userRole, logout, isAuthenticated } = useAuth();
+  const { currentUser, userRole, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const isAuthPage = ['/signin', '/login', '/signup', '/forgot-password'].includes(
     location.pathname.toLowerCase()
   );
 
-  // Layout Isolation: Public Auth Pages or Unauthenticated users get ONLY the brand logo header
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Layout Isolation: Public Auth Pages or Unauthenticated users get ONLY brand logo header
   if (isAuthPage || !isAuthenticated) {
     return (
       <header className="topbar">
@@ -57,9 +69,15 @@ function Navbar() {
   const activeNav = userRole && ROLE_NAV[userRole] ? ROLE_NAV[userRole] : ROLE_NAV.Resident;
 
   const handleLogout = () => {
+    setUserMenuOpen(false);
+    setOpen(false);
     logout();
     navigate('/signin');
   };
+
+  const displayName = currentUser
+    ? `${currentUser.first_name || 'Marcus'} ${currentUser.last_name ? currentUser.last_name.charAt(0) + '.' : ''}`
+    : 'Admin';
 
   return (
     <header className="topbar">
@@ -80,35 +98,111 @@ function Navbar() {
               {label}
             </NavLink>
           ))}
+
+          {/* Mobile Drawer Sign Out Option */}
+          <div className="show-mobile" style={{ marginTop: 'var(--s3)', paddingTop: 'var(--s3)', borderTop: '1px solid var(--line-hi)' }}>
+            <button
+              type="button"
+              className="btn btn-solid"
+              style={{ width: '100%', fontSize: '0.82rem' }}
+              onClick={handleLogout}
+            >
+              Sign Out ({displayName})
+            </button>
+          </div>
         </nav>
 
-        <div className="bar-end">
+        <div className="bar-end" style={{ gap: 'var(--s3)' }}>
           <Notifications />
-          <span
-            className="mono sm hide-mobile"
-            style={{
-              color: 'var(--signal)',
-              backgroundColor: 'var(--signal-wash)',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '3px',
-              border: '1px solid var(--line-hi)',
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-            }}
-          >
-            {userRole}
-          </span>
-          <button
-            type="button"
-            className="btn"
-            style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-            onClick={handleLogout}
-          >
-            Sign Out
-          </button>
+
+          {/* Account / Administrator Profile Dropdown Menu */}
+          <div style={{ position: 'relative' }} ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setUserMenuOpen((prev) => !prev)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--panel-hi)',
+                border: '1px solid var(--line-hi)',
+                padding: '0.3rem 0.6rem',
+                borderRadius: '4px',
+                color: 'var(--paper)',
+                fontSize: '0.78rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              aria-expanded={userMenuOpen}
+            >
+              <span
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--signal)',
+                  display: 'inline-block',
+                }}
+              />
+              <span>{displayName}</span>
+              <span className="mono sm faint" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
+                ▾
+              </span>
+            </button>
+
+            {userMenuOpen ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 6px)',
+                  width: '240px',
+                  backgroundColor: 'var(--panel)',
+                  border: '1px solid var(--line-hi)',
+                  borderRadius: '6px',
+                  padding: 'var(--s3)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                  zIndex: 99,
+                }}
+              >
+                <div style={{ paddingBottom: 'var(--s2)', marginBottom: 'var(--s2)', borderBottom: '1px solid var(--line-hi)' }}>
+                  <p className="sm" style={{ fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                    {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Marcus Vance'}
+                  </p>
+                  <p className="mono sm faint" style={{ color: 'var(--signal)', fontSize: '0.7rem', margin: '2px 0 0 0' }}>
+                    {userRole || 'Estate Administrator'}
+                  </p>
+                  <p className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem', margin: '4px 0 0 0' }}>
+                    {currentUser?.email || 'admin@riverside.co.za'}
+                  </p>
+                </div>
+
+                <div className="stack" style={{ gap: 'var(--s2)' }}>
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.78rem', padding: '0.35rem 0.5rem' }}
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                  >
+                    View Account Profile
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-solid"
+                    style={{ width: '100%', justifyContent: 'center', fontSize: '0.78rem', padding: '0.35rem 0.5rem' }}
+                    onClick={handleLogout}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <button
             type="button"

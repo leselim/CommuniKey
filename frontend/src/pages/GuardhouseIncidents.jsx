@@ -1,52 +1,42 @@
 import React, { useState } from 'react';
 import Modal from '../components/Modal';
-import StatusBadge from '../components/StatusBadge';
 
 const INITIAL_GUARD_LOGS = [
   {
     id: 'g-log-1',
     title: 'Tailgating Attempt Flagged',
     category: 'Gate Breaches',
-    location: 'Main Boom Gate 01',
-    vehicle: 'Unregistered Silver Sedan',
+    details: 'Main Boom Gate 01 · Vehicle: Silver Sedan (Unregistered)',
     outcome: 'Flagged & Intercepted',
     timestamp: '20 mins ago',
-    details: 'Main Boom Gate 01 • Vehicle: Unregistered Silver Sedan',
-    reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
+    reporterShort: 'Sipho D.',
   },
   {
     id: 'g-log-2',
     title: 'Expired Pass Rejected',
     category: 'Access Denied',
-    location: 'Terminal 01',
-    code: '771-304',
-    host: 'Unit 08',
+    details: 'Visitor code 771-304 rejected at Terminal 01 · Host: Unit 08',
     outcome: 'Turned Away',
     timestamp: '1 hour ago',
-    details: 'Visitor code 771-304 rejected at Terminal 01 • Host: Unit 08',
-    reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
+    reporterShort: 'Sipho D.',
   },
   {
     id: 'g-log-3',
     title: 'Manual Override Logged',
     category: 'Access Denied',
-    pass: '492-801',
-    authorizer: 'Admin Marcus',
+    details: 'Resident pass 492-801 manually authorized by Admin Marcus',
     outcome: 'Approved',
     timestamp: '2 hours ago',
-    details: 'Resident pass 492-801 manually authorized by Admin Marcus',
-    reportedBy: 'Marcus Vance (Estate Administrator)',
+    reporterShort: 'Marcus V.',
   },
   {
     id: 'g-log-4',
     title: 'Perimeter Sensor Trigger',
     category: 'Perimeter',
-    location: 'Sector 4 East Fence',
-    inspector: 'Patrol Volunteer Sarah',
-    outcome: 'Cleared / False Alarm',
+    details: 'Sector 4 East Fence · Inspected by Patrol Volunteer Sarah',
+    outcome: 'Cleared',
     timestamp: 'Yesterday',
-    details: 'Sector 4 East Fence • Inspected by Patrol Volunteer Sarah',
-    reportedBy: 'Sarah Jenkins (Safety Volunteer)',
+    reporterShort: 'Sarah J.',
   },
 ];
 
@@ -58,6 +48,40 @@ const EVENT_TYPES = [
   'Physical Barrier Issue',
   'Suspicious Vehicle',
 ];
+
+const getStatusPillStyle = (outcome) => {
+  if (outcome === 'Flagged & Intercepted' || outcome.includes('Flagged')) {
+    return {
+      color: '#f87171',
+      backgroundColor: 'rgba(153, 27, 27, 0.25)',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+      padding: '2px 8px',
+      borderRadius: '4px',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+    };
+  }
+  if (outcome === 'Turned Away' || outcome.includes('Denied') || outcome.includes('Rejected')) {
+    return {
+      color: '#fbbf24',
+      backgroundColor: 'rgba(146, 64, 14, 0.25)',
+      border: '1px solid rgba(245, 158, 11, 0.3)',
+      padding: '2px 8px',
+      borderRadius: '4px',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+    };
+  }
+  return {
+    color: '#a3a3a3',
+    backgroundColor: 'rgba(38, 38, 38, 0.4)',
+    border: '1px solid rgba(64, 64, 64, 0.4)',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '0.75rem',
+    fontWeight: 500,
+  };
+};
 
 function GuardhouseIncidents() {
   const [logs, setLogs] = useState(INITIAL_GUARD_LOGS);
@@ -93,12 +117,10 @@ function GuardhouseIncidents() {
       id: `g-log-${Date.now()}`,
       title: `${eventType} Event Logged`,
       category: category,
-      location: locationInput.trim() || 'Main Gate 01',
-      vehicle: plateInput.trim() ? plateInput.trim().toUpperCase() : 'N/A',
-      outcome: 'Flagged & Under Review',
+      details: `${locationInput.trim()} · ${notesInput.trim()}${plateInput ? ` · Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
+      outcome: 'Flagged & Intercepted',
       timestamp: 'Just now',
-      details: `${locationInput.trim()} • ${notesInput.trim()}${plateInput ? ` • Plate: ${plateInput.trim().toUpperCase()}` : ''}`,
-      reportedBy: 'Sipho Dlamini (Gate 01 Guard)',
+      reporterShort: 'Sipho D.',
     };
 
     setLogs([newEntry, ...logs]);
@@ -114,14 +136,11 @@ function GuardhouseIncidents() {
       {/* HEADER */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
-          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--dim)', margin: '0 0 var(--s1) 0' }}>
-            Station 01 — Security Ops • Riverside Estate
-          </p>
           <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
-            Guardhouse Incident & Gate Breach Log
+            Security & Access Incidents
           </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
-            Review security events, access denials, and perimeter flags for Main Gate 01.
+          <p className="masthead-meta" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0' }}>
+            Main Gate 01 operational activity and flagged events.
           </p>
         </div>
 
@@ -130,9 +149,9 @@ function GuardhouseIncidents() {
             type="button"
             className="btn btn-solid"
             onClick={() => setModalOpen(true)}
-            style={{ fontWeight: 600, padding: '0.45rem 0.85rem' }}
+            style={{ fontWeight: 600 }}
           >
-            [ + Log Security Event ]
+            + Log Incident
           </button>
         </div>
       </header>
@@ -185,48 +204,30 @@ function GuardhouseIncidents() {
                 borderRadius: '6px',
               }}
             >
+              {/* TOP ROW */}
               <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--s2)' }}>
                 <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
                     {item.title}
                   </h3>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontFamily: 'monospace',
-                      color: 'var(--dim)',
-                      backgroundColor: 'var(--ink)',
-                      padding: '2px 6px',
-                      borderRadius: '3px',
-                      border: '1px solid var(--line-hi)',
-                    }}
-                  >
+                  <span style={{ fontSize: '0.75rem', color: 'var(--dim)', fontWeight: 400 }}>
                     {item.category}
                   </span>
                 </div>
 
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: item.outcome.includes('Flagged') || item.outcome.includes('Turned Away') ? '#e11d48' : '#10b981',
-                    backgroundColor: 'var(--ink)',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid var(--line-hi)',
-                  }}
-                >
-                  * {item.outcome}
+                <span style={getStatusPillStyle(item.outcome)}>
+                  {item.outcome}
                 </span>
               </div>
 
+              {/* MIDDLE ROW SUMMARY */}
               <p style={{ color: 'var(--paper)', fontSize: '0.88rem', margin: '0 0 var(--s2) 0', lineHeight: 1.5 }}>
                 {item.details}
               </p>
 
-              <div className="cluster" style={{ justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--dim)' }}>
-                <span>Logged {item.timestamp}</span>
-                <span>Reporter: {item.reportedBy}</span>
+              {/* BOTTOM ROW TIMESTAMP & REPORTER */}
+              <div className="cluster" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
+                <span>{item.timestamp} · Logged by {item.reporterShort || 'Sipho D.'}</span>
               </div>
             </article>
           ))
@@ -236,7 +237,7 @@ function GuardhouseIncidents() {
       {/* LOG SECURITY EVENT MODAL */}
       {modalOpen ? (
         <Modal
-          title="Log Security Event"
+          title="Log Incident"
           onClose={() => setModalOpen(false)}
           footer={
             <div className="cluster" style={{ justifyContent: 'flex-end', gap: 'var(--s2)' }}>
@@ -244,7 +245,7 @@ function GuardhouseIncidents() {
                 Cancel
               </button>
               <button type="submit" form="sec-log-modal-form" className="btn btn-solid">
-                [ Submit Log Entry ]
+                Submit Log Entry
               </button>
             </div>
           }

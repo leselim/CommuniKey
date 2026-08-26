@@ -1,19 +1,63 @@
 import React from 'react';
 
 /**
- * Status marker. Red is reserved for emergencies and priority items, so the
- * remaining states read as a quiet three-step scale: new, in progress, closed.
+ * Standardized Status Color Mapping:
+ * 1. Active / In Progress / Open / Dispatched (Brand Blue: var(--signal))
+ * 2. Under Review / Pending / Awaiting Approval (Warm Amber: #d97706)
+ * 3. Resolved / Completed / Closed / Expired / Approved (Muted Neutral Grey: var(--dim))
+ * 4. Critical / Urgent / Failed / Emergency (Muted Rose: #e11d48)
  */
-const TONE = {
-  Priority: 'status-open',
-  Active: 'status-open',
-  Reported: 'status-active',
-  'Under review': '',
-  Resolved: 'status-closed',
-};
+export function getStatusClass(status = '') {
+  const norm = String(status).toLowerCase().trim();
+
+  if (
+    norm.includes('active') ||
+    norm.includes('in progress') ||
+    norm.includes('open') ||
+    norm.includes('dispatched') ||
+    norm.includes('reported')
+  ) {
+    return 'status-active';
+  }
+
+  if (
+    norm.includes('pending') ||
+    norm.includes('under review') ||
+    norm.includes('awaiting')
+  ) {
+    return 'status-pending';
+  }
+
+  if (
+    norm.includes('resolved') ||
+    norm.includes('completed') ||
+    norm.includes('closed') ||
+    norm.includes('expired') ||
+    norm.includes('approved') ||
+    norm.includes('verified') ||
+    norm.includes('success')
+  ) {
+    return 'status-resolved';
+  }
+
+  if (
+    norm.includes('urgent') ||
+    norm.includes('critical') ||
+    norm.includes('failed') ||
+    norm.includes('emergency') ||
+    norm.includes('sos') ||
+    norm.includes('declined') ||
+    norm.includes('priority')
+  ) {
+    return 'status-critical';
+  }
+
+  return 'status-resolved';
+}
 
 function StatusBadge({ status }) {
-  return <span className={`status ${TONE[status] || ''}`}>{status}</span>;
+  const cls = getStatusClass(status);
+  return <span className={`status ${cls}`}>{status}</span>;
 }
 
 export default StatusBadge;

@@ -488,9 +488,7 @@ function Dashboard() {
               <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
                 {formatDayDate(selectedEvent.event_date)} • {selectedEvent.time || '18:30 to 19:30'}
               </span>
-              <span className="status status-closed">
-                {rsvpState[selectedEvent.id] ? 'Attending' : 'RSVP Open'}
-              </span>
+              <StatusBadge status={rsvpState[selectedEvent.id] ? 'Attending' : 'RSVP Open'} />
             </div>
 
             <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>

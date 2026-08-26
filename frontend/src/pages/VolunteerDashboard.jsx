@@ -248,7 +248,7 @@ function VolunteerDashboard() {
                     Contact: {v.phone}
                   </p>
                 </div>
-                <span className="status status-closed">{v.status}</span>
+                <StatusBadge status={v.status} />
               </li>
             ))}
           </ul>

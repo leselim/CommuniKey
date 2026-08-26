@@ -517,16 +517,34 @@ button.link {
   background-color: currentColor;
 }
 
-.status-open {
-  color: var(--signal);
+.status-active,
+.status-open,
+.status-in-progress,
+.status-dispatched {
+  color: var(--signal); /* Brand Blue #3b6a9c */
 }
 
-.status-active {
-  color: var(--paper);
+.status-pending,
+.status-under-review,
+.status-awaiting {
+  color: #d97706; /* Warm Amber */
 }
 
-.status-closed {
-  color: var(--affirm);
+.status-resolved,
+.status-completed,
+.status-closed,
+.status-expired,
+.status-approved,
+.status-verified {
+  color: var(--dim); /* Muted Neutral Grey #929894 */
+}
+
+.status-critical,
+.status-urgent,
+.status-failed,
+.status-emergency,
+.status-declined {
+  color: #e11d48; /* Muted Rose / Red */
 }
 
 /* --------------------------------------------------------------- Ledger -- */

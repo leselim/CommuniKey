@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
 import api, { save, unwrap } from '../services/api';
 import { community, profile as demoProfile } from '../services/demoData';
@@ -111,7 +112,7 @@ function Profile() {
       <section className="section">
         <div className="section-head">
           <p className="eyebrow">Personal details</p>
-          <span className="status status-closed">Verified Role: {form.role}</span>
+          <StatusBadge status={`Verified (${form.role || 'Resident'})`} />
         </div>
 
         <div className="fields">
@@ -194,7 +195,7 @@ function Profile() {
       <section className="section">
         <div className="section-head">
           <p className="eyebrow">Membership</p>
-          <span className="status status-closed">Verified</span>
+          <StatusBadge status="Verified" />
         </div>
         <ul className="ledger">
           <li className="entry">

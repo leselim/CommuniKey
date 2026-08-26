@@ -161,34 +161,25 @@ function GuardhouseDashboard() {
     setTimeout(() => setTerminalNotice(''), 6000);
   };
 
+  const handleScanQR = () => {
+    setPinInput('CK-492');
+    setTerminalNotice('QR Code scanned from optical scanner: CK-492 (Sipho Ndlovu - Contractor).');
+    setTimeout(() => setTerminalNotice(''), 5000);
+  };
+
   return (
     <div className="stack" style={{ gap: 'var(--s5)' }}>
       {/* GUARDHOUSE TERMINAL HEADER */}
       <header className="masthead" style={{ borderBottom: '1px solid var(--line-hi)', paddingBottom: 'var(--s4)' }}>
         <div>
-          <div className="cluster" style={{ gap: 'var(--s3)', alignItems: 'center', marginBottom: 'var(--s1)' }}>
-            <span
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                color: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                padding: '2px 8px',
-                borderRadius: '3px',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-              }}
-            >
-              • SYSTEM ONLINE
-            </span>
-            <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.78rem' }}>
-              Station 01 • Main Gate Entrance
-            </span>
-          </div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 'var(--s1) 0' }}>
+          <p className="eyebrow" style={{ fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--dim)', margin: '0 0 var(--s1) 0' }}>
+            Station 01 — Main Entrance Guardhouse • Riverside Estate
+          </p>
+          <h1 style={{ fontSize: 'var(--fs-xl)', color: 'var(--paper)', margin: 0 }}>
             Main Guardhouse Terminal 01
           </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)' }}>
-            Operator: {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Sipho Dlamini'} (Security Guard) • Riverside Estate
+          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s1)' }}>
+            Operator: {currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Sipho Dlamini'} (Security Guard)
           </p>
         </div>
 
@@ -217,25 +208,36 @@ function GuardhouseDashboard() {
           </div>
 
           <div>
-            <input
-              type="text"
-              className="control"
-              placeholder="E.G. 492-801 OR CK-492"
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value)}
-              style={{
-                fontSize: '1.4rem',
-                fontFamily: 'monospace',
-                letterSpacing: '0.12em',
-                fontWeight: 700,
-                textAlign: 'center',
-                padding: 'var(--s4)',
-                backgroundColor: 'var(--panel-hi)',
-                borderColor: matchedPass ? '#10b981' : isInputEntered && !matchedPass ? '#e11d48' : 'var(--line-hi)',
-                textTransform: 'uppercase',
-              }}
-              autoFocus
-            />
+            <div className="cluster" style={{ gap: 'var(--s2)', alignItems: 'center' }}>
+              <input
+                type="text"
+                className="control"
+                placeholder="E.G. 492-801 OR CK-492"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  fontSize: '1.3rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.1em',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  padding: 'var(--s3) var(--s4)',
+                  backgroundColor: 'var(--panel-hi)',
+                  borderColor: matchedPass ? '#10b981' : isInputEntered && !matchedPass ? '#e11d48' : 'var(--line-hi)',
+                  textTransform: 'uppercase',
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={handleScanQR}
+                style={{ padding: 'var(--s3) var(--s4)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+              >
+                [ Scan QR Code ]
+              </button>
+            </div>
 
             <div className="cluster" style={{ justifyContent: 'center', gap: 'var(--s2)', marginTop: 'var(--s2)' }}>
               <span className="sm faint" style={{ color: 'var(--dim)', fontSize: '0.72rem' }}>Test active PINs:</span>

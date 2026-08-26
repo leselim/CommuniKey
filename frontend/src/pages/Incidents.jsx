@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
+import GuardhouseIncidents from './GuardhouseIncidents';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -29,6 +30,10 @@ function Incidents() {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState('');
+
+  if (userRole === 'Security Guard') {
+    return <GuardhouseIncidents />;
+  }
 
   useEffect(() => {
     if (!receipt) return undefined;

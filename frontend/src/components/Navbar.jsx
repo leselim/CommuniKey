@@ -88,17 +88,24 @@ function Navbar() {
         </NavLink>
 
         <nav className={`nav${open ? ' open' : ''}`} id="site-nav">
-          {activeNav.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) => `nav-item${isActive ? ' current' : ''}`}
-              onClick={() => setOpen(false)}
-            >
-              {label}
-            </NavLink>
-          ))}
+          {activeNav.map(({ to, label }) => {
+            const isExactRoot = to === '/' || to === '/admin';
+            const isActive = isExactRoot
+              ? location.pathname === to
+              : location.pathname === to || location.pathname.startsWith(`${to}/`);
+
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                end={isExactRoot}
+                className={`nav-item${isActive ? ' current' : ''}`}
+                onClick={() => setOpen(false)}
+              >
+                {label}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="bar-end" style={{ gap: 'var(--s3)' }}>

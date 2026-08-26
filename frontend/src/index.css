@@ -34,9 +34,9 @@
   --affirm-hi: #4a7bb0;
 
   /* Type */
-  --sans: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont,
+  --sans: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont,
     Helvetica, Arial, sans-serif;
-  --mono: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont,
+  --mono: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont,
     Helvetica, Arial, sans-serif;
 
   --fs-micro: 0.6875rem;

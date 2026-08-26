@@ -280,7 +280,7 @@ function Dashboard() {
                   <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
                     {req.time}
                   </span>
-                  <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--signal)' }}>
+                  <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
                     View Request →
                   </span>
                 </div>
@@ -310,7 +310,7 @@ function Dashboard() {
                 Upcoming Gatherings & Meetings
               </h2>
             </div>
-            <Link to="/events" className="link" style={{ color: 'var(--signal)', fontWeight: 500, fontSize: '0.8rem' }}>
+            <Link to="/events" className="link" style={{ color: 'var(--dim)', fontWeight: 500, fontSize: '0.8rem' }}>
               View calendar →
             </Link>
           </div>
@@ -357,7 +357,7 @@ function Dashboard() {
                     >
                       {statusText}
                     </span>
-                    <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--signal)' }}>
+                    <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
                       View Details →
                     </span>
                   </div>

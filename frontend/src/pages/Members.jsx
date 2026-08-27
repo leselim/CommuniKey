@@ -195,7 +195,7 @@ const INITIAL_DIRECT = [
     name: 'Main Gate Guardhouse (Gate 01 Desk)',
     role: 'Active Guard: Sipho Dlamini',
     online: true,
-    lastSeen: 'Online • Main Gate 01 Terminal',
+    lastSeen: 'Online | Main Gate 01 Terminal',
     type: 'direct',
     messages: [
       {
@@ -213,7 +213,7 @@ const INITIAL_DIRECT = [
     name: 'Sarah Jenkins (Safety Patrol Volunteer)',
     role: 'Safety Volunteer',
     online: true,
-    lastSeen: 'Online • Sector 4 Patrol',
+    lastSeen: 'Online | Sector 4 Patrol',
     type: 'direct',
     messages: [
       {
@@ -231,7 +231,7 @@ const INITIAL_DIRECT = [
     name: 'Marcus Vance (Admin Support)',
     role: 'Community Administrator',
     online: true,
-    lastSeen: 'Online • Active in Estate Office',
+    lastSeen: 'Online | Active in Estate Office',
     type: 'direct',
     messages: [
       {
@@ -906,10 +906,10 @@ function Members() {
                     {m.first_name} {m.last_name}
                   </h3>
                   <p className="entry-body">
-                    Address: {m.address} • Role: {m.role}
+                    Address: {m.address} | Role: {m.role}
                   </p>
                   <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
-                    Phone: <strong>+27 82 ••• ••••</strong> • Email: <strong>•••••@riverside.co.za</strong>
+                    Phone: <strong>+27 82 ••• ••••</strong> | Email: <strong>•••••@riverside.co.za</strong>
                   </p>
                 </div>
 
@@ -995,7 +995,7 @@ function Members() {
                   <div>
                     <h3 className="entry-title">{t.category || 'General Support Inquiry'}</h3>
                     <p className="sm faint" style={{ color: 'var(--dim)', marginTop: '2px' }}>
-                      From: <strong>{t.sender_name}</strong> • Sent {formatRelative(t.date_sent)}
+                      From: <strong>{t.sender_name}</strong> | Sent {formatRelative(t.date_sent)}
                     </p>
                   </div>
                   <StatusBadge status={t.status} />
@@ -1070,7 +1070,7 @@ function Members() {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {m.role} • {m.address}
+                      {m.role} | {m.address}
                     </p>
                   </div>
                   <button

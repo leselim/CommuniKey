@@ -1,86 +1,59 @@
 import React from 'react';
 
-/**
- * Standardized Status Color Mapping:
- * 1. Active / In Progress / Open / Dispatched (Brand Blue: var(--signal))
- * 2. Under Review / Pending / Awaiting Approval (Warm Amber: #d97706)
- * 3. Resolved / Completed / Closed / Expired / Approved (Muted Neutral Grey: var(--dim))
- * 4. Critical / Urgent / Failed / Emergency / Flagged / Rejected (Muted Rose: #e11d48)
- */
-export function getStatusClass(status = '') {
-  const norm = String(status).toLowerCase().replace(/[•·]/g, '').trim();
+export function StatusBadge({ status = '' }) {
+  if (!status) return null;
+  const cleanStr = String(status).replace(/[•·]/g, '').trim();
+  const normalized = cleanStr.toUpperCase().replace(/[\s-]+/g, '_');
 
-  if (
-    norm.includes('flagged') ||
-    norm.includes('rejected') ||
-    norm.includes('urgent') ||
-    norm.includes('critical') ||
-    norm.includes('failed') ||
-    norm.includes('emergency') ||
-    norm.includes('sos') ||
-    norm.includes('declined') ||
-    norm.includes('priority') ||
-    norm.includes('denied')
-  ) {
-    return 'status-critical';
-  }
+  const badgeStyles = {
+    SUCCESS: {
+      label: 'Success',
+      className: 'bg-neutral-800 text-neutral-300 border-neutral-700/60',
+    },
+    RESOLVED: {
+      label: 'Resolved',
+      className: 'bg-neutral-800 text-neutral-400 border-neutral-700/60',
+    },
+    AUTHORIZED: {
+      label: 'Authorized',
+      className: 'bg-neutral-800 text-neutral-300 border-neutral-700/60',
+    },
+    UNDER_REVIEW: {
+      label: 'Under Review',
+      className: 'bg-amber-950/40 text-amber-300 border-amber-800/40',
+    },
+    PENDING_VERIFICATION: {
+      label: 'Pending',
+      className: 'bg-amber-950/30 text-amber-200 border-amber-800/30',
+    },
+    PENDING: {
+      label: 'Pending',
+      className: 'bg-amber-950/30 text-amber-200 border-amber-800/30',
+    },
+    FLAGGED: {
+      label: 'Flagged',
+      className: 'bg-rose-950/40 text-rose-300 border-rose-800/40',
+    },
+    REJECTED: {
+      label: 'Rejected',
+      className: 'bg-rose-950/40 text-rose-300 border-rose-800/40',
+    },
+    REPORTED: {
+      label: 'Reported',
+      className: 'bg-neutral-800 text-neutral-300 border-neutral-700/60',
+    },
+  };
 
-  if (
-    norm.includes('active') ||
-    norm.includes('in progress') ||
-    norm.includes('open') ||
-    norm.includes('dispatched') ||
-    norm.includes('reported') ||
-    norm.includes('on shift') ||
-    norm.includes('patrolling') ||
-    norm.includes('valid')
-  ) {
-    return 'status-active';
-  }
+  const current = badgeStyles[normalized] || {
+    label: cleanStr.replace(/_/g, ' '),
+    className: 'bg-neutral-800 text-neutral-400 border-neutral-700/60',
+  };
 
-  if (
-    norm.includes('pending') ||
-    norm.includes('under review') ||
-    norm.includes('awaiting') ||
-    norm.includes('scheduled')
-  ) {
-    return 'status-pending';
-  }
-
-  if (
-    norm.includes('resolved') ||
-    norm.includes('completed') ||
-    norm.includes('closed') ||
-    norm.includes('expired') ||
-    norm.includes('approved') ||
-    norm.includes('verified') ||
-    norm.includes('success') ||
-    norm.includes('standby') ||
-    norm.includes('off duty') ||
-    norm.includes('clear') ||
-    norm.includes('operational')
-  ) {
-    return 'status-resolved';
-  }
-
-  return 'status-resolved';
-}
-
-function formatSentenceCase(str = '') {
-  const clean = String(str).replace(/[•·]/g, '').trim();
-  if (!clean) return '';
-  const words = clean.replace(/_/g, ' ').toLowerCase().split(' ');
-  return words
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ''))
-    .join(' ');
-}
-
-function StatusBadge({ status }) {
-  const cls = getStatusClass(status);
-  const cleanText = formatSentenceCase(status);
   return (
-    <span className={`status ${cls}`} title={`Status: ${cleanText}`}>
-      {cleanText}
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border tracking-wide uppercase font-mono ${current.className}`}
+    >
+      {current.label}
     </span>
   );
 }

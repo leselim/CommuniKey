@@ -137,15 +137,7 @@ function Navbar() {
               }}
               aria-expanded={userMenuOpen}
             >
-              <span
-                style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--signal)',
-                  display: 'inline-block',
-                }}
-              />
+              <span className="text-blue-500 font-bold" style={{ color: 'var(--signal)' }}>•</span>
               <span>{displayName}</span>
               <span className="mono sm faint" style={{ color: 'var(--dim)', fontSize: '0.7rem' }}>
                 ▾

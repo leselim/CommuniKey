@@ -65,7 +65,7 @@ function PlatformGuideModal({ isOpen, onClose }) {
               <tbody>
                 <tr style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td style={{ padding: 'var(--s2)', whiteSpace: 'nowrap' }}>
-                    <StatusBadge status="Active" />
+                    <span className="text-blue-500 font-mono text-xs font-semibold">• ACTIVE</span>
                   </td>
                   <td style={{ padding: 'var(--s2)', color: 'var(--dim)' }}>
                     <strong style={{ color: 'var(--paper)' }}>Brand Blue (ACTIVE / IN PROGRESS):</strong> Live gate passes, active incident responses, or ongoing maintenance.
@@ -73,7 +73,7 @@ function PlatformGuideModal({ isOpen, onClose }) {
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td style={{ padding: 'var(--s2)', whiteSpace: 'nowrap' }}>
-                    <StatusBadge status="Under Review" />
+                    <span className="text-amber-500 font-mono text-xs font-semibold">• UNDER REVIEW</span>
                   </td>
                   <td style={{ padding: 'var(--s2)', color: 'var(--dim)' }}>
                     <strong style={{ color: 'var(--paper)' }}>Amber (UNDER REVIEW / PENDING):</strong> Requests awaiting approval or verification.
@@ -81,7 +81,7 @@ function PlatformGuideModal({ isOpen, onClose }) {
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td style={{ padding: 'var(--s2)', whiteSpace: 'nowrap' }}>
-                    <StatusBadge status="Resolved" />
+                    <span className="text-neutral-400 font-mono text-xs font-semibold">• RESOLVED</span>
                   </td>
                   <td style={{ padding: 'var(--s2)', color: 'var(--dim)' }}>
                     <strong style={{ color: 'var(--paper)' }}>Muted Grey (RESOLVED / COMPLETED):</strong> Closed tickets and expired passes.
@@ -89,7 +89,7 @@ function PlatformGuideModal({ isOpen, onClose }) {
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--line-hi)' }}>
                   <td style={{ padding: 'var(--s2)', whiteSpace: 'nowrap' }}>
-                    <StatusBadge status="Critical" />
+                    <span className="text-rose-500 font-mono text-xs font-semibold">• CRITICAL</span>
                   </td>
                   <td style={{ padding: 'var(--s2)', color: 'var(--dim)' }}>
                     <strong style={{ color: 'var(--paper)' }}>Muted Rose (CRITICAL / SOS):</strong> Active emergency broadcasts and urgent alerts.

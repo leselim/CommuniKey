@@ -139,7 +139,7 @@ function GuardhouseVerificationModal({ isOpen, onClose, onLogEntry }) {
                     border: '1px solid rgba(16, 185, 129, 0.3)',
                   }}
                 >
-                  VALID | ENTRY PERMITTED
+                  VALID • ENTRY PERMITTED
                 </span>
                 <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
                   {matchedPass.code} ({matchedPass.pin})

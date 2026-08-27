@@ -334,7 +334,7 @@ function GuardhouseDashboard() {
                       border: '1px solid var(--line-hi)',
                     }}
                   >
-                    Valid Pass
+                    • Valid Pass
                   </span>
                   <span className="mono sm" style={{ color: 'var(--paper)', fontWeight: 600 }}>
                     {matchedPass.code} ({matchedPass.type})
@@ -407,7 +407,7 @@ function GuardhouseDashboard() {
                     marginBottom: 'var(--s2)',
                   }}
                 >
-                  Access Denied
+                  • Access Denied
                 </span>
                 <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.82rem' }}>
                   Access code "{cleanSubmitted}" was not found in active gate ledger or has expired. Please request host resident to generate a new pass.

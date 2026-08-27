@@ -155,7 +155,7 @@ function Dashboard() {
             Welcome back, {formatFirstName(currentUser)}
           </h1>
           <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s2)' }}>
-            Riverside Estate • Pretoria
+            Riverside Estate · Pretoria
           </p>
         </div>
 
@@ -525,7 +525,7 @@ function Dashboard() {
                   492-801
                 </div>
                 <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
-                  Gate Keypad Entry PIN | Scannable at Guardhouse Terminal
+                  Gate Keypad Entry PIN · Scannable at Guardhouse Terminal
                 </p>
               </div>
             ) : null}
@@ -585,7 +585,7 @@ function Dashboard() {
           <div className="stack" style={{ gap: 'var(--s3)' }}>
             <div className="cluster" style={{ justifyContent: 'space-between' }}>
               <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-                {formatDayDate(selectedEvent.event_date)} | {selectedEvent.time || '18:30 to 19:30'}
+                {formatDayDate(selectedEvent.event_date)} · {selectedEvent.time || '18:30 to 19:30'}
               </span>
               <StatusBadge status={rsvpState[selectedEvent.id] ? 'Attending' : 'RSVP Open'} />
             </div>

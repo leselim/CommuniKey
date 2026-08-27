@@ -173,7 +173,7 @@ function AdminDashboard() {
     },
     '30d': {
       total_users: 248,
-      user_subtitle: 'vs previous period | Verified Residents & Staff',
+      user_subtitle: 'vs previous period · Verified Residents & Staff',
       user_growth_pct: 12.4,
       resolution_rate: 96.4,
       incident_subtitle: '+12.4% resolved',
@@ -511,7 +511,7 @@ function AdminDashboard() {
             </span>
           </div>
           <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.72rem' }}>
-            {metrics.user_subtitle || 'vs previous period | Verified Residents & Staff'}
+            {metrics.user_subtitle || 'vs previous period · Verified Residents & Staff'}
           </p>
         </div>
 

@@ -132,7 +132,7 @@ function SysAdminDashboard() {
                   {user.first_name} {user.last_name}
                 </h3>
                 <p className="entry-body">
-                  Email: {user.email} | {user.address}
+                  Email: {user.email} · {user.address}
                 </p>
               </div>
 

@@ -110,7 +110,7 @@ function MemberModeration() {
                       {item.name}
                     </h3>
                     <p className="sm faint" style={{ color: 'var(--dim)', margin: '2px 0 0 0' }}>
-                      {item.address} | {item.email}
+                      {item.address} · {item.email}
                     </p>
                   </div>
                   <div className="cluster" style={{ gap: 'var(--s2)' }}>
@@ -141,7 +141,7 @@ function MemberModeration() {
                   </div>
                 </div>
                 <p className="sm faint" style={{ color: 'var(--paper)', margin: 0 }}>
-                  Uploaded Document: <strong>{item.documentType}</strong> ({item.fileName}) | Submitted {item.uploadedTime}
+                  Uploaded Document: <strong>{item.documentType}</strong> ({item.fileName}) · Submitted {item.uploadedTime}
                 </p>
               </li>
             ))}
@@ -188,7 +188,7 @@ function MemberModeration() {
                     {m.first_name} {m.last_name}
                   </h3>
                   <p className="sm faint" style={{ color: 'var(--dim)', margin: '2px 0 0 0' }}>
-                    {m.address} | {m.role}
+                    {m.address} · {m.role}
                   </p>
                 </div>
                 <div className="cluster" style={{ gap: 'var(--s2)' }}>

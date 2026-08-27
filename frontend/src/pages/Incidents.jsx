@@ -177,13 +177,13 @@ function GeneralIncidentsHub() {
                     </span>
                     {item.location ? (
                       <>
-                        <span style={{ color: 'var(--line-hi)' }}>|</span>
+                        <span style={{ color: 'var(--line-hi)' }}>·</span>
                         <span>Location: {item.location}</span>
                       </>
                     ) : null}
                     {item.reported_by ? (
                       <>
-                        <span style={{ color: 'var(--line-hi)' }}>|</span>
+                        <span style={{ color: 'var(--line-hi)' }}>·</span>
                         <span>Reported by {item.reported_by}</span>
                       </>
                     ) : null}

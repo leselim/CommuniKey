@@ -197,7 +197,7 @@ function VolunteerDashboard() {
                 <div>
                   <h3 className="entry-title">{item.incident_type}</h3>
                   <p className="sm faint" style={{ color: 'var(--dim)', marginTop: '2px' }}>
-                    Location: <strong>{item.location || 'General Estate'}</strong> | Reported by {item.reported_by}
+                    Location: <strong>{item.location || 'General Estate'}</strong> · Reported by {item.reported_by}
                   </p>
                 </div>
                 <StatusBadge status={item.status} />

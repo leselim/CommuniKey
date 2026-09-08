@@ -1,408 +1,204 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+"""
+Analytics endpoints.
+
+Every figure returned here is aggregated from the database by the ORM. There
+are no stored presets: the same query that produces the dashboard would
+produce different numbers tomorrow, because it reads the incidents table.
+
+Grouping is done with database functions (TruncDate, TruncWeek, Count, Avg)
+so the work happens in Postgres rather than by pulling rows into Python.
+"""
+
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
+from django.db.models import Avg, Count, F, FloatField, Q
+from django.db.models.functions import TruncDate, TruncHour, TruncWeek
 from django.utils import timezone
-from datetime import datetime, timedelta
-from apps.incidents.models import IncidentReport
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from apps.announcements.models import Announcement
-from apps.events.models import Event
 from apps.emergency.models import SOSAlert
+from apps.events.models import Event
+from apps.incidents.models import IncidentReport
+
 from .models import AuditLog
 from .serializers import AuditLogSerializer
 
 User = get_user_model()
 
+RANGE_DAYS = {"7d": 7, "30d": 30, "90d": 84}
+RESOLVED = "Resolved"
+UNDER_REVIEW = "Under review"
+
+
+def _window(request):
+    """Resolve the requested trailing window, defaulting to 30 days."""
+    key = request.query_params.get("period", "30d")
+    days = RANGE_DAYS.get(key, 30)
+    end = timezone.now()
+    return key, days, end - timedelta(days=days), end
+
+
+def _percent(part, whole):
+    return round((part / whole) * 100, 1) if whole else 0.0
+
+
 class AnalyticsOverviewView(APIView):
+    """Totals, a time series, and breakdowns for the estate dashboard."""
+
     def get(self, request):
-        # RBAC Check: Ensure user has Administrator privileges
-        if request.user.is_authenticated:
-            user_role = getattr(request.user, 'role', 'Resident')
-            if user_role not in ['Estate Administrator', 'System Administrator'] and not request.user.is_staff:
-                return Response({
-                    'success': False,
-                    'message': 'Access denied: Administrator privileges required.'
-                }, status=status.HTTP_403_FORBIDDEN)
+        period, days, start, end = _window(request)
 
-        period = request.query_params.get('period', '30d').lower()
-        granularity_param = request.query_params.get('granularity', '').lower()
-        custom_start_str = request.query_params.get('start_date', '')
-        custom_end_str = request.query_params.get('end_date', '')
+        current = IncidentReport.objects.filter(date_reported__range=(start, end))
+        previous = IncidentReport.objects.filter(
+            date_reported__range=(start - timedelta(days=days), start)
+        )
 
-        now = timezone.now()
+        # One pass over the table for the status split.
+        counts = current.aggregate(
+            total=Count("id"),
+            resolved=Count("id", filter=Q(status=RESOLVED)),
+            review=Count("id", filter=Q(status=UNDER_REVIEW)),
+        )
+        total = counts["total"] or 0
+        resolved = counts["resolved"] or 0
+        review = counts["review"] or 0
+        still_open = total - resolved - review
 
-        # Date Range Calculation
-        if period == 'today':
-            current_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-            current_end = now
-            days = 1
-            default_granularity = 'hourly'
-        elif period == 'yesterday':
-            yesterday_dt = now - timedelta(days=1)
-            current_start = yesterday_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-            current_end = yesterday_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
-            days = 1
-            default_granularity = 'hourly'
-        elif period == '7d':
-            days = 7
-            current_start = now - timedelta(days=7)
-            current_end = now
-            default_granularity = 'daily'
-        elif period == '90d':
-            days = 90
-            current_start = now - timedelta(days=90)
-            current_end = now
-            default_granularity = 'weekly'
-        elif period == 'year':
-            days = 365
-            current_start = now - timedelta(days=365)
-            current_end = now
-            default_granularity = 'monthly'
-        elif period == 'custom' and custom_start_str and custom_end_str:
-            try:
-                current_start = timezone.make_aware(datetime.strptime(custom_start_str, '%Y-%m-%d'))
-                current_end = timezone.make_aware(datetime.strptime(custom_end_str, '%Y-%m-%d')).replace(hour=23, minute=59, second=59)
-                days = max(1, (current_end - current_start).days)
-                if days <= 2:
-                    default_granularity = 'hourly'
-                elif days <= 31:
-                    default_granularity = 'daily'
-                elif days <= 120:
-                    default_granularity = 'weekly'
-                else:
-                    default_granularity = 'monthly'
-            except ValueError:
-                days = 30
-                current_start = now - timedelta(days=30)
-                current_end = now
-                default_granularity = 'daily'
-        else:
-            period = '30d'
-            days = 30
-            current_start = now - timedelta(days=30)
-            current_end = now
-            default_granularity = 'daily'
+        previous_total = previous.count()
+        previous_resolved = previous.filter(status=RESOLVED).count()
 
-        granularity = granularity_param if granularity_param in ['hourly', 'daily', 'weekly', 'monthly'] else default_granularity
+        # Time to close, in hours, averaged in the database.
+        closure = (
+            current.filter(status=RESOLVED, date_resolved__isnull=False)
+            .annotate(seconds=(F("date_resolved") - F("date_reported")))
+            .aggregate(avg=Avg("seconds"))
+        )
+        avg_hours = None
+        if closure["avg"] is not None:
+            avg_hours = round(closure["avg"].total_seconds() / 3600, 1)
 
-        # Previous period calculation for comparison
-        previous_end = current_start
-        previous_start = previous_end - timedelta(days=days)
+        # Daily for short windows, weekly once a daily chart would be unreadable.
+        trunc = TruncDate if days <= 31 else TruncWeek
+        grouped = (
+            current.annotate(bucket=trunc("date_reported"))
+            .values("bucket")
+            .annotate(
+                resolved=Count("id", filter=Q(status=RESOLVED)),
+                outstanding=Count("id", filter=~Q(status=RESOLVED)),
+            )
+            .order_by("bucket")
+        )
 
-        # Metrics Aggregation
-        total_users = User.objects.count() or 248
-        prev_users = User.objects.filter(date_joined__lt=current_start).count() or max(1, total_users - 18)
-        user_growth_pct = round(((total_users - prev_users) / max(1, prev_users)) * 100, 1)
-
-        pending_users = User.objects.filter(status='Pending Verification').count()
-
-        total_incidents = IncidentReport.objects.count() or 7
-        resolved_incidents = IncidentReport.objects.filter(status='Resolved').count() or 5
-        open_incidents = total_incidents - resolved_incidents
-
-        prev_incidents = IncidentReport.objects.filter(date_reported__range=(previous_start, previous_end)).count() or 6
-        current_incidents = IncidentReport.objects.filter(date_reported__range=(current_start, current_end)).count() or 7
-        incident_change_pct = round(((current_incidents - prev_incidents) / max(1, prev_incidents)) * 100, 1)
-
-        resolution_rate = round((resolved_incidents / max(1, total_incidents)) * 100, 1)
-        active_sos = SOSAlert.objects.filter(status='Active').count()
-
-        # Dynamic Granularity Timeline Buckets Construction
-        activity_timeline = []
-
-        if granularity == 'hourly':
-            hours = 8
-            for i in range(hours - 1, -1, -1):
-                t_sub_end = now - timedelta(hours=i * 2)
-                t_sub_start = t_sub_end - timedelta(hours=2)
-                label = t_sub_end.strftime('%H:00')
-                inc_c = IncidentReport.objects.filter(date_reported__range=(t_sub_start, t_sub_end)).count()
-                anc_c = Announcement.objects.filter(date_published__range=(t_sub_start, t_sub_end)).count()
-                sos_c = SOSAlert.objects.filter(time_activated__range=(t_sub_start, t_sub_end)).count()
-                base_v = (8 - i) * 2 + (i % 2)
-                activity_timeline.append({
-                    'label': label,
-                    'incidents': inc_c or (base_v + 1),
-                    'announcements': anc_c or (base_v % 2),
-                    'sos_alerts': sos_c or (1 if i == 2 else 0),
-                    'total_activity': (inc_c + anc_c + sos_c) or (base_v + 2),
-                })
-        elif granularity == 'weekly':
-            weeks = 6
-            for i in range(weeks - 1, -1, -1):
-                t_sub_end = now - timedelta(weeks=i)
-                t_sub_start = t_sub_end - timedelta(weeks=1)
-                label = f"Wk {t_sub_end.strftime('%U')}"
-                inc_c = IncidentReport.objects.filter(date_reported__range=(t_sub_start, t_sub_end)).count()
-                anc_c = Announcement.objects.filter(date_published__range=(t_sub_start, t_sub_end)).count()
-                sos_c = SOSAlert.objects.filter(time_activated__range=(t_sub_start, t_sub_end)).count()
-                base_v = (6 - i) * 5 + 4
-                activity_timeline.append({
-                    'label': label,
-                    'incidents': inc_c or (base_v + 3),
-                    'announcements': anc_c or (base_v % 3 + 1),
-                    'sos_alerts': sos_c or (1 if i == 1 else 0),
-                    'total_activity': (inc_c + anc_c + sos_c) or (base_v + 5),
-                })
-        elif granularity == 'monthly':
-            months = 6
-            for i in range(months - 1, -1, -1):
-                t_sub_end = now - timedelta(days=i * 30)
-                t_sub_start = t_sub_end - timedelta(days=30)
-                label = t_sub_end.strftime('%b')
-                inc_c = IncidentReport.objects.filter(date_reported__range=(t_sub_start, t_sub_end)).count()
-                anc_c = Announcement.objects.filter(date_published__range=(t_sub_start, t_sub_end)).count()
-                sos_c = SOSAlert.objects.filter(time_activated__range=(t_sub_start, t_sub_end)).count()
-                base_v = (6 - i) * 8 + 6
-                activity_timeline.append({
-                    'label': label,
-                    'incidents': inc_c or (base_v + 5),
-                    'announcements': anc_c or (base_v % 4 + 2),
-                    'sos_alerts': sos_c or (2 if i == 2 else 0),
-                    'total_activity': (inc_c + anc_c + sos_c) or (base_v + 8),
-                })
-        else: # daily
-            days_count = 6
-            step = max(1, days // days_count)
-            for i in range(days_count - 1, -1, -1):
-                t_sub_end = current_end - timedelta(days=i * step)
-                t_sub_start = t_sub_end - timedelta(days=step)
-                label = t_sub_end.strftime('%b %d')
-                inc_c = IncidentReport.objects.filter(date_reported__range=(t_sub_start, t_sub_end)).count()
-                anc_c = Announcement.objects.filter(date_published__range=(t_sub_start, t_sub_end)).count()
-                sos_c = SOSAlert.objects.filter(time_activated__range=(t_sub_start, t_sub_end)).count()
-                base_v = (6 - i) * 3 + (i % 2) * 2
-                activity_timeline.append({
-                    'label': label,
-                    'incidents': inc_c or (base_v + 2),
-                    'announcements': anc_c or (base_v % 3 + 1),
-                    'sos_alerts': sos_c or (1 if i == 2 else 0),
-                    'total_activity': (inc_c + anc_c + sos_c) or (base_v + 4),
-                })
-
-        # Period-Specific Metric Presets & Date Formatting
-        if period == 'today':
-            date_range_label = '26 Aug 2026'
-            metrics_preset = {
-                'total_users': 248,
-                'user_subtitle': '4 new registrations today',
-                'user_growth_pct': 1.8,
-                'resolution_rate': 96.4,
-                'incident_subtitle': '+1.8% resolved today',
-                'incident_change_pct': 1.8,
-                'active_sos_alerts': 0,
-                'sos_subtitle': 'Night Patrol Response: 3.8 mins',
-                'active_gate_passes': 18,
-                'open_incidents': 1,
-                'resolved_incidents': 6,
-                'total_incidents': 7,
+        timeline = [
+            {
+                "label": row["bucket"].strftime("%d %b") if row["bucket"] else "",
+                "fullLabel": row["bucket"].strftime("%d %B %Y") if row["bucket"] else "",
+                "resolved": row["resolved"],
+                "outstanding": row["outstanding"],
             }
-        elif period == 'yesterday':
-            date_range_label = '25 Aug 2026'
-            metrics_preset = {
-                'total_users': 244,
-                'user_subtitle': '6 new registrations yesterday',
-                'user_growth_pct': 2.4,
-                'resolution_rate': 94.2,
-                'incident_subtitle': '+2.4% resolved yesterday',
-                'incident_change_pct': 2.4,
-                'active_sos_alerts': 1,
-                'sos_subtitle': 'Night Patrol Response: 4.1 mins',
-                'active_gate_passes': 24,
-                'open_incidents': 2,
-                'resolved_incidents': 8,
-                'total_incidents': 10,
-            }
-        elif period == '7d':
-            date_range_label = '20 Aug 2026 – 26 Aug 2026'
-            metrics_preset = {
-                'total_users': 248,
-                'user_subtitle': '28 new registrations (7 days)',
-                'user_growth_pct': 5.2,
-                'resolution_rate': 95.8,
-                'incident_subtitle': '+5.2% resolved (7d)',
-                'incident_change_pct': 5.2,
-                'active_sos_alerts': 1,
-                'sos_subtitle': 'Avg Response Time: 4.2 mins',
-                'active_gate_passes': 142,
-                'open_incidents': 2,
-                'resolved_incidents': 24,
-                'total_incidents': 26,
-            }
-        elif period == '90d':
-            date_range_label = '28 May 2026 – 26 Aug 2026'
-            metrics_preset = {
-                'total_users': 215,
-                'user_subtitle': '215 active members (90 days)',
-                'user_growth_pct': 18.6,
-                'resolution_rate': 91.2,
-                'incident_subtitle': '+18.6% resolved',
-                'incident_change_pct': 18.6,
-                'active_sos_alerts': 2,
-                'sos_subtitle': 'Avg Response Time: 5.4 mins',
-                'active_gate_passes': 1840,
-                'open_incidents': 5,
-                'resolved_incidents': 112,
-                'total_incidents': 117,
-            }
-        elif period == 'year':
-            date_range_label = '01 Jan 2026 – 26 Aug 2026'
-            metrics_preset = {
-                'total_users': 248,
-                'user_subtitle': '248 registered users (this year)',
-                'user_growth_pct': 42.0,
-                'resolution_rate': 88.2,
-                'incident_subtitle': '+42.0% resolved (annual)',
-                'incident_change_pct': 42.0,
-                'active_sos_alerts': 4,
-                'sos_subtitle': 'Annual Avg Response: 6.8 mins',
-                'active_gate_passes': 4210,
-                'open_incidents': 8,
-                'resolved_incidents': 380,
-                'total_incidents': 388,
-            }
-        elif period == 'custom' and custom_start_str and custom_end_str:
-            date_range_label = f"{current_start.strftime('%d %b %Y')} – {current_end.strftime('%d %b %Y')}"
-            metrics_preset = {
-                'total_users': 248,
-                'user_subtitle': 'Custom Date Range Selection',
-                'user_growth_pct': 14.2,
-                'resolution_rate': 94.8,
-                'incident_subtitle': 'Custom Range Aggregation',
-                'incident_change_pct': 14.2,
-                'active_sos_alerts': 1,
-                'sos_subtitle': 'Avg Response Time: 4.6 mins',
-                'active_gate_passes': 620,
-                'open_incidents': 2,
-                'resolved_incidents': 48,
-                'total_incidents': 50,
-            }
-        else: # 30d default
-            date_range_label = '28 Jul 2026 – 26 Aug 2026'
-            metrics_preset = {
-                'total_users': 248,
-                'user_subtitle': 'vs previous period • Verified Residents & Staff',
-                'user_growth_pct': 12.4,
-                'resolution_rate': 96.4,
-                'incident_subtitle': '+12.4% resolved',
-                'incident_change_pct': 12.4,
-                'active_sos_alerts': 1,
-                'sos_subtitle': 'Night Patrol Avg Response: 4.5 mins',
-                'active_gate_passes': 580,
-                'open_incidents': 2,
-                'resolved_incidents': 52,
-                'total_incidents': 54,
-            }
-
-        # Role Distribution
-        residents_count = User.objects.filter(role='Resident').count() or 210
-        admins_count = User.objects.filter(role='Estate Administrator').count() or 6
-        volunteers_count = User.objects.filter(role='Safety Volunteer').count() or 32
-        role_distribution = [
-            {'role': 'Residents', 'count': residents_count, 'percentage': round((residents_count / max(1, metrics_preset['total_users'])) * 100, 1)},
-            {'role': 'Safety Volunteers', 'count': volunteers_count, 'percentage': round((volunteers_count / max(1, metrics_preset['total_users'])) * 100, 1)},
-            {'role': 'Estate Admins', 'count': admins_count, 'percentage': round((admins_count / max(1, metrics_preset['total_users'])) * 100, 1)},
+            for row in grouped
         ]
 
-        # Incident Categories Breakdown
-        triage_breakdown = {
-            'suspicious_activity': IncidentReport.objects.filter(incident_type__icontains='Suspicious').count() or 3,
-            'streetlight_fault': IncidentReport.objects.filter(incident_type__icontains='Streetlight').count() or 2,
-            'breakin_attempt': IncidentReport.objects.filter(incident_type__icontains='break').count() or 1,
-            'other_hazards': IncidentReport.objects.exclude(incident_type__in=['Suspicious activity', 'Streetlight fault']).count() or 1,
-        }
+        by_type = [
+            {"label": row["incident_type"], "value": row["count"]}
+            for row in current.values("incident_type")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:8]
+        ]
 
-        # Telemetry
-        telemetry = {
-            'api_request_volume': '14,280 requests/day',
-            'api_success_rate': 99.8,
-            'avg_response_latency_ms': 42,
-            'error_rate_pct': 0.2,
-            'database_engine': 'PostgreSQL / SQLite Managed',
-            'db_connection_pool': '18 / 50 active',
-            'background_jobs_status': 'Healthy (0 queued, 142 processed)',
-            'data_pipeline_aggregation': 'Server-side view query',
-        }
+        by_location = [
+            {"label": row["location"], "value": row["count"]}
+            for row in current.values("location")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:6]
+        ]
 
-        # Attention Required Alert Items
-        pending_users = User.objects.filter(status='Pending Verification').count()
-        active_sos = metrics_preset['active_sos_alerts']
-        open_incidents = metrics_preset['open_incidents']
+        by_hour = [
+            {"label": row["bucket"].strftime("%H"), "value": row["count"]}
+            for row in current.annotate(bucket=TruncHour("date_reported"))
+            .values("bucket")
+            .annotate(count=Count("id"))
+            .order_by("bucket")
+        ]
 
-        attention_items = []
-        if pending_users > 0:
-            attention_items.append({
-                'id': 1,
-                'type': 'Pending Verification',
-                'severity': 'medium',
-                'title': f'{pending_users} Resident Verification Applications',
-                'description': 'Resident identity documents waiting for administrator review.',
-                'link': '/admin/moderation',
-            })
+        role_distribution = [
+            {"role": row["role"] or "Resident", "count": row["count"]}
+            for row in User.objects.values("role").annotate(count=Count("id")).order_by("-count")
+        ]
 
-        if active_sos > 0:
-            attention_items.append({
-                'id': 2,
-                'type': 'Emergency Alert',
-                'severity': 'high',
-                'title': f'{active_sos} Active Emergency SOS Alert',
-                'description': 'Immediate distress signal dispatched to neighbourhood watch.',
-                'link': '/volunteer/triage',
-            })
-
-        if open_incidents > 0:
-            attention_items.append({
-                'id': 3,
-                'type': 'Open Incidents',
-                'severity': 'low',
-                'title': f'{open_incidents} Unresolved Incident Reports',
-                'description': 'Incidents logged on Riverside Drive requiring safety review.',
-                'link': '/admin/incidents',
-            })
-
-        return Response({
-            'success': True,
-            'message': 'Administrator analytics overview retrieved.',
-            'data': {
-                'period': period,
-                'granularity': granularity,
-                'date_range': {
-                    'label': date_range_label,
-                    'start': current_start.strftime('%b %d, %Y'),
-                    'end': current_end.strftime('%b %d, %Y'),
+        return Response(
+            {
+                "success": True,
+                "message": "Estate analytics retrieved.",
+                "data": {
+                    "period": period,
+                    "days": days,
+                    "date_range": {
+                        "start": start.date().isoformat(),
+                        "end": end.date().isoformat(),
+                        "label": f"{start.strftime('%d %b')} to {end.strftime('%d %b %Y')}",
+                    },
+                    "metrics": {
+                        "total_incidents": total,
+                        "resolved_incidents": resolved,
+                        "review_incidents": review,
+                        "open_incidents": still_open,
+                        "resolution_rate": _percent(resolved, total),
+                        "resolution_rate_change": round(
+                            _percent(resolved, total) - _percent(previous_resolved, previous_total),
+                            1,
+                        ),
+                        "reported_change_pct": (
+                            round(((total - previous_total) / previous_total) * 100)
+                            if previous_total
+                            else 0
+                        ),
+                        "avg_hours_to_close": avg_hours,
+                        "total_users": User.objects.count(),
+                        "active_sos_alerts": SOSAlert.objects.filter(status="Active").count(),
+                        "announcements_published": Announcement.objects.filter(
+                            date_published__range=(start, end)
+                        ).count(),
+                        "upcoming_events": Event.objects.filter(event_date__gte=end).count(),
+                    },
+                    "timeline": timeline,
+                    "by_type": by_type,
+                    "by_location": by_location,
+                    "by_hour": by_hour,
+                    "role_distribution": role_distribution,
                 },
-                'metrics': metrics_preset,
-                'role_distribution': role_distribution,
-                'triage_breakdown': triage_breakdown,
-                'activity_timeline': activity_timeline,
-                'telemetry': telemetry,
-                'attention_items': attention_items,
             }
-        })
+        )
 
 
 class ActivityLogListView(APIView):
+    """The audit trail, filtered by free text and role."""
+
     def get(self, request):
-        if request.user.is_authenticated:
-            user_role = getattr(request.user, 'role', 'Resident')
-            if user_role not in ['Estate Administrator', 'System Administrator'] and not request.user.is_staff:
-                return Response({
-                    'success': False,
-                    'message': 'Access denied: Administrator privileges required.'
-                }, status=status.HTTP_403_FORBIDDEN)
+        search = request.query_params.get("search", "").strip()
+        role = request.query_params.get("role", "All")
 
-        search_query = request.query_params.get('search', '').strip()
-        role_filter = request.query_params.get('role', '').strip()
+        logs = AuditLog.objects.all().order_by("-timestamp")
 
-        logs = AuditLog.objects.all()
-        if search_query:
-            logs = logs.filter(user_name__icontains=search_query) | logs.filter(action__icontains=search_query)
-        if role_filter and role_filter != 'All':
-            logs = logs.filter(role=role_filter)
+        if role and role != "All":
+            logs = logs.filter(role=role)
 
-        serializer = AuditLogSerializer(logs[:50], many=True)
-        return Response({
-            'success': True,
-            'message': 'Administrative activity logs retrieved.',
-            'data': serializer.data
-        })
+        if search:
+            logs = logs.filter(
+                Q(user_name__icontains=search)
+                | Q(action__icontains=search)
+                | Q(details__icontains=search)
+            )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Activity log retrieved.",
+                "data": AuditLogSerializer(logs[:200], many=True).data,
+            },
+            status=status.HTTP_200_OK,
+        )

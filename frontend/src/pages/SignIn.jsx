@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { SAMPLE_USERS, SEED_PASSWORD } from '../context/AuthContext';
+import Avatar from '../components/Avatar';
+
+/*
+ * Sign in.
+ *
+ * The four seeded accounts are offered as one-click entries. Every role in
+ * this system sees a different application, and asking a reviewer to
+ * remember four addresses and a password to find that out is a poor first
+ * impression. The normal credential form is still the primary path.
+ */
 
 function SignIn() {
   const { login } = useAuth();
@@ -12,138 +23,121 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
+
+  const attempt = (emailValue, passwordValue) => {
+    const result = login(emailValue, passwordValue);
+    if (result.success) {
+      navigate(from, { replace: true });
+    } else {
+      setError(result.message || 'That email and password do not match an account.');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email.trim()) {
-      setError('Please enter your registered email address.');
+      setError('Enter the email address you registered with.');
       return;
     }
-
-    const result = login(email, password);
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.message || 'Invalid email or password.');
-    }
+    attempt(email, password);
   };
 
   return (
-    <div className="stack" style={{ maxWidth: '460px', margin: '0 auto' }}>
-      {/* Masthead Header */}
-      <header className="masthead" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-        <div>
-          <p className="eyebrow">
-            CommuniKey Security
-          </p>
-          <h1 style={{ fontSize: 'var(--fs-xl)' }}>Sign In</h1>
-          <p className="masthead-meta">
-            Enter your credentials to access your estate community workspace.
-          </p>
-        </div>
-      </header>
+    <div className="auth">
+      <div className="auth-card">
+        <header className="auth-head">
+          <h1>Sign in</h1>
+          <p>Access your estate workspace.</p>
+        </header>
 
-      {error ? (
-        <div
-          className="panel"
-          style={{
-            padding: 'var(--s3) var(--s4)',
-            backgroundColor: 'var(--panel-hi)',
-            borderLeft: '3px solid var(--signal)',
-          }}
-        >
-          <p className="sm" style={{ color: 'var(--paper)', margin: 0 }}>
-            {error}
-          </p>
-        </div>
-      ) : null}
+        {error ? <p className="error">{error}</p> : null}
 
-      {/* Production-Grade Sign In Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="panel stack"
-        style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', gap: 'var(--s4)' }}
-      >
-        <div className="field">
-          <label className="eyebrow" htmlFor="signin-email">
-            Email Address
-          </label>
-          <input
-            id="signin-email"
-            type="email"
-            className="control"
-            placeholder="name@example.com"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError('');
-            }}
-            required
-            autoComplete="email"
-          />
-        </div>
-
-        <div className="field">
-          <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-            <label className="eyebrow" htmlFor="signin-password">
-              Password
-            </label>
-            <button
-              type="button"
-              className="link sm"
-              style={{ fontSize: '0.75rem', color: 'var(--dim)', border: 'none', background: 'none', cursor: 'pointer' }}
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          <input
-            id="signin-password"
-            type={showPassword ? 'text' : 'password'}
-            className="control"
-            placeholder="••••••••••••"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError('');
-            }}
-            required
-            autoComplete="current-password"
-          />
-        </div>
-
-        {/* Remember Me & Forgot Password Row */}
-        <div className="cluster" style={{ justifyContent: 'space-between', fontSize: 'var(--fs-sm)' }}>
-          <label className="cluster" style={{ gap: 'var(--s2)', cursor: 'pointer' }}>
+        <form onSubmit={handleSubmit} className="stack" style={{ gap: 'var(--s4)' }}>
+          <div className="field">
+            <label htmlFor="signin-email">Email address</label>
             <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              style={{ accentColor: 'var(--signal)' }}
+              id="signin-email"
+              type="email"
+              className="control"
+              placeholder="name@riverside.co.za"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              required
+              autoComplete="email"
             />
-            <span className="sm faint" style={{ color: 'var(--paper)' }}>
-              Remember Me
-            </span>
-          </label>
+          </div>
 
-          <Link to="/forgot-password" className="link sm" style={{ color: 'var(--dim)' }}>
-            Forgot password?
-          </Link>
-        </div>
+          <div className="field">
+            <div className="spread" style={{ gap: 'var(--s2)' }}>
+              <label htmlFor="signin-password">Password</label>
+              <button type="button" className="btn-quiet btn btn-sm" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            <input
+              id="signin-password"
+              type={showPassword ? 'text' : 'password'}
+              className="control"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              required
+              autoComplete="current-password"
+            />
+          </div>
 
-        <button type="submit" className="btn btn-solid" style={{ width: '100%', padding: '0.6rem', marginTop: 'var(--s2)' }}>
-          Sign In
-        </button>
+          <div className="spread">
+            <Link to="/forgot-password" className="link">
+              Forgotten your password?
+            </Link>
+          </div>
 
-        <p className="sm faint" style={{ textAlign: 'center', marginTop: 'var(--s2)' }}>
-          Don't have an account?{' '}
-          <Link to="/signup" className="link" style={{ color: 'var(--paper)', fontWeight: 600 }}>
-            Create an Account
-          </Link>
+          <button type="submit" className="btn btn-solid btn-block">
+            Sign in
+          </button>
+        </form>
+
+        <section style={{ marginTop: 'var(--s6)' }}>
+          <div className="section-head" style={{ marginBottom: 'var(--s3)' }}>
+            <h2 style={{ fontSize: 'var(--fs-base)' }}>Or open a demonstration account</h2>
+          </div>
+          <p className="hint" style={{ marginBottom: 'var(--s3)' }}>
+            Each role sees a different application. Password for all four is{' '}
+            <span className="nums">{SEED_PASSWORD}</span>.
+          </p>
+
+          <div className="persona-list">
+            {SAMPLE_USERS.map((user) => {
+              const name = `${user.first_name} ${user.last_name}`;
+              return (
+                <button
+                  key={user.id}
+                  type="button"
+                  className="persona"
+                  onClick={() => attempt(user.email, SEED_PASSWORD)}
+                >
+                  <Avatar name={name} size="sm" />
+                  <span className="persona-text">
+                    <span className="persona-name">{name}</span>
+                    <span className="persona-role">{user.role}</span>
+                  </span>
+                  <span className="persona-go">Open</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <p className="auth-foot">
+          No account yet? <Link to="/signup">Register your household</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

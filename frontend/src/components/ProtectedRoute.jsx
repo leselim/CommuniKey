@@ -15,15 +15,15 @@ function ProtectedRoute({ children, allowedRoles }) {
       <div className="stack">
         <header className="masthead">
           <div>
-            <p className="eyebrow" style={{ color: 'var(--signal)' }}>Access Restricted</p>
-            <h1>Role Permission Required</h1>
+            <p className="eyebrow" style={{ color: 'var(--signal)' }}>Access restricted</p>
+            <h1>You do not have access to this</h1>
             <p className="masthead-meta">
               Your account ({userRole}) does not have permission to view this section.
             </p>
           </div>
         </header>
 
-        <div className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+        <div className="panel">
           <p className="sm faint" style={{ color: 'var(--paper)', marginBottom: 'var(--s3)' }}>
             This feature is restricted to <strong>{allowedRoles.join(', ')}</strong> roles. You have been safely prevented from unauthorized access.
           </p>

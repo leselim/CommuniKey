@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import StatusBadge from '../components/StatusBadge';
+import Avatar from '../components/Avatar';
 import { useAuth } from '../context/AuthContext';
-import api, { save, unwrap } from '../services/api';
+import { save } from '../services/api';
 import { community, profile as demoProfile } from '../services/demoData';
 
 const SETTINGS_KEY = 'ccp_notification_settings';
@@ -10,17 +11,17 @@ const SETTINGS = [
   {
     key: 'notify_emergency',
     label: 'Emergency alerts',
-    hint: 'Notify me whenever an SOS alert is raised nearby.',
+    hint: 'Whenever an SOS is raised near your address.',
   },
   {
     key: 'notify_announcements',
-    label: 'Announcements',
-    hint: 'Notify me when administrators publish an announcement.',
+    label: 'Estate announcements',
+    hint: 'When management publishes a notice.',
   },
   {
     key: 'notify_events',
     label: 'Event reminders',
-    hint: 'Remind me about events I have said I will attend.',
+    hint: 'Before an event you said you would attend.',
   },
 ];
 
@@ -61,8 +62,8 @@ function Profile() {
     ...(currentUser || {}),
     ...loadStoredSettings(),
   });
-  const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState('');
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -72,7 +73,7 @@ function Profile() {
 
   const setField = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
-    setSaved(false);
+    setDirty(true);
   };
 
   const submit = async (event) => {
@@ -85,24 +86,29 @@ function Profile() {
     );
     updateProfile(form);
     await save('/auth/profile', form, 'put');
-    setSaved(true);
-    setNotice('Profile details saved successfully.');
+    setDirty(false);
+    setNotice('Your details have been saved.');
     setTimeout(() => setNotice(''), 4000);
   };
 
+  const fullName = `${form.first_name || ''} ${form.last_name || ''}`.trim() || 'Your account';
+
   return (
-    <form className="stack" onSubmit={submit}>
-      <header className="masthead">
-        <div>
-          <h1 style={{ margin: 0 }}>
-            {form.first_name} {form.last_name}
-          </h1>
-          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
-            {form.role || 'Resident'}, {community.community_name}
-          </p>
+    <form className="stack" style={{ gap: 'var(--s6)' }} onSubmit={submit}>
+      <header className="profile-head">
+        <Avatar name={fullName} size="xl" ring />
+        <div className="profile-id">
+          <span className="profile-name">{fullName}</span>
+          <div className="profile-tags">
+            <StatusBadge status="Verified" />
+            <span className="chip chip-plain">{form.role || 'Resident'}</span>
+            <span className="sm faint">{community.community_name}</span>
+          </div>
         </div>
-        <div className="cluster">
-          <p className="mono">{form.email}</p>
+        <div className="profile-actions">
+          <button type="submit" className="btn btn-solid" disabled={!dirty}>
+            {dirty ? 'Save changes' : 'Saved'}
+          </button>
         </div>
       </header>
 
@@ -110,73 +116,73 @@ function Profile() {
 
       <section className="section">
         <div className="section-head">
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>Personal Details</h2>
-          <StatusBadge status={`Verified (${form.role || 'Resident'})`} />
+          <h2>Your details</h2>
+          <span className="sm faint">Visible to estate management</span>
         </div>
 
         <div className="fields">
           <div className="field">
-            <label className="eyebrow" htmlFor="first-name">
-              First name
-            </label>
+            <label htmlFor="first-name">First name</label>
             <input
               id="first-name"
               className="control"
+              autoComplete="given-name"
               value={form.first_name || ''}
               onChange={(event) => setField('first_name', event.target.value)}
             />
           </div>
           <div className="field">
-            <label className="eyebrow" htmlFor="last-name">
-              Last name
-            </label>
+            <label htmlFor="last-name">Last name</label>
             <input
               id="last-name"
               className="control"
+              autoComplete="family-name"
               value={form.last_name || ''}
               onChange={(event) => setField('last_name', event.target.value)}
             />
           </div>
           <div className="field">
-            <label className="eyebrow" htmlFor="email">
-              Email address
-            </label>
+            <label htmlFor="email">Email address</label>
             <input
               id="email"
               type="email"
               className="control"
+              autoComplete="email"
               value={form.email || ''}
               onChange={(event) => setField('email', event.target.value)}
             />
           </div>
           <div className="field">
-            <label className="eyebrow" htmlFor="phone">
-              Phone number
-            </label>
+            <label htmlFor="phone">Phone number</label>
             <input
               id="phone"
+              type="tel"
               className="control"
+              autoComplete="tel"
               value={form.phone_number || ''}
               onChange={(event) => setField('phone_number', event.target.value)}
             />
           </div>
           <div className="field field-wide">
-            <label className="eyebrow" htmlFor="address">
-              Address
-            </label>
+            <label htmlFor="address">Street address</label>
             <input
               id="address"
               className="control"
+              autoComplete="street-address"
               value={form.address || ''}
               onChange={(event) => setField('address', event.target.value)}
             />
+            <span className="hint">
+              Patrols use this to find you during an emergency. Keep it accurate.
+            </span>
           </div>
         </div>
       </section>
 
       <section className="section">
         <div className="section-head">
-          <p className="eyebrow">Notifications</p>
+          <h2>Notifications</h2>
+          <span className="sm faint">Emergency alerts cannot be muted entirely</span>
         </div>
         <div>
           {SETTINGS.map((item) => (
@@ -193,28 +199,26 @@ function Profile() {
 
       <section className="section">
         <div className="section-head">
-          <p className="eyebrow">Membership</p>
+          <h2>Membership</h2>
           <StatusBadge status="Verified" />
         </div>
-        <ul className="ledger">
-          <li className="entry">
-            <h3 className="entry-title">{community.community_name}</h3>
-            <span className="entry-aside mono">{community.member_count} members</span>
-            <div className="entry-meta">
-              <span>
-                {community.suburb}, {community.city}, {community.province}
-              </span>
-            </div>
-          </li>
-        </ul>
+        <div className="details">
+          <div className="details-row">
+            <span className="details-label">Community</span>
+            <span className="details-value">{community.community_name}</span>
+          </div>
+          <div className="details-row">
+            <span className="details-label">Location</span>
+            <span className="details-value">
+              {community.suburb}, {community.city}, {community.province}
+            </span>
+          </div>
+          <div className="details-row">
+            <span className="details-label">Members</span>
+            <span className="details-value nums">{community.member_count}</span>
+          </div>
+        </div>
       </section>
-
-      <div className="cluster">
-        <button type="submit" className="btn btn-solid">
-          Save changes
-        </button>
-        {saved ? <span className="mono">Saved</span> : null}
-      </div>
     </form>
   );
 }

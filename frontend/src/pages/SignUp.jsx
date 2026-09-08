@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/*
+ * Household registration.
+ *
+ * Errors are reported per field rather than as a single line at the top,
+ * so a person can see which box to go back to. Validation runs on submit
+ * and then re-checks a field as it is corrected.
+ */
+
+const MIN_PASSWORD = 8;
+
 function SignUp() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -17,205 +27,207 @@ function SignUp() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validate = (values) => {
+    const found = {};
+    if (!values.first_name.trim()) found.first_name = 'Enter your first name.';
+    if (!values.last_name.trim()) found.last_name = 'Enter your last name.';
+
+    if (!values.email.trim()) found.email = 'Enter your email address.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email.trim())) {
+      found.email = 'That does not look like an email address.';
+    }
+
+    if (!values.address.trim()) {
+      found.address = 'Enter your street address so patrols can find you.';
+    }
+
+    if (!values.password) found.password = 'Choose a password.';
+    else if (values.password.length < MIN_PASSWORD) {
+      found.password = `Use at least ${MIN_PASSWORD} characters.`;
+    }
+
+    if (values.confirm_password !== values.password) {
+      found.confirm_password = 'This does not match the password above.';
+    }
+
+    return found;
+  };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
+    const next = { ...form, [e.target.name]: e.target.value };
+    setForm(next);
+    if (submitted) setErrors(validate(next));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim()) {
-      setError('Please fill in all required fields.');
-      return;
-    }
+    setSubmitted(true);
+    const found = validate(form);
+    setErrors(found);
 
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
-
-    if (form.password !== form.confirm_password) {
-      setError('Passwords do not match. Please re-enter your password.');
+    const firstBad = Object.keys(found)[0];
+    if (firstBad) {
+      const el = document.getElementById(`signup-${firstBad.replace(/_/g, '-')}`);
+      if (el) el.focus();
       return;
     }
 
     const result = register(form);
     if (result.success) {
       navigate('/', { replace: true });
+    } else {
+      setErrors({ email: result.message || 'That account could not be created.' });
     }
   };
 
+  const fieldError = (key) =>
+    errors[key] ? (
+      <span className="hint" style={{ color: 'var(--alert)' }}>
+        {errors[key]}
+      </span>
+    ) : null;
+
   return (
-    <div className="stack" style={{ maxWidth: '580px', margin: '0 auto' }}>
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">
-            CommuniKey Registration
+    <div className="auth">
+      <div className="auth-card auth-card-wide">
+        <header className="auth-head">
+          <h1>Register your household</h1>
+          <p>
+            Estate management verifies every application against the resident register before
+            granting access.
           </p>
-          <h1>Create Resident Account</h1>
-          <p className="masthead-meta">
-            Register your estate household account for community verification & emergency access.
-          </p>
-        </div>
-      </header>
+        </header>
 
-      {error ? (
-        <div
-          className="panel"
-          style={{
-            padding: 'var(--s3) var(--s4)',
-            backgroundColor: 'var(--panel-hi)',
-            borderLeft: '3px solid var(--signal)',
-          }}
-        >
-          <p className="sm" style={{ color: 'var(--paper)', margin: 0 }}>
-            {error}
-          </p>
-        </div>
-      ) : null}
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="fields">
+            <div className="field">
+              <label htmlFor="signup-first-name">First name</label>
+              <input
+                id="signup-first-name"
+                name="first_name"
+                className="control"
+                autoComplete="given-name"
+                value={form.first_name}
+                onChange={handleChange}
+                aria-invalid={errors.first_name ? 'true' : undefined}
+              />
+              {fieldError('first_name')}
+            </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="panel stack"
-        style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', gap: 'var(--s4)' }}
-      >
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
-          <div className="field" style={{ flex: 1 }}>
-            <label className="eyebrow" htmlFor="first_name">
-              First Name *
-            </label>
-            <input
-              id="first_name"
-              name="first_name"
-              type="text"
-              className="control"
-              placeholder="e.g., Elena"
-              value={form.first_name}
-              onChange={handleChange}
-              required
-            />
+            <div className="field">
+              <label htmlFor="signup-last-name">Last name</label>
+              <input
+                id="signup-last-name"
+                name="last_name"
+                className="control"
+                autoComplete="family-name"
+                value={form.last_name}
+                onChange={handleChange}
+                aria-invalid={errors.last_name ? 'true' : undefined}
+              />
+              {fieldError('last_name')}
+            </div>
+
+            <div className="field">
+              <label htmlFor="signup-email">Email address</label>
+              <input
+                id="signup-email"
+                name="email"
+                type="email"
+                className="control"
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                aria-invalid={errors.email ? 'true' : undefined}
+              />
+              {fieldError('email')}
+            </div>
+
+            <div className="field">
+              <label htmlFor="signup-phone-number">Phone number</label>
+              <input
+                id="signup-phone-number"
+                name="phone_number"
+                type="tel"
+                className="control"
+                autoComplete="tel"
+                placeholder="+27 82 000 0000"
+                value={form.phone_number}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="field field-wide">
+              <label htmlFor="signup-address">Street address</label>
+              <input
+                id="signup-address"
+                name="address"
+                className="control"
+                autoComplete="street-address"
+                placeholder="22 Riverside Drive, Section A"
+                value={form.address}
+                onChange={handleChange}
+                aria-invalid={errors.address ? 'true' : undefined}
+              />
+              {fieldError('address') || (
+                <span className="hint">Used to route patrols and emergency response.</span>
+              )}
+            </div>
+
+            <div className="field">
+              <div className="spread" style={{ gap: 'var(--s2)' }}>
+                <label htmlFor="signup-password">Password</label>
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <input
+                id="signup-password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                className="control"
+                autoComplete="new-password"
+                value={form.password}
+                onChange={handleChange}
+                aria-invalid={errors.password ? 'true' : undefined}
+              />
+              {fieldError('password') || (
+                <span className="hint">At least {MIN_PASSWORD} characters.</span>
+              )}
+            </div>
+
+            <div className="field">
+              <label htmlFor="signup-confirm-password">Confirm password</label>
+              <input
+                id="signup-confirm-password"
+                name="confirm_password"
+                type={showPassword ? 'text' : 'password'}
+                className="control"
+                autoComplete="new-password"
+                value={form.confirm_password}
+                onChange={handleChange}
+                aria-invalid={errors.confirm_password ? 'true' : undefined}
+              />
+              {fieldError('confirm_password')}
+            </div>
           </div>
 
-          <div className="field" style={{ flex: 1 }}>
-            <label className="eyebrow" htmlFor="last_name">
-              Last Name *
-            </label>
-            <input
-              id="last_name"
-              name="last_name"
-              type="text"
-              className="control"
-              placeholder="e.g., Rostova"
-              value={form.last_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
+          <button type="submit" className="btn btn-solid btn-block" style={{ marginTop: 'var(--s5)' }}>
+            Create account
+          </button>
+        </form>
 
-        <div className="field">
-          <label className="eyebrow" htmlFor="email">
-            Email Address *
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className="control"
-            placeholder="elena@example.com"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="cluster" style={{ gap: 'var(--s3)' }}>
-          <div className="field" style={{ flex: 1 }}>
-            <label className="eyebrow" htmlFor="phone_number">
-              Phone Number
-            </label>
-            <input
-              id="phone_number"
-              name="phone_number"
-              type="text"
-              className="control"
-              placeholder="+27 82 123 4567"
-              value={form.phone_number}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="field" style={{ flex: 1 }}>
-            <label className="eyebrow" htmlFor="address">
-              Estate Unit / Address
-            </label>
-            <input
-              id="address"
-              name="address"
-              type="text"
-              className="control"
-              placeholder="e.g., 14 Riverside Drive"
-              value={form.address}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className="field">
-          <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-            <label className="eyebrow" htmlFor="password">
-              Password *
-            </label>
-            <button
-              type="button"
-              className="link sm"
-              style={{ fontSize: '0.75rem', color: 'var(--dim)', border: 'none', background: 'none' }}
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? 'Hide Password' : 'Show Password'}
-            </button>
-          </div>
-          <input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            className="control"
-            placeholder="Minimum 6 characters"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="field">
-          <label className="eyebrow" htmlFor="confirm_password">
-            Confirm Password *
-          </label>
-          <input
-            id="confirm_password"
-            name="confirm_password"
-            type={showPassword ? 'text' : 'password'}
-            className="control"
-            placeholder="Re-enter password"
-            value={form.confirm_password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-solid" style={{ width: '100%', padding: '0.6rem', marginTop: 'var(--s2)' }}>
-          Create Resident Account
-        </button>
-
-        <p className="sm faint" style={{ textAlign: 'center', marginTop: 'var(--s2)' }}>
-          Already have an account?{' '}
-          <Link to="/signin" className="link" style={{ color: 'var(--paper)', fontWeight: 600 }}>
-            Sign In
-          </Link>
+        <p className="auth-foot">
+          Already registered? <Link to="/signin">Sign in</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

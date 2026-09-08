@@ -4,6 +4,14 @@ import { notifications as demoNotifications } from '../services/demoData';
 import { save } from '../services/api';
 import { formatRelative } from '../utils/format';
 
+/*
+ * Notification tray.
+ *
+ * Unread is carried by a single dot in the left gutter and by the title
+ * turning full contrast - read items simply go quiet rather than being
+ * struck through or greyed into illegibility.
+ */
+
 function Notifications() {
   const { items, setItems } = useCollection('/notifications', demoNotifications);
   const [open, setOpen] = useState(false);
@@ -28,9 +36,7 @@ function Notifications() {
   const unread = items.filter((item) => !item.read_status);
 
   const markRead = async (id) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, read_status: true } : item))
-    );
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, read_status: true } : item)));
     await save(`/notifications/${id}/read`, {}, 'put');
   };
 
@@ -45,44 +51,31 @@ function Notifications() {
         type="button"
         className="notify-btn"
         aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={
+          unread.length > 0
+            ? `Notifications, ${unread.length} unread`
+            : 'Notifications, none unread'
+        }
         onClick={() => setOpen((value) => !value)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '0.35rem 0.65rem',
-          backgroundColor: open ? 'var(--panel-hi)' : 'transparent',
-          border: '1px solid var(--line-hi)',
-          borderRadius: '4px',
-          color: 'var(--paper)',
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-        }}
       >
-        Notifications ({unread.length})
+        Notifications
+        {unread.length > 0 ? <span className="notify-count">{unread.length}</span> : null}
       </button>
 
       {open ? (
-        <div className="tray" style={{ zIndex: 100 }}>
+        <div className="tray">
           <div className="tray-head">
-            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, margin: 0 }}>
-              ESTATE NOTIFICATIONS & ALERTS
-            </p>
+            <h2>Notifications</h2>
             {unread.length > 0 ? (
-              <button
-                type="button"
-                className="link"
-                onClick={markAllRead}
-                style={{ fontSize: '0.72rem', color: 'var(--signal)', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Mark all as read
+              <button type="button" className="link" onClick={markAllRead}>
+                Mark all read
               </button>
             ) : null}
           </div>
 
           {items.length === 0 ? (
-            <p className="blank">No notifications.</p>
+            <p className="tray-empty">Nothing new.</p>
           ) : (
             items.map((item) => (
               <button
@@ -92,7 +85,7 @@ function Notifications() {
                 onClick={() => markRead(item.id)}
               >
                 <span
-                  className={`tray-flag${item.read_status ? ' read' : ''}`}
+                  className={`tray-flag${item.read_status ? ' read' : ' unread'}`}
                   aria-hidden="true"
                 />
                 <span className="tray-title">{item.title}</span>

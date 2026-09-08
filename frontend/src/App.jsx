@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
-import DevPersonaSwitcher from './components/DevPersonaSwitcher';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -11,7 +10,8 @@ import Events from './pages/Events';
 import ForgotPassword from './pages/ForgotPassword';
 import Incidents from './pages/Incidents';
 import MemberModeration from './pages/MemberModeration';
-import Members from './pages/Members';
+import Directory from './pages/Directory';
+import Insights from './pages/Insights';
 import PatrolOps from './pages/PatrolOps';
 import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
@@ -40,7 +40,6 @@ function App() {
       <AuthProvider>
         <div className="app">
           <Navbar />
-          <DevPersonaSwitcher />
           <main className="view">
             <div className="shell">
               <Routes>
@@ -140,20 +139,19 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-
                 <Route
-                  path="/messages"
+                  path="/directory"
                   element={
                     <ProtectedRoute>
-                      <Members />
+                      <Directory />
                     </ProtectedRoute>
                   }
                 />
                 <Route
-                  path="/admin/messages"
+                  path="/insights"
                   element={
-                    <ProtectedRoute allowedRoles={['Estate Administrator']}>
-                      <Members defaultTab="helpdesk" />
+                    <ProtectedRoute allowedRoles={['Estate Administrator', 'Safety Volunteer']}>
+                      <Insights />
                     </ProtectedRoute>
                   }
                 />

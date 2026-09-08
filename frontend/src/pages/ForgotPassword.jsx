@@ -24,7 +24,7 @@ function ForgotPassword() {
           <p className="eyebrow">
             Account Recovery
           </p>
-          <h1>Password Reset</h1>
+          <h1>Reset your password</h1>
           <p className="masthead-meta">
             Enter your registered email address to receive password recovery instructions.
           </p>
@@ -32,8 +32,8 @@ function ForgotPassword() {
       </header>
 
       {submitted ? (
-        <div className="panel stack" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', gap: 'var(--s4)' }}>
-          <p className="notice" style={{ margin: 0 }}>
+        <div className="panel stack" style={{ padding: 'var(--s5)', gap: 'var(--s4)' }}>
+          <p className="notice">
             {message}
           </p>
           <p className="sm faint">
@@ -49,7 +49,7 @@ function ForgotPassword() {
         <form
           onSubmit={handleSubmit}
           className="panel stack"
-          style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', gap: 'var(--s4)' }}
+          style={{ padding: 'var(--s5)', gap: 'var(--s4)' }}
         >
           <div className="field">
             <label className="eyebrow" htmlFor="reset-email">

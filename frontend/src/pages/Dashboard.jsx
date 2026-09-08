@@ -15,70 +15,87 @@ import {
 } from '../services/demoData';
 import { formatDayDate, formatRelative } from '../utils/format';
 import AdminDashboard from './AdminDashboard';
-import SysAdminDashboard from './SysAdminDashboard';
 import VolunteerDashboard from './VolunteerDashboard';
 import GuardhouseDashboard from './GuardhouseDashboard';
 
 const MY_REQUESTS = [
   {
     id: 'CK-492',
-    title: 'Visitor Access Gate Pass',
+    title: 'Visitor gate pass',
     type: 'Gate Pass',
     status: 'Active',
     guestName: 'Johan Smith',
     vehicle: 'Silver Polo (GP 482 CP)',
-    details: 'Valid for guest: Johan Smith (Car: GP 482 CP)',
+    details: 'Valid for one guest arriving at the main gate.',
     time: 'Expires today at 22:00',
-    validity: 'Valid today until 22:00',
+    pin: '492-801',
   },
   {
     id: 'INC-104',
-    title: 'Streetlight Repair Request',
+    title: 'Streetlight repair',
     type: 'Maintenance',
     status: 'In Progress',
-    details: 'Section A pole #14. City infrastructure dispatched.',
-    contractor: 'City Power Dispatch Team',
-    time: 'Updated 2h ago',
-    repairNotes: 'Technician on site tomorrow at 09:00 for pole replacement.',
+    details: 'Section A, pole 14. City infrastructure has been dispatched.',
+    contractor: 'City Power dispatch team',
+    time: 'Updated 2 hours ago',
+    repairNotes: 'Technician on site tomorrow at 09:00 to replace the pole.',
   },
   {
     id: 'REQ-88',
-    title: 'Gate Remote Access Sync',
+    title: 'Gate remote sync',
     type: 'Access Key',
     status: 'Completed',
-    details: 'Secondary remote programmed for Unit 22.',
+    details: 'Secondary remote programmed for unit 22.',
     time: 'Completed yesterday',
-    notes: 'Remote sync code #8841 verified at main gate.',
+    notes: 'Remote sync code 8841 verified at the main gate.',
   },
 ];
 
-function formatFirstName(user) {
-  if (!user) return 'Leseli';
+/* A fixed pattern standing in for a real encoded pass. Kept high-contrast
+   on white so a phone camera can actually read it off the screen. */
+const QR_CELLS = [
+  [2, 2, 7, 7], [3, 3, 5, 5, true], [4, 4, 3, 3],
+  [20, 2, 7, 7], [21, 3, 5, 5, true], [22, 4, 3, 3],
+  [2, 20, 7, 7], [3, 21, 5, 5, true], [4, 22, 3, 3],
+  [10, 3, 2, 2], [14, 2, 2, 3], [17, 4, 2, 2],
+  [3, 10, 2, 2], [6, 11, 2, 2], [10, 8, 3, 3],
+  [15, 9, 4, 2], [21, 11, 2, 3], [24, 10, 3, 2],
+  [11, 13, 2, 4], [15, 14, 3, 2], [20, 16, 2, 2],
+  [24, 15, 2, 3], [10, 19, 3, 2], [14, 20, 2, 3],
+  [18, 21, 4, 2], [23, 20, 3, 3], [11, 24, 2, 3],
+  [16, 25, 3, 2], [21, 24, 4, 3],
+];
 
-  const nameCandidate = user.first_name || user.firstName || '';
-  if (nameCandidate) {
-    const raw = nameCandidate.trim();
-    if (raw.toLowerCase().startsWith('leseli')) return 'Leseli';
-    const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
-    const firstWord = spaced.split(/\s+/)[0];
-    if (firstWord) {
-      if (firstWord.toLowerCase().startsWith('leseli')) return 'Leseli';
-      return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    }
-  }
+function PassCode() {
+  return (
+    <span className="pass-code">
+      <svg width="120" height="120" viewBox="0 0 29 29" aria-label="Gate pass code" role="img">
+        <rect width="29" height="29" fill="#ffffff" />
+        {QR_CELLS.map((cell, i) => (
+          <rect
+            key={i}
+            x={cell[0]}
+            y={cell[1]}
+            width={cell[2]}
+            height={cell[3]}
+            fill={cell[4] ? '#ffffff' : '#000000'}
+          />
+        ))}
+      </svg>
+    </span>
+  );
+}
 
+function firstNameOf(user) {
+  if (!user) return 'there';
+  const raw = (user.first_name || user.firstName || '').trim();
+  if (raw) return raw.split(/\s+/)[0];
   if (user.email) {
-    const handle = user.email.split('@')[0];
-    if (handle.toLowerCase().startsWith('leseli')) return 'Leseli';
-    const cleaned = handle.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[._-]/g, ' ');
-    const firstWord = cleaned.split(/\s+/)[0];
-    if (firstWord) {
-      if (firstWord.toLowerCase().startsWith('leseli')) return 'Leseli';
-      return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    }
+    const handle = user.email.split('@')[0].replace(/[._-]+/g, ' ').trim();
+    const word = handle.split(/\s+/)[0];
+    if (word) return word.charAt(0).toUpperCase() + word.slice(1);
   }
-
-  return 'Leseli';
+  return 'there';
 }
 
 function Dashboard() {
@@ -90,7 +107,6 @@ function Dashboard() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [notice, setNotice] = useState('');
 
-  // Interactive Modals State
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpState, setRsvpState] = useState({});
@@ -98,24 +114,12 @@ function Dashboard() {
   const [guardhouseModalOpen, setGuardhouseModalOpen] = useState(false);
 
   const announcements = useCollection('/announcements', demoAnnouncements);
-  const incidents = useCollection('/incidents', demoIncidents);
+  useCollection('/incidents', demoIncidents);
   const events = useCollection('/events', demoEvents);
 
-  if (userRole === 'Estate Administrator') {
-    return <AdminDashboard />;
-  }
-
-  if (userRole === 'Safety Volunteer') {
-    return <VolunteerDashboard />;
-  }
-
-  if (userRole === 'Security Guard') {
-    return <GuardhouseDashboard />;
-  }
-
-  if (userRole === 'System Administrator') {
-    return <SysAdminDashboard />;
-  }
+  if (userRole === 'Estate Administrator') return <AdminDashboard />;
+  if (userRole === 'Safety Volunteer') return <VolunteerDashboard />;
+  if (userRole === 'Security Guard') return <GuardhouseDashboard />;
 
   const upcomingEvents = events.items
     .filter((item) => new Date(item.event_date) >= new Date())
@@ -126,440 +130,236 @@ function Dashboard() {
   const handleGenerateVisitorPass = (e) => {
     e.preventDefault();
     if (!visitorName.trim()) return;
-
     const code = `CK-${Math.floor(100 + Math.random() * 900)}`;
     setGeneratedCode(code);
-    setNotice(`Visitor Pass ${code} created for ${visitorName}. Code sent to gate guardhouse.`);
+    setNotice(`Pass ${code} created for ${visitorName}. The guardhouse has been notified.`);
+  };
+
+  const closeVisitorModal = () => {
+    setVisitorModal(false);
+    setGeneratedCode('');
+    setVisitorName('');
+    setVisitorVehicle('');
   };
 
   const handleContactGuardhouse = () => {
-    setNotice('Direct channel open to Main Gate Guardhouse. Security officer on duty notified.');
+    setNotice('The officer on duty at the main gate has been notified.');
     setTimeout(() => setNotice(''), 4000);
   };
 
   const toggleRsvp = (eventId) => {
-    setRsvpState((prev) => ({
-      ...prev,
-      [eventId]: !prev[eventId],
-    }));
-    setNotice(!rsvpState[eventId] ? 'RSVP confirmed! Event added to your calendar.' : 'RSVP updated.');
+    const next = !rsvpState[eventId];
+    setRsvpState((prev) => ({ ...prev, [eventId]: next }));
+    setNotice(next ? 'You are on the attendance list.' : 'You have been removed from the list.');
     setTimeout(() => setNotice(''), 4000);
   };
 
   return (
-    <div className="stack">
-      {/* HERO SECTION: Greeting & Quick Actions */}
+    <div className="stack" style={{ gap: 'var(--s6)' }}>
       <header className="masthead">
         <div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: 0 }}>
-            Welcome back, {formatFirstName(currentUser)}
-          </h1>
-          <p className="masthead-meta" style={{ color: 'var(--dim)', marginTop: 'var(--s2)' }}>
-            Riverside Estate · Pretoria
+          <p className="eyebrow">
+            {community.community_name} · {community.city}
+          </p>
+          <h1>Good to see you, {firstNameOf(currentUser)}</h1>
+          <p className="masthead-meta">
+            Everything happening at your address, and the gate tools you can use right now.
           </p>
         </div>
 
-        <div className="cluster" style={{ gap: 'var(--s3)', alignItems: 'center' }}>
-          <button
-            type="button"
-            className="btn"
-            style={{ borderColor: 'var(--line-hi)' }}
-            onClick={() => setVisitorModal(true)}
-          >
-            Generate Visitor Pass
+        <div className="cluster" style={{ gap: 'var(--s2)' }}>
+          <button type="button" className="btn" onClick={() => setVisitorModal(true)}>
+            Visitor pass
           </button>
-          <button
-            type="button"
-            className="btn"
-            style={{ borderColor: 'var(--line-hi)' }}
-            onClick={() => setGuardhouseModalOpen(true)}
-          >
-            Verify Gate Pass
+          <button type="button" className="btn" onClick={() => setGuardhouseModalOpen(true)}>
+            Verify a pass
           </button>
-          <button
-            type="button"
-            className="btn"
-            style={{ borderColor: 'var(--line-hi)' }}
-            onClick={handleContactGuardhouse}
-          >
-            Contact Guardhouse
+          <button type="button" className="btn" onClick={handleContactGuardhouse}>
+            Call the gate
           </button>
           <Link to="/incidents" className="btn btn-solid">
-            Report Issue / Alert
+            Report something
           </Link>
         </div>
       </header>
 
       {notice ? <p className="notice">{notice}</p> : null}
 
-      {/* SOS EMERGENCY ALERT PANEL */}
       <SOSButton />
 
-      {/* TOP SECTION: Active Pinned Estate Broadcasts */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <div>
-            <p className="eyebrow">
-              Active Pinned Notices
-            </p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Official Estate Broadcasts & Utilities
-            </h2>
-          </div>
+      <section className="section">
+        <div className="section-head">
+          <h2>Notices from management</h2>
           <Link to="/announcements" className="link">
-            All announcements
+            All notices
           </Link>
         </div>
 
-        <div className="stack" style={{ gap: 'var(--s3)' }}>
-          {pinnedAnnouncements.map((anc) => (
-            <div
-              key={anc.id}
-              style={{
-                padding: 'var(--s4)',
-                backgroundColor: 'var(--panel-hi)',
-                border: '1px solid var(--line-hi)',
-                borderRadius: '4px',
-              }}
-            >
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)' }}>
-                <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                  {anc.title}
-                </h3>
-                <span
-                  className="mono sm"
-                  style={{
-                    color: 'var(--signal)',
-                    backgroundColor: 'var(--signal-wash)',
-                    padding: '0.15rem 0.5rem',
-                    borderRadius: '3px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  {anc.priority === 'high' ? 'High Priority' : 'Notice'}
-                </span>
-              </div>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                {anc.content}
-              </p>
-              <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
-                Published {formatRelative(anc.date_published)} by {anc.created_by}
-              </p>
-            </div>
-          ))}
-        </div>
+        {pinnedAnnouncements.length === 0 ? (
+          <p className="blank">Nothing has been posted yet.</p>
+        ) : (
+          <div>
+            {pinnedAnnouncements.map((anc) => (
+              <article
+                className={`note-card${anc.priority === 'high' ? ' note-card-high' : ''}`}
+                key={anc.id}
+              >
+                <div className="note-head">
+                  <h3>{anc.title}</h3>
+                  {anc.priority === 'high' ? (
+                    <StatusBadge status="High priority" />
+                  ) : null}
+                </div>
+                <p className="note-body">{anc.content}</p>
+                <p className="note-foot">
+                  {formatRelative(anc.date_published)} · {anc.created_by}
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* MIDDLE GRID: My Activity (Left) & Upcoming Community Events (Right) */}
-      <div className="grid-2" style={{ gap: 'var(--s5)' }}>
-        {/* Left Column: My Activity & Requests */}
-        <section
-          className="panel"
-          style={{
-            padding: 'var(--s5)',
-            border: '1px solid var(--line-hi)',
-          }}
-        >
-          <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-            <div>
-              <div className="cluster" style={{ gap: '8px', alignItems: 'center' }}>
-                <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
-                  MY ACTIVITY & REQUESTS
-                </p>
-                <button
-                  type="button"
-                  className="link sm"
-                  style={{
-                    color: 'var(--dim)',
-                    fontSize: '0.7rem',
-                    textDecoration: 'none',
-                    border: '1px solid var(--line-hi)',
-                    borderRadius: '50%',
-                    width: '16px',
-                    height: '16px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setGuideModalOpen(true)}
-                  title="View Status & Role Guide"
-                >
-                  ?
-                </button>
-              </div>
-              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                My Gate Passes & Maintenance Reports
-              </h2>
-            </div>
+      <div className="grid-2">
+        <section className="section">
+          <div className="section-head">
+            <h2>Your requests</h2>
+            <button type="button" className="link" onClick={() => setGuideModalOpen(true)}>
+              What do these mean?
+            </button>
           </div>
 
-          <div className="stack" style={{ gap: 'var(--s3)' }}>
+          <div className="row-list">
             {MY_REQUESTS.map((req) => (
-              <div
+              <button
+                type="button"
+                className="row-item"
                 key={req.id}
-                style={{
-                  padding: 'var(--s3) var(--s4)',
-                  backgroundColor: 'var(--panel-hi)',
-                  border: '1px solid var(--line-hi)',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  transition: 'border-color 0.2s ease',
-                }}
                 onClick={() => setSelectedRequest(req)}
-                className="interactive-card"
               >
-                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--paper)' }}>
-                    {req.title} <span className="mono faint">({req.id})</span>
-                  </strong>
+                <span className="row-main">
+                  <span className="row-title">{req.title}</span>
+                  <span className="row-meta">
+                    {req.id} · {req.time}
+                  </span>
+                </span>
+                <span className="row-end">
                   <StatusBadge status={req.status} />
-                </div>
-                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-                  {req.details}
-                </p>
-                <div className="cluster" style={{ justifyContent: 'space-between', marginTop: '6px' }}>
-                  <span className="mono sm" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
-                    {req.time}
-                  </span>
-                  <span className="link sm" style={{ fontSize: '0.75rem', color: 'var(--dim)' }}>
-                    View Request →
-                  </span>
-                </div>
-              </div>
+                </span>
+              </button>
             ))}
           </div>
         </section>
 
-        {/* Right Column: Upcoming Community Events */}
-        <section
-          className="panel"
-          style={{
-            padding: 'var(--s5)',
-            border: '1px solid var(--line-hi)',
-          }}
-        >
-          <div
-            className="panel-head"
-            style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-              Upcoming Events
-            </h2>
-            <Link to="/events" className="link" style={{ color: 'var(--dim)', fontWeight: 500, fontSize: '0.75rem', textDecoration: 'none' }}>
-              View calendar →
+        <section className="section">
+          <div className="section-head">
+            <h2>What is coming up</h2>
+            <Link to="/events" className="link">
+              Full calendar
             </Link>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {upcomingEvents.map((evt) => {
-              const title = evt.title || evt.event_name;
-              const venue = evt.venue || evt.location || evt.event_location;
-              const attendeesCount = evt.attendees_count || 14;
+          {upcomingEvents.length === 0 ? (
+            <p className="blank">No events are scheduled.</p>
+          ) : (
+            <div className="row-list">
+              {upcomingEvents.map((evt) => {
+                const title = evt.title || evt.event_name;
+                const venue = evt.venue || evt.location || evt.event_location;
+                const attending = evt.attendees_count || 14;
 
-              return (
-                <div
-                  key={evt.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 8px',
-                    borderBottom: '1px solid var(--line-hi)',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.15s ease',
-                  }}
-                  onClick={() => setSelectedEvent(evt)}
-                >
-                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, paddingRight: 'var(--s3)' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--paper)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {title}
+                return (
+                  <button
+                    type="button"
+                    className="row-item"
+                    key={evt.id}
+                    onClick={() => setSelectedEvent(evt)}
+                  >
+                    <span className="row-main">
+                      <span className="row-title">{title}</span>
+                      <span className="row-meta">
+                        {venue} · {attending} attending
+                      </span>
                     </span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                      {venue} | {attendeesCount} attending
+                    <span className="row-end">
+                      <span className="row-date">{formatDayDate(evt.event_date)}</span>
                     </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s3)', flexShrink: 0 }}>
-                    <span className="mono" style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--signal)' }}>
-                      {formatDayDate(evt.event_date)}
-                    </span>
-                    <span style={{ color: 'var(--dim)', fontSize: '0.85rem' }}>→</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 
-      {/* BOTTOM SECTION: Reassuring Community Safety Digest */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
-          <div>
-            <p className="eyebrow">
-              Estate Safety Digest
-            </p>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
-              Weekly Community Safety Status
-            </h2>
-          </div>
-        </div>
-
-        <div
-          style={{
-            padding: 'var(--s4)',
-            backgroundColor: 'var(--panel-hi)',
-            borderLeft: '3px solid var(--signal)',
-            borderTop: '1px solid var(--line-hi)',
-            borderRight: '1px solid var(--line-hi)',
-            borderBottom: '1px solid var(--line-hi)',
-          }}
-        >
-          <p className="sm" style={{ color: 'var(--paper)', margin: 0, lineHeight: 1.6 }}>
-            <strong>5 of 5 community safety reports resolved this week.</strong> All gate access barriers, perimeter fencing sensors, and night patrol routes remain fully operational with zero open security breaches.
-          </p>
-        </div>
-      </section>
-
-      {/* INTERACTIVE REQUEST DETAILS MODAL */}
       {selectedRequest ? (
         <Modal
-          title={`Request Details (${selectedRequest.id})`}
+          title={selectedRequest.title}
           onClose={() => setSelectedRequest(null)}
           footer={
-            <div className="cluster" style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                {selectedRequest.type === 'Gate Pass' ? (
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => {
-                      const shareText = `CommuniKey Gate Pass ${selectedRequest.id}\nEntry PIN: 492-801\nGuest: ${selectedRequest.guestName || 'Visitor'}\nValidity: ${selectedRequest.time}`;
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(shareText);
-                        setNotice('Pass credentials & PIN copied to clipboard.');
-                        setTimeout(() => setNotice(''), 4000);
-                      }
-                    }}
-                    style={{ fontSize: '0.78rem' }}
-                  >
-                    Copy Pass Link / Details
-                  </button>
-                ) : null}
-              </div>
-              <div className="cluster" style={{ gap: 'var(--s2)' }}>
-                <button type="button" className="btn" onClick={() => setSelectedRequest(null)}>
-                  Close
-                </button>
-                {selectedRequest.type === 'Gate Pass' ? (
-                  <button
-                    type="button"
-                    className="btn btn-solid"
-                    onClick={() => {
-                      setNotice(`Gate Pass ${selectedRequest.id} extended for another 24 hours.`);
-                      setSelectedRequest(null);
-                      setTimeout(() => setNotice(''), 4000);
-                    }}
-                  >
-                    Extend Pass
-                  </button>
-                ) : null}
-              </div>
-            </div>
+            <button type="button" className="btn" onClick={() => setSelectedRequest(null)}>
+              Close
+            </button>
           }
         >
-          <div className="stack" style={{ gap: 'var(--s3)' }}>
-            <div className="cluster" style={{ justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: 'var(--fs-base)', color: 'var(--paper)', margin: 0 }}>
-                {selectedRequest.title}
-              </h3>
-              <StatusBadge status={selectedRequest.status} />
+          <div className="spread" style={{ marginBottom: 'var(--s4)' }}>
+            <span className="mono">{selectedRequest.id}</span>
+            <StatusBadge status={selectedRequest.status} />
+          </div>
+
+          {selectedRequest.type === 'Gate Pass' ? (
+            <div className="pass">
+              <PassCode />
+              <span className="pass-pin">{selectedRequest.pin}</span>
+              <span className="hint">
+                Show this at the gate, or type the number into the keypad.
+              </span>
             </div>
+          ) : null}
 
-            {selectedRequest.type === 'Gate Pass' ? (
-              <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)', borderRadius: '4px', textAlign: 'center' }}>
-                <p className="eyebrow" style={{ color: 'var(--signal)', fontSize: '0.7rem', margin: '0 0 8px 0' }}>
-                  SCANNABLE GATE PASS & ENTRY PIN
-                </p>
-
-                {/* High Contrast Scannable SVG QR Code */}
-                <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '6px', width: '144px', margin: '0 auto 12px auto' }}>
-                  <svg width="120" height="120" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="29" height="29" fill="#FFFFFF" />
-                    <rect x="2" y="2" width="7" height="7" fill="#000000" />
-                    <rect x="3" y="3" width="5" height="5" fill="#FFFFFF" />
-                    <rect x="4" y="4" width="3" height="3" fill="#000000" />
-                    <rect x="20" y="2" width="7" height="7" fill="#000000" />
-                    <rect x="21" y="3" width="5" height="5" fill="#FFFFFF" />
-                    <rect x="22" y="4" width="3" height="3" fill="#000000" />
-                    <rect x="2" y="20" width="7" height="7" fill="#000000" />
-                    <rect x="3" y="21" width="5" height="5" fill="#FFFFFF" />
-                    <rect x="4" y="22" width="3" height="3" fill="#000000" />
-                    <rect x="10" y="3" width="2" height="2" fill="#000000" />
-                    <rect x="14" y="2" width="2" height="3" fill="#000000" />
-                    <rect x="17" y="4" width="2" height="2" fill="#000000" />
-                    <rect x="3" y="10" width="2" height="2" fill="#000000" />
-                    <rect x="6" y="11" width="2" height="2" fill="#000000" />
-                    <rect x="10" y="8" width="3" height="3" fill="#000000" />
-                    <rect x="15" y="9" width="4" height="2" fill="#000000" />
-                    <rect x="21" y="11" width="2" height="3" fill="#000000" />
-                    <rect x="24" y="10" width="3" height="2" fill="#000000" />
-                    <rect x="11" y="13" width="2" height="4" fill="#000000" />
-                    <rect x="15" y="14" width="3" height="2" fill="#000000" />
-                    <rect x="20" y="16" width="2" height="2" fill="#000000" />
-                    <rect x="24" y="15" width="2" height="3" fill="#000000" />
-                    <rect x="10" y="19" width="3" height="2" fill="#000000" />
-                    <rect x="14" y="20" width="2" height="3" fill="#000000" />
-                    <rect x="18" y="21" width="4" height="2" fill="#000000" />
-                    <rect x="23" y="20" width="3" height="3" fill="#000000" />
-                    <rect x="11" y="24" width="2" height="3" fill="#000000" />
-                    <rect x="16" y="25" width="3" height="2" fill="#000000" />
-                    <rect x="21" y="24" width="4" height="3" fill="#000000" />
-                  </svg>
-                </div>
-
-                <div className="mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--paper)', letterSpacing: '0.12em', margin: '4px 0' }}>
-                  492-801
-                </div>
-                <p className="sm faint" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
-                  Gate Keypad Entry PIN · Scannable at Guardhouse Terminal
-                </p>
+          <div className="details" style={{ marginTop: 'var(--s4)' }}>
+            <div className="details-row">
+              <span className="details-label">Detail</span>
+              <span className="details-value">{selectedRequest.details}</span>
+            </div>
+            {selectedRequest.guestName ? (
+              <div className="details-row">
+                <span className="details-label">Guest</span>
+                <span className="details-value">{selectedRequest.guestName}</span>
               </div>
             ) : null}
-
-            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Details:</strong> {selectedRequest.details}
-              </p>
-              {selectedRequest.guestName ? (
-                <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                  <strong>Guest Name:</strong> {selectedRequest.guestName}
-                </p>
-              ) : null}
-              {selectedRequest.vehicle ? (
-                <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                  <strong>Guest Vehicle:</strong> {selectedRequest.vehicle}
-                </p>
-              ) : null}
-              {selectedRequest.contractor ? (
-                <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                  <strong>Assigned Contractor:</strong> {selectedRequest.contractor}
-                </p>
-              ) : null}
-              {selectedRequest.repairNotes ? (
-                <p className="sm faint" style={{ color: 'var(--paper)' }}>
-                  <strong>Repair Notes:</strong> {selectedRequest.repairNotes}
-                </p>
-              ) : null}
+            {selectedRequest.vehicle ? (
+              <div className="details-row">
+                <span className="details-label">Vehicle</span>
+                <span className="details-value">{selectedRequest.vehicle}</span>
+              </div>
+            ) : null}
+            {selectedRequest.contractor ? (
+              <div className="details-row">
+                <span className="details-label">Assigned to</span>
+                <span className="details-value">{selectedRequest.contractor}</span>
+              </div>
+            ) : null}
+            {selectedRequest.repairNotes ? (
+              <div className="details-row">
+                <span className="details-label">Latest note</span>
+                <span className="details-value">{selectedRequest.repairNotes}</span>
+              </div>
+            ) : null}
+            {selectedRequest.notes ? (
+              <div className="details-row">
+                <span className="details-label">Note</span>
+                <span className="details-value">{selectedRequest.notes}</span>
+              </div>
+            ) : null}
+            <div className="details-row">
+              <span className="details-label">Updated</span>
+              <span className="details-value">{selectedRequest.time}</span>
             </div>
           </div>
         </Modal>
       ) : null}
 
-      {/* INTERACTIVE EVENT DETAILS MODAL */}
       {selectedEvent ? (
         <Modal
           title={selectedEvent.title || selectedEvent.event_name}
@@ -571,164 +371,98 @@ function Dashboard() {
               </button>
               <button
                 type="button"
-                className="btn btn-solid"
-                onClick={() => {
-                  toggleRsvp(selectedEvent.id);
-                  setSelectedEvent(null);
-                }}
+                className={rsvpState[selectedEvent.id] ? 'btn' : 'btn btn-solid'}
+                onClick={() => toggleRsvp(selectedEvent.id)}
               >
-                {rsvpState[selectedEvent.id] ? 'Cancel RSVP' : 'Confirm RSVP'}
+                {rsvpState[selectedEvent.id] ? 'Cancel my place' : 'Count me in'}
               </button>
             </>
           }
         >
-          <div className="stack" style={{ gap: 'var(--s3)' }}>
-            <div className="cluster" style={{ justifyContent: 'space-between' }}>
-              <span className="mono sm" style={{ color: 'var(--signal)', fontWeight: 600 }}>
-                {formatDayDate(selectedEvent.event_date)} · {selectedEvent.time || '18:30 to 19:30'}
-              </span>
-              <StatusBadge status={rsvpState[selectedEvent.id] ? 'Attending' : 'RSVP Open'} />
+          <div className="details">
+            <div className="details-row">
+              <span className="details-label">When</span>
+              <span className="details-value">{formatDayDate(selectedEvent.event_date)}</span>
             </div>
-
-            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Venue:</strong> {selectedEvent.venue || selectedEvent.location || selectedEvent.event_location}
-              </p>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
-                <strong>Organiser:</strong> {selectedEvent.organiser || 'Safety Committee'}
-              </p>
-              <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)', lineHeight: 1.5 }}>
-                {selectedEvent.description || 'Join your fellow residents for this estate gathering.'}
-              </p>
-              <p className="mono sm" style={{ color: 'var(--dim)', margin: 0, fontSize: '0.75rem' }}>
-                Attending Residents: {(selectedEvent.attendees_count || 14) + (rsvpState[selectedEvent.id] ? 1 : 0)} Households
-              </p>
+            <div className="details-row">
+              <span className="details-label">Where</span>
+              <span className="details-value">
+                {selectedEvent.venue || selectedEvent.location || selectedEvent.event_location}
+              </span>
+            </div>
+            <div className="details-row">
+              <span className="details-label">Attending</span>
+              <span className="details-value nums">{selectedEvent.attendees_count || 14}</span>
             </div>
           </div>
+          {selectedEvent.description ? (
+            <p className="sm dim" style={{ marginTop: 'var(--s4)' }}>
+              {selectedEvent.description}
+            </p>
+          ) : null}
         </Modal>
       ) : null}
 
-      {/* Visitor Pass Generator Modal */}
       {visitorModal ? (
         <Modal
-          title="Generate Visitor Access Pass"
-          onClose={() => {
-            setVisitorModal(false);
-            setGeneratedCode('');
-          }}
+          title="Visitor pass"
+          onClose={closeVisitorModal}
           footer={
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                setVisitorModal(false);
-                setGeneratedCode('');
-              }}
-            >
-              Close
-            </button>
+            generatedCode ? (
+              <button type="button" className="btn btn-solid" onClick={closeVisitorModal}>
+                Done
+              </button>
+            ) : (
+              <>
+                <button type="button" className="btn" onClick={closeVisitorModal}>
+                  Cancel
+                </button>
+                <button type="submit" form="visitor-form" className="btn btn-solid">
+                  Create pass
+                </button>
+              </>
+            )
           }
         >
           {generatedCode ? (
-            <div className="stack" style={{ textAlign: 'center', gap: 'var(--s3)' }}>
-              <p className="eyebrow" style={{ color: 'var(--signal)' }}>
-                Pass Created Cleanly
-              </p>
-
-              {/* High Contrast Scannable SVG QR Code */}
-              <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '6px', width: '144px', margin: '0 auto' }}>
-                <svg width="120" height="120" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="29" height="29" fill="#FFFFFF" />
-                  <rect x="2" y="2" width="7" height="7" fill="#000000" />
-                  <rect x="3" y="3" width="5" height="5" fill="#FFFFFF" />
-                  <rect x="4" y="4" width="3" height="3" fill="#000000" />
-                  <rect x="20" y="2" width="7" height="7" fill="#000000" />
-                  <rect x="21" y="3" width="5" height="5" fill="#FFFFFF" />
-                  <rect x="22" y="4" width="3" height="3" fill="#000000" />
-                  <rect x="2" y="20" width="7" height="7" fill="#000000" />
-                  <rect x="3" y="21" width="5" height="5" fill="#FFFFFF" />
-                  <rect x="4" y="4" width="3" height="3" fill="#000000" />
-                  <rect x="10" y="3" width="2" height="2" fill="#000000" />
-                  <rect x="14" y="2" width="2" height="3" fill="#000000" />
-                  <rect x="17" y="4" width="2" height="2" fill="#000000" />
-                  <rect x="3" y="10" width="2" height="2" fill="#000000" />
-                  <rect x="6" y="11" width="2" height="2" fill="#000000" />
-                  <rect x="10" y="8" width="3" height="3" fill="#000000" />
-                  <rect x="15" y="9" width="4" height="2" fill="#000000" />
-                  <rect x="21" y="11" width="2" height="3" fill="#000000" />
-                  <rect x="24" y="10" width="3" height="2" fill="#000000" />
-                  <rect x="11" y="13" width="2" height="4" fill="#000000" />
-                  <rect x="15" y="14" width="3" height="2" fill="#000000" />
-                  <rect x="20" y="16" width="2" height="2" fill="#000000" />
-                  <rect x="24" y="15" width="2" height="3" fill="#000000" />
-                  <rect x="10" y="19" width="3" height="2" fill="#000000" />
-                  <rect x="14" y="20" width="2" height="3" fill="#000000" />
-                  <rect x="18" y="21" width="4" height="2" fill="#000000" />
-                  <rect x="23" y="20" width="3" height="3" fill="#000000" />
-                  <rect x="11" y="24" width="2" height="3" fill="#000000" />
-                  <rect x="16" y="25" width="3" height="2" fill="#000000" />
-                  <rect x="21" y="24" width="4" height="3" fill="#000000" />
-                </svg>
-              </div>
-
-              <h2 className="mono" style={{ fontSize: '1.8rem', letterSpacing: '0.1em', color: 'var(--paper)', margin: 0 }}>
-                {generatedCode} (PIN: 492-801)
-              </h2>
-              <p className="sm faint">
-                Share this access code & PIN with <strong>{visitorName}</strong>. Sent automatically to Main Gate Guardhouse.
-              </p>
-              <button
-                type="button"
-                className="btn btn-solid"
-                onClick={() => {
-                  if (navigator.clipboard) {
-                    navigator.clipboard.writeText(`CommuniKey Gate Pass Code: ${generatedCode} | PIN: 492-801 | Visitor: ${visitorName}`);
-                    setNotice('Pass credentials & PIN copied to clipboard.');
-                    setTimeout(() => setNotice(''), 4000);
-                  }
-                }}
-              >
-                Copy Pass Details
-              </button>
+            <div className="pass">
+              <PassCode />
+              <span className="pass-pin">{generatedCode}</span>
+              <span className="hint">
+                Sent to {visitorName}. The guardhouse can see it immediately.
+              </span>
             </div>
           ) : (
-            <form onSubmit={handleGenerateVisitorPass} className="stack" style={{ gap: 'var(--s4)' }}>
-              <div className="field">
-                <label className="eyebrow" htmlFor="v-name">
-                  Visitor Full Name *
-                </label>
+            <form id="visitor-form" onSubmit={handleGenerateVisitorPass} className="fields">
+              <div className="field field-wide">
+                <label htmlFor="visitor-name">Visitor name</label>
                 <input
-                  id="v-name"
+                  id="visitor-name"
                   className="control"
-                  placeholder="e.g., Johan Smith"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
+                  placeholder="Johan Smith"
                   required
                 />
               </div>
-
-              <div className="field">
-                <label className="eyebrow" htmlFor="v-veh">
-                  Vehicle Registration (Optional)
-                </label>
+              <div className="field field-wide">
+                <label htmlFor="visitor-vehicle">Vehicle and registration</label>
                 <input
-                  id="v-veh"
+                  id="visitor-vehicle"
                   className="control"
-                  placeholder="e.g., GP 482 CP"
                   value={visitorVehicle}
                   onChange={(e) => setVisitorVehicle(e.target.value)}
+                  placeholder="Silver Polo, GP 482 CP"
                 />
+                <span className="hint">Optional, but it speeds up entry at the boom.</span>
               </div>
-
-              <button type="submit" className="btn btn-solid">
-                Generate 6-Digit Gate Pass
-              </button>
             </form>
           )}
         </Modal>
       ) : null}
 
       <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
+
       <GuardhouseVerificationModal
         isOpen={guardhouseModalOpen}
         onClose={() => setGuardhouseModalOpen(false)}

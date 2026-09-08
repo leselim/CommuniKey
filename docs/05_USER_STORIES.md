@@ -1,284 +1,205 @@
-# Community Cloud Platform - User Stories
+# CommuniKey - User Stories
 
-**Version:** 1.0  
-**Last Updated:** 26 July 2026
+**Version:** 3.0
+**Last Updated:** 7 September 2026
 
 ---
 
 # Introduction
 
-This document defines the user stories for the Community Cloud Platform.
+CommuniKey serves one residential estate: Riverside Estate. The platform
+exists to solve fragmented communication. Today an estate's information is
+scattered across a WhatsApp group nobody reads, a noticeboard at the gate, a
+phone call to the guardhouse and a Facebook page. Nothing is verified and
+nothing leaves a record.
 
-User stories describe the system from the perspective of the people who will use it. They help ensure that the platform is designed around real user needs and provide guidance during development and testing.
+These stories describe a single, verified channel where an announcement is
+published once and reaches everyone, an incident is reported once and is
+visible to the people who can act on it, and every action leaves an audit
+trail the estate can report on afterwards.
+
+Scope note: this is a single-estate platform. There is no community search,
+join or leave flow, because there is only one community. Multi-tenancy is
+listed under future work.
 
 ---
 
-# Resident User Stories
+# Roles
 
-## Account Management
+| Role | Who they are |
+|---|---|
+| Resident | Lives at a verified address in the estate |
+| Safety Volunteer | A resident who responds to alerts and walks patrol |
+| Estate Administrator | Manages membership, publishes notices, reads reporting |
+| Security Guard | Staffs the gate and verifies visitor passes |
+
+---
+
+# Accounts and verification
 
 ### US-001
-
-**As a new resident, I want to create an account so that I can access my community.**
-
----
+**As a new resident, I want to register with my street address so that estate
+management can confirm I live here.**
 
 ### US-002
-
-**As a resident, I want to securely log in so that my information remains protected.**
-
----
+**As a new resident, I want to upload proof of residence so that my
+application can be verified against the resident register.**
 
 ### US-003
-
-**As a resident, I want to reset my password if I forget it so that I can regain access to my account.**
-
----
+**As a resident, I want to sign in securely so that estate information is not
+visible to outsiders.**
 
 ### US-004
-
-**As a resident, I want to update my profile information so that my details remain accurate.**
-
----
-
-# Community Membership
+**As a resident, I want to reset my password so that I can regain access.**
 
 ### US-005
-
-**As a resident, I want to search for my community so that I can join it.**
-
----
+**As a resident, I want to keep my address and phone number current so that
+patrols can reach me in an emergency.**
 
 ### US-006
-
-**As a resident, I want to request membership to a community so that only verified residents can join.**
-
----
+**As an estate administrator, I want to review a pending application and its
+supporting document so that only genuine residents gain access.**
 
 ### US-007
-
-**As a resident, I want to leave a community whenever I choose.**
+**As an estate administrator, I want to approve or decline an application so
+that the register stays accurate.**
 
 ---
 
-# Announcements
+# Notices
 
 ### US-008
-
-**As a resident, I want to receive community announcements so that I stay informed.**
-
----
+**As an estate administrator, I want to publish a notice once so that every
+verified resident receives it through one channel.**
 
 ### US-009
-
-**As a resident, I want to search previous announcements so that I can find important information quickly.**
-
----
-
-# Emergency Features
+**As an estate administrator, I want to mark a notice as high priority so
+that urgent items also trigger an alert.**
 
 ### US-010
-
-**As a resident, I want to activate an SOS alert during an emergency so nearby community members can be notified immediately.**
-
----
+**As a resident, I want to read estate notices in one place so that I am not
+relying on a group chat I may have muted.**
 
 ### US-011
-
-**As a resident, I want to share my location with an SOS alert so responders can find me more easily.**
+**As a resident, I want to filter notices by priority so that I can find
+urgent items quickly.**
 
 ---
+
+# Incidents
 
 ### US-012
-
-**As a resident, I want to cancel an accidental SOS alert.**
-
----
-
-# Incident Reporting
+**As a resident, I want to report an incident with a type and location so
+that it reaches the people who can act on it.**
 
 ### US-013
-
-**As a resident, I want to report suspicious activity so that my community stays informed.**
-
----
+**As a resident, I want to see the status of a report I submitted so that I
+know whether it is being dealt with.**
 
 ### US-014
-
-**As a resident, I want to upload photos with my incident report to provide evidence.**
-
----
+**As a safety volunteer, I want to see incoming reports so that I can triage
+what needs a response.**
 
 ### US-015
-
-**As a resident, I want to track the status of my incident report.**
-
----
-
-# Community Feed
+**As a safety volunteer, I want to move a report to under review or resolved
+so that its status reflects reality.**
 
 ### US-016
-
-**As a resident, I want to post updates to my community so that I can share useful information.**
+**As an estate administrator, I want to see the oldest reports still open so
+that nothing is quietly forgotten.**
 
 ---
+
+# Emergency
 
 ### US-017
-
-**As a resident, I want to comment on community posts so that I can participate in discussions.**
-
----
+**As a resident, I want to raise an SOS alert so that volunteers and the
+guardhouse are notified immediately.**
 
 ### US-018
-
-**As a resident, I want to react to posts so that I can acknowledge useful information quickly.**
-
----
-
-# Events
+**As a resident, I want a short countdown before the alert is sent so that I
+can cancel an accidental trigger.**
 
 ### US-019
-
-**As a resident, I want to view upcoming community events.**
-
----
+**As a resident, I want to choose whether my location is shared so that I
+stay in control of my privacy.**
 
 ### US-020
-
-**As a resident, I want to RSVP to events so organisers know who will attend.**
+**As a safety volunteer, I want to move an alert through acknowledged, en
+route, on scene and resolved so that everyone can see where the response is.**
 
 ---
 
-# Notifications
+# Access control
 
 ### US-021
-
-**As a resident, I want to receive push notifications for emergency alerts.**
-
----
+**As a resident, I want to issue a visitor pass so that my guest is expected
+at the gate.**
 
 ### US-022
-
-**As a resident, I want to receive reminders for community events.**
-
----
-
-# Community Administrator User Stories
+**As a security guard, I want to verify a pass at the gate so that only
+expected visitors are admitted.**
 
 ### US-023
-
-**As a community administrator, I want to approve membership requests so that only verified members join the community.**
+**As a safety volunteer, I want to log patrol check-ins by zone so that
+coverage is recorded.**
 
 ---
+
+# Reporting
 
 ### US-024
-
-**As a community administrator, I want to reject suspicious membership requests.**
-
----
+**As an estate administrator, I want to see how many incidents were reported
+and how many were closed so that I can judge whether the estate is coping.**
 
 ### US-025
-
-**As a community administrator, I want to publish official announcements.**
-
----
+**As an estate administrator, I want to see the typical time taken to close a
+report so that I can spot categories that drag.**
 
 ### US-026
-
-**As a community administrator, I want to edit announcements if information changes.**
-
----
+**As an estate administrator, I want to see what gets reported and where so
+that patrol effort can be targeted.**
 
 ### US-027
-
-**As a community administrator, I want to remove inappropriate content from the community feed.**
-
----
+**As an estate administrator, I want to see when reports come in across the
+day so that volunteer shifts can be scheduled around demand.**
 
 ### US-028
-
-**As a community administrator, I want to manage community events.**
-
----
+**As an estate administrator, I want to change the reporting period so that I
+can compare a week against a quarter.**
 
 ### US-029
-
-**As a community administrator, I want to review incident reports submitted by residents.**
+**As an estate administrator, I want an audit trail of platform activity so
+that decisions can be accounted for.**
 
 ---
 
-# Safety Volunteer User Stories
+# Directory
 
 ### US-030
-
-**As a safety volunteer, I want to receive nearby emergency alerts so that I can respond quickly when assistance is needed.**
-
----
+**As a resident, I want to see who else is verified in the estate so that I
+know who my neighbours are.**
 
 ### US-031
-
-**As a safety volunteer, I want to update the status of emergency incidents so residents know help is on the way.**
-
----
-
-# System Administrator User Stories
-
-### US-032
-
-**As a system administrator, I want to verify communities before they become publicly available.**
+**As a resident, I want other residents' contact details to be partly masked
+so that my privacy is protected.**
 
 ---
 
-### US-033
+# Future work
 
-**As a system administrator, I want to manage users across the platform.**
+Deliberately out of scope for this release:
 
----
-
-### US-034
-
-**As a system administrator, I want to monitor platform performance and availability.**
-
----
-
-### US-035
-
-**As a system administrator, I want to generate usage reports so that platform growth can be monitored.**
-
----
-
-# Future User Stories
-
-### US-036
-
-**As a resident, I want to ask an AI assistant questions about my community.**
-
----
-
-### US-037
-
-**As a resident, I want to find trusted local businesses recommended by my community.**
-
----
-
-### US-038
-
-**As a resident, I want to vote in community polls.**
-
----
-
-### US-039
-
-**As a resident, I want to use the application in my preferred language.**
-
----
-
-### US-040
-
-**As a resident, I want to continue using important features when my internet connection is temporarily unavailable.**
+- Multi-estate tenancy, with community search and join
+- Direct messaging between residents. Free-form chat is another silo, and
+  would work against the single verified channel this platform is for
+- Native mobile applications
+- Payment and levy management
 
 ---
 
 # Summary
 
-These user stories define the core functionality required for the Community Cloud Platform MVP and establish a roadmap for future enhancements. They will guide system design, implementation, testing, and future development iterations.
+31 stories across seven areas and four roles. Every story listed above is
+implemented in the application, which is the point: the scope was cut to
+match what genuinely works rather than describing an aspiration.

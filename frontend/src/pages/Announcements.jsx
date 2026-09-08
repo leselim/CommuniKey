@@ -4,7 +4,7 @@ import useCollection from '../hooks/useCollection';
 import { announcements as demoAnnouncements } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
-const ANNOUNCEMENT_FILTERS = ['All', 'High Priority', 'General'];
+const ANNOUNCEMENT_FILTERS = ['All', 'High priority', 'General'];
 
 function Announcements() {
   const { items, loading } = useCollection('/announcements', demoAnnouncements);
@@ -15,7 +15,7 @@ function Announcements() {
     const term = query.trim().toLowerCase();
     return items
       .filter((item) => {
-        if (filter === 'High Priority') return item.priority === 'high';
+        if (filter === 'High priority') return item.priority === 'high';
         if (filter === 'General') return item.priority !== 'high';
         return true;
       })
@@ -33,7 +33,7 @@ function Announcements() {
     <div className="stack">
       <header className="masthead">
         <div>
-          <h1 style={{ margin: 0 }}>Announcements</h1>
+          <h1>Announcements</h1>
           <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>Official updates published by community administrators.</p>
         </div>
         <p className="mono">{items.length} published</p>
@@ -75,10 +75,10 @@ function Announcements() {
           <ul className="ledger">
             {visible.map((item) => (
               <li className="entry" key={item.id}>
-                <h3 className="entry-title">{item.title}</h3>
-                <span className="entry-aside">
-                  {item.priority === 'high' ? <StatusBadge status="Priority" /> : null}
-                </span>
+                <div className="entry-head">
+                  <h3 className="entry-title">{item.title}</h3>
+                  {item.priority === 'high' ? <StatusBadge status="High priority" /> : null}
+                </div>
                 <p className="entry-body">{item.content}</p>
                 <div className="entry-meta">
                   <span>{formatStamp(item.date_published)}</span>

@@ -1,20 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
-function Modal({ title, onClose, children, footer }) {
+/*
+ * Dialog. Rendered through a portal so it is never clipped by an ancestor's
+ * overflow, closes on Escape or a click on the backdrop, and moves focus
+ * into itself on open so keyboard users are not left behind on the page.
+ */
+
+function Modal({ title, onClose, children, footer, wide = false }) {
+  const dialogRef = useRef(null);
+
   useEffect(() => {
+    const previouslyFocused = document.activeElement;
+
     const onKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKeyDown);
 
-    // Prevent background scrolling while modal is active
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    if (dialogRef.current) dialogRef.current.focus();
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousOverflow;
+      if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
     };
   }, [onClose]);
 
@@ -25,29 +37,25 @@ function Modal({ title, onClose, children, footer }) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="dialog" role="dialog" aria-modal="true" aria-label={title}>
+      <div
+        className={`dialog${wide ? ' dialog-wide' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        ref={dialogRef}
+        tabIndex={-1}
+      >
         <div className="dialog-head">
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-            {title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--dim)',
-              fontSize: '1.1rem',
-              cursor: 'pointer',
-              padding: '0.2rem 0.4rem',
-              borderRadius: '4px',
-              lineHeight: 1,
-              opacity: 0.8,
-              transition: 'opacity 0.15s ease',
-            }}
-            aria-label="Close modal dialog"
-          >
-            ✕
+          <h2>{title}</h2>
+          <button type="button" className="dialog-close" onClick={onClose} aria-label="Close">
+            <svg viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+              <path
+                d="M2 2 L12 12 M12 2 L2 12"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
         <div className="dialog-body">{children}</div>

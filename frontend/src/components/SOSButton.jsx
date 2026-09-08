@@ -5,6 +5,19 @@ import { formatClock } from '../utils/format';
 
 const COUNTDOWN_SECONDS = 5;
 
+/*
+ * Emergency SOS.
+ *
+ * Idle, this is a single anchored button in the corner - nothing more.
+ * The explanation and the location choice live in a dialog, so no body
+ * copy is ever floating over the page behind it.
+ *
+ * Once an alert is live it stops being a floating element entirely and
+ * renders as a banner in the normal flow of the page, because an active
+ * emergency is the most important thing on screen and must not be able to
+ * hide anything or be scrolled out from under.
+ */
+
 /** Resolves to coordinates, or null if unavailable or declined (US-011). */
 function readPosition(enabled) {
   return new Promise((resolve) => {
@@ -25,7 +38,7 @@ function readPosition(enabled) {
 }
 
 function SOSButton() {
-  const [phase, setPhase] = useState('idle'); // idle | arming | live
+  const [phase, setPhase] = useState('idle'); // idle | confirm | arming | live
   const [seconds, setSeconds] = useState(COUNTDOWN_SECONDS);
   const [shareLocation, setShareLocation] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -75,24 +88,27 @@ function SOSButton() {
 
   if (phase === 'live') {
     return (
-      <section className="sos live" aria-live="assertive">
-        <div className="sos-copy">
-          <p className="eyebrow">
-            <span className="live-dot" aria-hidden="true" /> SOS Dispatched · Live Alert Active
+      <section className="sos-live" aria-live="assertive">
+        <div>
+          <p className="sos-live-title">
+            <span className="sos-live-dot" aria-hidden="true" />
+            SOS alert is live
           </p>
-          <h2 style={{ fontSize: 'var(--fs-lg)', color: 'var(--paper)', margin: '4px 0' }}>
-            Responders & Patrol Officers Have Been Notified
-          </h2>
-          <p className="mono" style={{ fontSize: '0.8rem', color: 'var(--dim)', margin: 0 }}>
-            {alert && alert.time_activated ? `Activated ${formatClock(alert.time_activated)}` : 'Activating'}
+          <p className="sos-copy" style={{ marginTop: 'var(--s2)' }}>
+            Safety volunteers, patrol officers and estate management have been notified.
+          </p>
+          <p className="sos-note" style={{ marginTop: 'var(--s2)' }}>
+            {alert && alert.time_activated
+              ? `Sent at ${formatClock(alert.time_activated)}`
+              : 'Sending'}
             {alert && alert.latitude
-              ? ` / Coordinates: ${alert.latitude}, ${alert.longitude}`
-              : ' / location not shared'}
+              ? ` · location ${alert.latitude}, ${alert.longitude}`
+              : ' · location not shared'}
           </p>
         </div>
         <div className="sos-action">
           <button type="button" className="btn btn-solid" onClick={resolve}>
-            Mark Myself Safe
+            I am safe now
           </button>
         </div>
       </section>
@@ -101,87 +117,65 @@ function SOSButton() {
 
   return (
     <>
-      <section className="sos">
-        <div className="sos-copy">
-          <p className="eyebrow">Emergency</p>
-          <h2>Send an SOS alert</h2>
-          <p>
-            Nearby members, safety volunteers and community administrators are notified
-            immediately. You have {COUNTDOWN_SECONDS} seconds to cancel before the alert is
-            dispatched.
+      <div className="sos">
+        <button type="button" className="sos-trigger" onClick={() => setPhase('confirm')}>
+          Emergency SOS
+        </button>
+      </div>
+
+      {phase === 'confirm' ? (
+        <Modal
+          title="Send an SOS alert"
+          onClose={cancel}
+          footer={
+            <>
+              <button type="button" className="btn" onClick={cancel}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={arm}>
+                Send alert
+              </button>
+            </>
+          }
+        >
+          <p className="sos-copy">
+            Nearby members, safety volunteers and estate management are notified straight away.
+            You will have {COUNTDOWN_SECONDS} seconds to stop it before it goes out.
           </p>
-          {resolvedAt ? (
-            <p className="mono sos-note">
-              Last alert resolved {formatClock(resolvedAt)}
-            </p>
-          ) : null}
-        </div>
-        <div className="sos-action">
-          <button type="button" className="sos-trigger" onClick={arm}>
-            Activate SOS
-          </button>
+
           <label className="sos-opt">
             <input
               type="checkbox"
               checked={shareLocation}
               onChange={(event) => setShareLocation(event.target.checked)}
             />
-            Share my location
+            Share my location with responders
           </label>
-        </div>
-      </section>
 
-      {/* SOS TRIGGER COUNTDOWN MODAL */}
+          {resolvedAt ? (
+            <p className="sos-note" style={{ marginTop: 'var(--s4)' }}>
+              Your last alert was closed at {formatClock(resolvedAt)}.
+            </p>
+          ) : null}
+        </Modal>
+      ) : null}
+
       {phase === 'arming' ? (
         <Modal
-          title="Emergency SOS Confirmation"
+          title="Sending in a moment"
           onClose={cancel}
           footer={
-            <div className="cluster" style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="mono sm" style={{ color: 'var(--dim)' }}>
-                Auto-dispatching in {seconds}s...
-              </span>
-              <button
-                type="button"
-                className="btn btn-solid"
-                onClick={cancel}
-                style={{ backgroundColor: '#e11d48', borderColor: '#e11d48', color: '#ffffff', fontWeight: 600 }}
-              >
-                Cancel SOS
-              </button>
-            </div>
+            <button type="button" className="btn btn-danger btn-block" onClick={cancel}>
+              Stop, this was a mistake
+            </button>
           }
         >
-          <div className="stack" style={{ textAlign: 'center', padding: 'var(--s4) 0', gap: 'var(--s3)' }}>
-            <p className="eyebrow" style={{ color: '#e11d48', letterSpacing: '0.08em', margin: 0 }}>
-              EMERGENCY ALERT DISPATCHING
-            </p>
-
-            <div
-              style={{
-                fontSize: '3.5rem',
-                fontWeight: 700,
-                color: 'var(--paper)',
-                fontFamily: 'monospace',
-                lineHeight: 1,
-                padding: 'var(--s3)',
-                border: '2px solid #e11d48',
-                borderRadius: '8px',
-                width: '90px',
-                margin: '0 auto',
-                backgroundColor: 'var(--panel-hi)',
-              }}
-            >
-              0{seconds}
-            </div>
-
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-              Dispatching Emergency Dispatches to Patrol & Admin
-            </h3>
-            <p className="sm faint" style={{ color: 'var(--dim)', margin: 0 }}>
-              Click <strong>Cancel SOS</strong> below immediately if this alert was triggered by accident.
-            </p>
-          </div>
+          <p className="sos-count" aria-live="assertive">
+            {seconds}
+          </p>
+          <p className="sos-copy" style={{ marginTop: 'var(--s4)', textAlign: 'center' }}>
+            The alert goes out when this reaches zero.
+          </p>
         </Modal>
       ) : null}
     </>
@@ -189,4 +183,3 @@ function SOSButton() {
 }
 
 export default SOSButton;
-

@@ -218,7 +218,7 @@ function GuardhouseDashboard() {
 
         <div className="stack" style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
           <span className="eyebrow faint" style={{ fontSize: '0.65rem', color: 'var(--dim)' }}>
-            TERMINAL CLOCK
+            Terminal clock
           </span>
           <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--paper)' }}>
             {clock}
@@ -229,12 +229,9 @@ function GuardhouseDashboard() {
       {terminalNotice ? <p className="notice" style={{ borderLeftColor: '#10b981' }}>{terminalNotice}</p> : null}
 
       {/* CENTRAL VERIFICATION PANEL */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+      <section className="panel" style={{ padding: 'var(--s5)', backgroundColor: 'var(--panel)' }}>
         <div className="stack" style={{ gap: 'var(--s4)', maxWidth: '640px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center' }}>
-            <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--dim)', margin: 0 }}>
-              Visitor Gate Verification
-            </p>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--paper)', margin: 'var(--s1) 0 0 0' }}>
               Enter 6-Digit PIN or Scan Pass
             </h2>
@@ -294,7 +291,6 @@ function GuardhouseDashboard() {
                     padding: '0.15rem 0.4rem',
                     fontSize: '0.7rem',
                     fontFamily: 'monospace',
-                    border: '1px solid var(--line-hi)',
                     borderRadius: '3px',
                     backgroundColor: 'var(--ink)',
                     color: 'var(--paper)',
@@ -318,7 +314,6 @@ function GuardhouseDashboard() {
                 style={{
                   padding: 'var(--s4)',
                   backgroundColor: 'var(--panel-hi)',
-                  border: '1px solid var(--line-hi)',
                   borderRadius: '6px',
                 }}
               >
@@ -331,7 +326,6 @@ function GuardhouseDashboard() {
                       backgroundColor: 'var(--ink)',
                       padding: '3px 10px',
                       borderRadius: '4px',
-                      border: '1px solid var(--line-hi)',
                     }}
                   >
                     • Valid Pass
@@ -344,27 +338,27 @@ function GuardhouseDashboard() {
                 <div className="grid-2" style={{ gap: 'var(--s3)', fontSize: '0.85rem' }}>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      RESIDENT HOST & UNIT
+                      Resident host and unit
                     </span>
                     <strong style={{ color: 'var(--paper)', fontSize: '0.92rem' }}>{matchedPass.host}</strong>
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      VISITOR NAME
+                      Visitor name
                     </span>
                     <strong style={{ color: 'var(--paper)', fontSize: '0.92rem' }}>{matchedPass.visitor}</strong>
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      VEHICLE REGISTRATION
+                      Vehicle registration
                     </span>
                     <span className="mono" style={{ color: 'var(--paper)' }}>{matchedPass.vehicle}</span>
                   </div>
                   <div>
                     <span className="eyebrow" style={{ fontSize: '0.65rem', display: 'block', color: 'var(--dim)' }}>
-                      PASS EXPIRY
+                      Pass expiry
                     </span>
-                    <span style={{ color: 'var(--dim)' }}>{matchedPass.validity}</span>
+                    <span>{matchedPass.validity}</span>
                   </div>
                 </div>
 
@@ -380,7 +374,7 @@ function GuardhouseDashboard() {
                     }}
                     onClick={handleAuthorizeEntry}
                   >
-                    Authorize Entry & Release Gate
+                    Authorize Entry and Release Gate
                   </button>
                 </div>
               </div>
@@ -402,7 +396,6 @@ function GuardhouseDashboard() {
                     backgroundColor: 'var(--ink)',
                     padding: '3px 10px',
                     borderRadius: '4px',
-                    border: '1px solid var(--line-hi)',
                     display: 'inline-block',
                     marginBottom: 'var(--s2)',
                   }}
@@ -433,7 +426,7 @@ function GuardhouseDashboard() {
       </section>
 
       {/* RECENT SCANS FEED */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)', backgroundColor: 'var(--panel)' }}>
+      <section className="panel" style={{ padding: 'var(--s5)', backgroundColor: 'var(--panel)' }}>
         <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s3)' }}>
           <p className="eyebrow" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>
             RECENT AUTHORIZED VEHICLE SCANS (MAIN GATE 01 LEDGER)
@@ -503,7 +496,6 @@ function GuardhouseDashboard() {
                 width: '100%',
                 height: '200px',
                 backgroundColor: 'var(--ink)',
-                border: '1px solid var(--line-hi)',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',

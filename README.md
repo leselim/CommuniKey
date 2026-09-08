@@ -1,118 +1,176 @@
 # CommuniKey
 
-A production-ready, cloud-native community engagement platform designed to provide residents with a secure, centralised hub for communication, safety, emergency response, and neighbourhood collaboration.
+Community safety, access control and engagement for residential estates.
 
-The platform replaces fragmented communication channels such as WhatsApp groups by providing structured announcements, emergency alerts, incident reporting, community events, and role-based administration.
+A resident reports a broken streetlight, issues a gate pass for a visitor, or
+raises an SOS. A safety volunteer triages that alert and logs a patrol. A guard
+verifies the pass at the boom. Estate management sees all of it, verifies new
+households against the resident register, and reads the numbers that come out
+the other end.
 
----
-
-## Project Status
-
-**Current Phase:** Production-Ready MVP Complete
-
----
-
-## Core Features
-
-- **Emergency SOS Distress Button:** Real-time activation with location dispatch to neighbourhood patrol.
-- **Incident Reporting & Status Tracking:** Log suspicious activity, streetlight faults, or hazards with automated triage.
-- **Official Community Announcements:** Priority-sorted noticeboard for management alerts and municipality updates.
-- **Event Scheduling & RSVPs:** Community event calendar with attendance tracking.
-- **Role-Based Administration & Moderation:** Granular RBAC supporting Residents, Estate Administrators, Safety Volunteers, and System Administrators.
-- **Privacy-First Messaging & Profiling:** Redacted sensitive details (gate codes, emergency notes) based on persona permissions.
+Four roles, one record of what happened.
 
 ---
 
-## Technology Stack
+## Run it locally
 
-- **Frontend:** React 18, React Router v6, Axios, Modular Dark-Mode CSS Design Tokens.
-- **Backend:** Python 3.11+, Django 4.2, Django REST Framework, SimpleJWT Authentication.
-- **Database:** SQLite (local dev) / PostgreSQL (production).
-- **Testing:** Django TestCase suite (13 unit tests), React Testing Library / Jest.
-- **DevOps & Cloud:** Docker, Terraform, GitHub Actions, AWS Free Tier compatible.
+Two ways. Pick either.
 
----
+### Option A, run the two parts yourself
 
-## Local Setup & Development
+You need **Node 18+** and **Python 3.10+**.
 
-### 1. Backend Setup
+**1. Backend** (terminal one)
 
 ```bash
 cd backend
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-
-# Run migrations and seed sample data
-python3 manage.py makemigrations authentication communities announcements incidents events emergency
-python3 manage.py migrate
-python3 manage.py seed_data
-
-# Start Django backend server
-python3 manage.py runserver
+python manage.py migrate
+python manage.py seed_data         # loads the Riverside Estate sample data
+python manage.py runserver
 ```
-The Django REST API will be accessible at `http://localhost:8000/api/v1/`.
 
-### 2. Frontend Setup
+The API is now on **http://localhost:8000/api/v1**
+
+**2. Frontend** (terminal two, leave the backend running)
 
 ```bash
 cd frontend
 npm install
-
-# Start React development server
 npm start
 ```
-The application UI will be accessible at `http://localhost:3000`.
+
+Open **http://localhost:3000**
+
+That is the only address you need. The dev server forwards API calls to
+Django for you, so you never have to visit port 8000 yourself.
+
+The backend defaults to SQLite, so there is no database server to install. To
+point it at PostgreSQL instead, set `USE_SQLITE=0` along with `DB_NAME`,
+`DB_USER`, `DB_PASSWORD`, `DB_HOST` and `DB_PORT`.
+
+### Option B, Docker
+
+```bash
+docker compose up --build
+```
+
+This starts PostgreSQL, runs the migrations, seeds the data and serves both
+parts. Same two addresses:
+
+- **http://localhost:3000**, the application
+- **http://localhost:8000/api/v1**, the API
 
 ---
 
-## Running Automated Tests
+## Signing in
 
-### Backend Unit Tests
-```bash
-cd backend
-python3 manage.py test
+The sign-in screen lists all four demonstration accounts. Click one and you are
+straight in, each role sees a genuinely different application, so it is worth
+looking at all four.
+
+| Role | Email | What they see |
+|---|---|---|
+| Resident | `thabo@example.com` | Notices, their reports, visitor passes, SOS, directory |
+| Estate Administrator | `admin@example.com` | Overview, verification queue, full reporting |
+| Safety Volunteer | `sarah@example.com` | Triage, patrol, reporting |
+| Security Guard | `sipho@example.com` | Gate terminal and incidents |
+
+You can also switch between all four from the avatar menu without signing out.
+
+Password for all four: `Password123!`
+
+The frontend keeps working if the backend is not running, it falls back to
+seeded sample data, so you can demonstrate the interface on its own.
+
+---
+
+## What is where
+
 ```
-
-### Frontend Unit Tests
-```bash
-cd frontend
-npm test -- --watchAll=false
-```
-
-### Production Build
-```bash
-cd frontend
-npm run build
+backend/            Django + DRF API
+  apps/
+    analytics/      aggregation endpoints and the activity log
+    announcements/  estate broadcasts
+    authentication/ custom user model, JWT
+    communities/    estates, memberships, seed_data command
+    emergency/      SOS alerts
+    events/         community calendar
+    incidents/      incident reports and triage
+frontend/           React single-page app
+  src/
+    components/     Chart, Avatar, StatusBadge, Modal, Navbar...
+    pages/          one file per screen, split by role
+    services/       API client and the fallback sample data
+    index.css       the whole design system
+infrastructure/     Terraform for the cloud deployment
+docs/               vision, requirements, ERD, architecture, deployment
 ```
 
 ---
 
-## Repository Structure
+## How the reporting works
 
-```text
-CommuniKey/
-├── backend/                  # Django REST Framework backend API
-│   ├── apps/                 # Modular Django apps (auth, communities, incidents, announcements, events, emergency)
-│   ├── config/               # Settings, WSGI, root URL routing
-│   └── manage.py
-├── frontend/                 # React 18 SPA frontend
-│   ├── src/
-│   │   ├── components/       # Reusable modular UI components
-│   │   ├── context/          # AuthContext and RBAC logic
-│   │   ├── pages/            # Views (Dashboard, Incidents, Announcements, Events, Members, Profile, etc.)
-│   │   └── services/         # API client & local demo data fallback
-│   └── package.json
-├── docs/                     # Full system architecture, ERD, and API design specifications
-└── README.md
-```
+This is as much a data project as a cloud one, so none of the figures on the
+dashboards are stored constants.
+
+`frontend/src/utils/analytics.js` aggregates the incident and gate records
+into totals, time series and breakdowns: resolution rate, median time to
+close, reports by type, by location and by hour of day, and period over
+period comparison against the preceding window.
+
+The same grouping runs server side in `backend/apps/analytics/views.py`,
+using the ORM (`TruncDate`, `TruncWeek`, `Count`, `Avg`) so Postgres does the
+work rather than Python. The frontend uses the API when it is reachable and
+falls back to computing locally when it is not, which is why the dashboards
+still work for a demonstration with the backend stopped.
+
+The sample history in `services/demoData.js` is generated by a seeded
+pseudo random function, so the numbers are stable across reloads and
+identical on every machine, with realistic weekday and evening shape.
 
 ---
 
-## License
+## Cloud architecture
 
-This project is developed for educational and portfolio purposes.
+See `docs/09_CLOUD_DESIGN.md` for the full design. In short: the React build
+sits in S3 behind CloudFront, Django runs in a container on EC2, Postgres is
+on RDS in a private subnet, and verification documents go to a private,
+versioned, encrypted S3 bucket.
 
-## Repository Verification
+Publishing a notice writes to Postgres and then publishes one message to an
+SNS topic. A Lambda function (`infrastructure/lambda/notify_residents/`)
+receives it and sends the email through SES in batches, with residents in
+BCC. The web request returns without waiting for the mail provider.
 
-**Verification Code:** `WTC-59PV9ZVN`
+Terraform for the topic, the function, its IAM role and the document bucket
+is in `infrastructure/terraform/`.
+
+---
+
+## Notes on the interface
+
+Colour means one thing throughout, and only one:
+
+- **Estate blue**, live active items or selected navigation
+- **Emerald green**, verified member profile or confirmed address
+- **Electric sky cyan**, authorised gate access or entry clearance
+- **Neon lime**, active neighbourhood watch or security patrol on duty
+- **Seafoam mint**, zone or perimeter check logged as clear
+- **Violet**, newly reported incident or issue
+- **Teal**, work actively under way / in progress
+- **Fuchsia magenta**, volunteer standing by or awaiting responder dispatch
+- **Luminous amber**, high priority notice or important broadcast
+- **Soft rose**, pending document or household verification check
+- **Ochre**, waiting on a person to decide
+- **Brick**, danger, emergencies, destructive actions
+- **Grey**, settled and closed, deliberately quiet
+
+Charts label every axis, start every scale at zero, and never identify a series
+by colour alone. Values are read on demand in the strip under the plot rather
+than being printed over every bar.
+
+Figures, timestamps and reference codes are set in IBM Plex Mono so digits line
+up in columns; everything else is Inter.

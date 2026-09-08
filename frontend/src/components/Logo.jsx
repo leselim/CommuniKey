@@ -1,12 +1,16 @@
 import React from 'react';
 
+/*
+ * Wordmark. Typographic only - the name is the mark. The weight shift and
+ * the colour change at "Key" carry the identity without needing a glyph
+ * sitting next to it.
+ */
+
 function Logo({ className = '' }) {
   return (
-    <div className={`wordmark-brand ${className}`} style={{ display: 'inline-flex', alignItems: 'center' }}>
-      <span className="wordmark-title" style={{ fontWeight: 600, fontSize: '0.95rem', letterSpacing: '-0.01em', color: '#e9ecea' }}>
-        Communi<span style={{ color: 'var(--signal, #3b6a9c)', fontWeight: 700 }}>Key</span>
-      </span>
-    </div>
+    <span className={`wordmark-title ${className}`.trim()}>
+      Communi<em>Key</em>
+    </span>
   );
 }
 

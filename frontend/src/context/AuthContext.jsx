@@ -190,7 +190,7 @@ export function AuthProvider({ children }) {
   };
 
   /**
-   * Data Privacy & RBAC Permission Boundaries:
+   * Data Privacy and RBAC Permission Boundaries:
    * 1. Administrators cannot view private peer-to-peer chats between residents unless explicitly escalated as an Admin Ticket.
    * 2. Residents only have access to their own personal data and direct communications.
    * 3. Safety Volunteers are restricted strictly to active safety alerts, triage logs, and dispatching.
@@ -200,7 +200,7 @@ export function AuthProvider({ children }) {
     if (!currentUser) return false;
     const myFullName = `${currentUser.first_name} ${currentUser.last_name}`;
 
-    // Admin & SysAdmin privacy restriction: No reading private peer-to-peer resident chats unless Admin support is a participant
+    // Admin and SysAdmin privacy restriction: No reading private peer-to-peer resident chats unless Admin support is a participant
     if (currentUser.role === 'Estate Administrator') {
       return (
         senderName.includes('Marcus') ||
@@ -210,7 +210,7 @@ export function AuthProvider({ children }) {
       );
     }
 
-    // Residents & Volunteers can only view chats they are directly part of
+    // Residents and Volunteers can only view chats they are directly part of
     return (
       senderName === myFullName ||
       recipientName === myFullName ||
@@ -224,12 +224,12 @@ export function AuthProvider({ children }) {
     const isSelf = currentUser.email === residentMember.email;
     const isVolunteer = currentUser.role === 'Safety Volunteer';
 
-    // If viewing another resident's profile as Admin or another Resident, redact private gate access code & personal notes
+    // If viewing another resident's profile as Admin or another Resident, redact private gate access code and personal notes
     if (!isSelf && !isVolunteer) {
       return {
         ...residentMember,
         gate_access_code: '•••• [Protected Resident Privacy]',
-        emergency_notes: 'Redacted: Accessible strictly to Safety Responders & Emergency Patrol during active alerts.',
+        emergency_notes: 'Redacted: Accessible strictly to Safety Responders and Emergency Patrol during active alerts.',
       };
     }
 

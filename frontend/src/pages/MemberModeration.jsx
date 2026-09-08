@@ -72,7 +72,7 @@ function MemberModeration() {
           <p className="eyebrow">
             Estate Administration
           </p>
-          <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Member Moderation & Approvals</h1>
+          <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Members and approvals</h1>
           <p className="masthead-meta" style={{ marginTop: 'var(--s2)' }}>
             Review pending resident verification documents, approve household accounts, and manage the estate directory.
           </p>
@@ -82,12 +82,9 @@ function MemberModeration() {
       {notice ? <p className="notice">{notice}</p> : null}
 
       {/* Pending Resident Registrations Panel */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+      <section className="panel">
+        <div className="panel-head">
           <div>
-            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-              PENDING VERIFICATION QUEUE
-            </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
               Applications Awaiting Document Verification ({pendingQueue.length})
             </h2>
@@ -149,16 +146,13 @@ function MemberModeration() {
         )}
       </section>
 
-      {/* Verified Resident Directory & Search Panel */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
+      {/* Verified Resident Directory and Search Panel */}
+      <section className="panel">
         <div
           className="panel-head"
           style={{ marginBottom: 'var(--s3)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
         >
           <div>
-            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-              VERIFIED RESIDENT ROSTER
-            </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
               Active Household Directory ({filteredMembers.length})
             </h2>
@@ -237,7 +231,7 @@ function MemberModeration() {
           }
         >
           <div className="stack" style={{ gap: 'var(--s3)' }}>
-            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)', border: '1px solid var(--line-hi)' }}>
+            <div style={{ padding: 'var(--s4)', backgroundColor: 'var(--panel-hi)' }}>
               <p className="sm" style={{ color: 'var(--paper)', marginBottom: 'var(--s2)' }}>
                 <strong>Resident Name:</strong> {selectedDocModal.name}
               </p>
@@ -264,7 +258,7 @@ function MemberModeration() {
                 textAlign: 'center',
               }}
             >
-              <p className="sm faint" style={{ color: 'var(--dim)' }}>
+              <p className="sm faint">
                 Preview of {selectedDocModal.fileName}
                 <br />
                 (Document ID & Municipal Match Verified)

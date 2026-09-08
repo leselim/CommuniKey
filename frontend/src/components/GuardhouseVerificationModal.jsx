@@ -86,7 +86,7 @@ function GuardhouseVerificationModal({ isOpen, onClose, onLogEntry }) {
     >
       <div className="stack" style={{ gap: 'var(--s4)' }}>
         <p className="eyebrow" style={{ fontSize: '0.68rem', color: 'var(--dim)', margin: 0 }}>
-          MAIN GUARDHOUSE ACCESS CONTROL TERMINAL
+          Main guardhouse access control
         </p>
 
         {/* Access Code Input */}
@@ -153,15 +153,15 @@ function GuardhouseVerificationModal({ isOpen, onClose, onLogEntry }) {
                 </div>
                 <div>
                   <strong style={{ color: 'var(--paper)' }}>Destination Host: </strong>
-                  <span style={{ color: 'var(--dim)' }}>{matchedPass.host}</span>
+                  <span>{matchedPass.host}</span>
                 </div>
                 <div>
                   <strong style={{ color: 'var(--paper)' }}>Vehicle Registration: </strong>
-                  <span className="mono" style={{ color: 'var(--dim)' }}>{matchedPass.vehicle}</span>
+                  <span className="mono">{matchedPass.vehicle}</span>
                 </div>
                 <div>
                   <strong style={{ color: 'var(--paper)' }}>Valid Until: </strong>
-                  <span style={{ color: 'var(--dim)' }}>{matchedPass.validUntil}</span>
+                  <span>{matchedPass.validUntil}</span>
                 </div>
               </div>
             </div>
@@ -186,7 +186,7 @@ function GuardhouseVerificationModal({ isOpen, onClose, onLogEntry }) {
                     border: '1px solid rgba(225, 29, 72, 0.3)',
                   }}
                 >
-                  EXPIRED / INVALID PASS
+                  Expired or invalid pass
                 </span>
               </div>
               <p className="sm faint" style={{ color: 'var(--dim)', margin: 'var(--s1) 0 0 0', fontSize: '0.78rem' }}>

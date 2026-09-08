@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+// Relative by default so the app runs on a single address. The dev server
+// proxies /api to Django (see "proxy" in package.json); in production the
+// same path is served by whatever fronts the build.
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

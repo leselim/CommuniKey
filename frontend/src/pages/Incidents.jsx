@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
-import GuardhouseIncidents from './GuardhouseIncidents';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -88,7 +87,7 @@ function GeneralIncidentsHub() {
     <div className="stack">
       <header className="masthead">
         <div>
-          <h1 style={{ margin: 0 }}>Incidents</h1>
+          <h1>Incidents</h1>
           <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
             Report suspicious activity and follow the status of your reports.
           </p>
@@ -287,13 +286,9 @@ function GeneralIncidentsHub() {
   );
 }
 
+/* One incident view for every role. What differs is what you can do with a
+   report, which the hub decides from the signed in role. */
 function Incidents() {
-  const { userRole } = useAuth();
-
-  if (userRole === 'Security Guard') {
-    return <GuardhouseIncidents />;
-  }
-
   return <GeneralIncidentsHub />;
 }
 

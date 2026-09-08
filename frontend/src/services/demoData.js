@@ -313,3 +313,135 @@ export const INCIDENT_TYPES = [
 ];
 
 export const INCIDENT_STATUSES = ['Reported', 'Under review', 'Resolved'];
+
+/* ---------------------------------------------------------------------------
+ * Estate history
+ *
+ * The dashboards report on real records rather than on figures typed into a
+ * chart component. To make that possible offline, this generates a plausible
+ * twelve weeks of incident history for Riverside Estate.
+ *
+ * The generator is deterministic: a small seeded PRNG means every reload,
+ * and every marker opening the project, sees identical numbers. Weekday and
+ * seasonal shape is built in so the charts show something worth reading
+ * rather than noise.
+ * ------------------------------------------------------------------------ */
+
+/** Mulberry32: tiny, fast, stable across browsers. */
+function seeded(seed) {
+  let a = seed;
+  return function next() {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const HISTORY_DAYS = 84;
+
+const LOCATIONS = [
+  'Riverside Drive',
+  'Mill Road',
+  'Section A',
+  'Section B',
+  'Section C',
+  'Clubhouse',
+  'Main gate',
+];
+
+/* Roughly how often each type occurs, and how long it usually takes to
+   close. Faults get fixed; security matters get reviewed and closed faster. */
+const TYPE_PROFILE = {
+  'Suspicious activity': { weight: 26, hoursToClose: 20 },
+  'Streetlight fault': { weight: 22, hoursToClose: 96 },
+  'Road hazard': { weight: 14, hoursToClose: 72 },
+  Vandalism: { weight: 12, hoursToClose: 60 },
+  'Attempted break-in': { weight: 9, hoursToClose: 14 },
+  'Lost pet': { weight: 12, hoursToClose: 30 },
+  Other: { weight: 5, hoursToClose: 48 },
+};
+
+const TYPE_TABLE = Object.entries(TYPE_PROFILE).flatMap(([name, cfg]) =>
+  Array.from({ length: cfg.weight }, () => name)
+);
+
+function buildIncidentHistory() {
+  const rand = seeded(20260907);
+  const rows = [];
+  let id = 100;
+
+  for (let dayOffset = HISTORY_DAYS; dayOffset >= 0; dayOffset -= 1) {
+    const when = new Date(Date.now() - dayOffset * DAY);
+    const weekday = when.getDay();
+
+    // Friday and Saturday run busier; midweek is quiet.
+    let expected = 1.5;
+    if (weekday === 5 || weekday === 6) expected = 3.1;
+    else if (weekday === 0) expected = 2.2;
+
+    // A gentle upward trend, so the trend line has something to say.
+    expected *= 0.85 + ((HISTORY_DAYS - dayOffset) / HISTORY_DAYS) * 0.4;
+
+    const count = Math.max(0, Math.round(expected + (rand() - 0.5) * 2.2));
+
+    for (let i = 0; i < count; i += 1) {
+      const type = TYPE_TABLE[Math.floor(rand() * TYPE_TABLE.length)];
+      const profile = TYPE_PROFILE[type];
+
+      // Evenings are when most things get reported.
+      const hour = rand() < 0.55 ? 17 + Math.floor(rand() * 7) : 7 + Math.floor(rand() * 10);
+      const reported = new Date(when);
+      reported.setHours(hour, Math.floor(rand() * 60), 0, 0);
+
+      const closeHours = profile.hoursToClose * (0.5 + rand());
+      const closedAt = new Date(reported.getTime() + closeHours * 60 * 60 * 1000);
+      const isClosed = closedAt.getTime() < Date.now();
+
+      let status = 'Resolved';
+      if (!isClosed) status = rand() < 0.45 ? 'Under review' : 'Reported';
+
+      id += 1;
+      rows.push({
+        id,
+        incident_type: type,
+        description: `${type} reported at ${LOCATIONS[Math.floor(rand() * LOCATIONS.length)]}.`,
+        status,
+        date_reported: reported.toISOString(),
+        date_resolved: status === 'Resolved' ? closedAt.toISOString() : null,
+        resolution_hours: status === 'Resolved' ? Math.round(closeHours) : null,
+        reported_by: 'Resident Member',
+        location: LOCATIONS[Math.floor(rand() * LOCATIONS.length)],
+      });
+    }
+  }
+
+  return rows.sort((a, b) => new Date(b.date_reported) - new Date(a.date_reported));
+}
+
+/** Twelve weeks of history, with the hand written recent items kept on top. */
+export const incidentHistory = [...incidents, ...buildIncidentHistory()];
+
+/** Gate movements per day, used for the access-control chart. */
+export function buildGateHistory() {
+  const rand = seeded(88131);
+  const rows = [];
+  for (let dayOffset = HISTORY_DAYS; dayOffset >= 0; dayOffset -= 1) {
+    const when = new Date(Date.now() - dayOffset * DAY);
+    const weekday = when.getDay();
+    let base = 300;
+    if (weekday === 0) base = 210;
+    else if (weekday === 6) base = 350;
+    else if (weekday === 5) base = 330;
+    rows.push({
+      date: when.toISOString().slice(0, 10),
+      residents: Math.round(base * (0.9 + rand() * 0.2)),
+      visitors: Math.round(base * 0.35 * (0.7 + rand() * 0.6)),
+      deliveries: Math.round(base * 0.12 * (0.6 + rand() * 0.8)),
+    });
+  }
+  return rows;
+}
+
+export const gateHistory = buildGateHistory();

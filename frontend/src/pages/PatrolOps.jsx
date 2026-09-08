@@ -5,7 +5,7 @@ const PATROL_ZONES = [
   { id: 1, zone: 'Section A Perimeter', status: 'Clear', lastChecked: '15 mins ago by Sarah Jenkins', notes: 'Fence sensors active. Barrier gates locked.' },
   { id: 2, zone: 'Section B Mill Road Route', status: 'Patrolling', lastChecked: 'Active Now', notes: 'Foot patrol checking streetlights #10 to #18.' },
   { id: 3, zone: 'North Boundary Wall', status: 'Clear', lastChecked: '1h ago by Night Patrol Team', notes: 'Infrared cameras clear. Zero activity.' },
-  { id: 4, zone: 'Clubhouse & Pool Area', status: 'Clear', lastChecked: '45 mins ago', notes: 'Facilities locked. Security locks intact.' },
+  { id: 4, zone: 'Clubhouse and Pool Area', status: 'Clear', lastChecked: '45 mins ago', notes: 'Facilities locked. Security locks intact.' },
 ];
 
 const GUARDHOUSE_LOGS = [
@@ -48,9 +48,9 @@ function PatrolOps() {
           <p className="eyebrow">
             Safety Volunteer Operations
           </p>
-          <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Patrol Operations & Guardhouse Coordination</h1>
+          <h1 style={{ fontSize: 'var(--fs-xl)', margin: 0 }}>Patrol and guardhouse</h1>
           <p className="masthead-meta" style={{ marginTop: 'var(--s2)' }}>
-            Shift check-in, live sector rounds, perimeter fence status, and main gate guardhouse logs.
+            Shift check in, sector rounds, fence status and the gatehouse log.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ function PatrolOps() {
             className={shiftActive ? 'btn btn-solid' : 'btn'}
             onClick={handleToggleShift}
           >
-            {shiftActive ? 'Active Patrol Shift (Checked In)' : 'Check In for Shift'}
+            {shiftActive ? 'Checked in' : 'Check in for shift'}
           </button>
         </div>
       </header>
@@ -68,55 +68,33 @@ function PatrolOps() {
       {notice ? <p className="notice">{notice}</p> : null}
 
       {/* Patrol Zones Panel */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+      <section className="panel">
+        <div className="panel-head">
           <div>
-            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-              PATROL SECTORS & PERIMETER STATUS
-            </p>
-            <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-              Active Patrol Zones & Rounds
-            </h2>
+            <h2 className="panel-title">Patrol zones</h2>
           </div>
         </div>
 
-        <div className="grid-2" style={{ gap: 'var(--s4)' }}>
+        <div className="grid-2 grid-tight">
           {PATROL_ZONES.map((z) => (
-            <div
-              key={z.id}
-              style={{
-                padding: 'var(--s4)',
-                backgroundColor: 'var(--panel-hi)',
-                border: '1px solid var(--line-hi)',
-                borderRadius: '4px',
-              }}
-            >
-              <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s1)' }}>
-                <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-                  {z.zone}
-                </h3>
+            <div className="zone" key={z.id}>
+              <div className="zone-head">
+                <h3 className="zone-name">{z.zone}</h3>
                 <StatusBadge status={z.status} />
               </div>
-              <p className="sm faint" style={{ color: 'var(--dim)', margin: '0 0 var(--s2) 0' }}>
-                Last Checked: {z.lastChecked}
-              </p>
-              <p className="sm" style={{ color: 'var(--paper)', margin: 0 }}>
-                {z.notes}
-              </p>
+              <p className="zone-note">{z.notes}</p>
+              <p className="zone-time">Checked {z.lastChecked}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Guardhouse Coordination Logs Panel */}
-      <section className="panel" style={{ padding: 'var(--s5)', border: '1px solid var(--line-hi)' }}>
-        <div className="panel-head" style={{ marginBottom: 'var(--s3)' }}>
+      <section className="panel">
+        <div className="panel-head">
           <div>
-            <p className="eyebrow" style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.05em' }}>
-              GUARDHOUSE COORDINATION LOG
-            </p>
             <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--paper)', margin: 0 }}>
-              Live Security Desk & Shift Logs
+              Live Security Desk and Shift Logs
             </h2>
           </div>
         </div>

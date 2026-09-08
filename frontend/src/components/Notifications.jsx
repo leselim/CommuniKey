@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import { notifications as demoNotifications } from '../services/demoData';
 import { save } from '../services/api';
@@ -7,13 +9,15 @@ import { formatRelative } from '../utils/format';
 /*
  * Notification tray.
  *
- * Unread is carried by a single dot in the left gutter and by the title
- * turning full contrast - read items simply go quiet rather than being
- * struck through or greyed into illegibility.
+ * Unread status is indicated by a signal dot in the left gutter and full
+ * contrast typography. Clicking any notification marks it read, closes the tray,
+ * and navigates directly to the relevant platform view.
  */
 
 function Notifications() {
   const { items, setItems } = useCollection('/notifications', demoNotifications);
+  const { userRole } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const wrapper = useRef(null);
 
@@ -43,6 +47,42 @@ function Notifications() {
   const markAllRead = async () => {
     setItems((prev) => prev.map((item) => ({ ...item, read_status: true })));
     await Promise.all(unread.map((item) => save(`/notifications/${item.id}/read`, {}, 'put')));
+  };
+
+  const handleNotificationClick = async (item) => {
+    if (!item.read_status) {
+      await markRead(item.id);
+    }
+    setOpen(false);
+
+    const type = (item.notification_type || '').toLowerCase();
+    const title = (item.title || '').toLowerCase();
+
+    if (type === 'incident' || title.includes('incident') || title.includes('suspicious')) {
+      if (userRole === 'Safety Volunteer') {
+        navigate('/volunteer/triage');
+      } else if (userRole === 'Estate Administrator') {
+        navigate('/admin/incidents');
+      } else {
+        navigate('/incidents');
+      }
+    } else if (type === 'announcement' || title.includes('announcement') || title.includes('meeting') || title.includes('notice')) {
+      if (userRole === 'Estate Administrator') {
+        navigate('/admin/announcements');
+      } else {
+        navigate('/announcements');
+      }
+    } else if (type === 'event' || title.includes('event') || title.includes('reminder') || title.includes('clean-up')) {
+      navigate('/events');
+    } else if (type === 'member' || title.includes('member') || title.includes('verification')) {
+      if (userRole === 'Estate Administrator') {
+        navigate('/admin/moderation');
+      } else {
+        navigate('/profile');
+      }
+    } else {
+      navigate('/');
+    }
   };
 
   return (
@@ -82,7 +122,7 @@ function Notifications() {
                 key={item.id}
                 type="button"
                 className={`tray-item${item.read_status ? '' : ' new'}`}
-                onClick={() => markRead(item.id)}
+                onClick={() => handleNotificationClick(item)}
               >
                 <span
                   className={`tray-flag${item.read_status ? ' read' : ' unread'}`}

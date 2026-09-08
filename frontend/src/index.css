@@ -1429,14 +1429,14 @@ select.control {
   top: calc(100% + 10px);
   right: 0;
   z-index: 120;
-  width: min(23rem, calc(100vw - 2rem));
-  max-height: 25rem;
+  width: min(27rem, calc(100vw - 2rem));
+  max-height: 28rem;
   overflow-y: auto;
   overflow-x: hidden;
   border: 1px solid var(--line-hi);
   border-radius: var(--radius-lg);
-  background-color: var(--panel);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  background-color: var(--panel-hi);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
 
 .tray-head {
@@ -1447,57 +1447,59 @@ select.control {
   align-items: center;
   justify-content: space-between;
   gap: var(--s3);
-  padding: var(--s3) var(--s4);
-  border-bottom: 1px solid var(--line);
-  background-color: var(--panel);
+  padding: var(--s4);
+  border-bottom: 1px solid var(--line-hi);
+  background-color: var(--panel-hi);
 }
 
 .tray-head h2 {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   font-weight: 600;
   color: var(--paper);
 }
 
-/* These rows are <button> elements. Without an explicit background the
-   browser paints them in the default control colour, which is light. */
+/* Notification item buttons */
 .tray-item {
   display: grid;
-  grid-template-columns: 8px minmax(0, 1fr);
+  grid-template-columns: 10px minmax(0, 1fr);
   align-items: start;
-  gap: 3px var(--s3);
+  gap: 5px var(--s3);
   width: 100%;
-  padding: var(--s3) var(--s4);
+  padding: var(--s4);
   border: 0;
-  border-bottom: 1px solid var(--line);
-  background: none;
+  border-bottom: 1px solid var(--line-hi);
+  background-color: var(--panel);
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .tray-item:last-child { border-bottom: 0; }
-.tray-item:hover { background-color: var(--panel-hi); }
+.tray-item:hover { background-color: var(--panel-top); }
 
 .tray-flag {
   grid-column: 1;
   grid-row: 1;
-  width: 6px;
-  height: 6px;
-  margin-top: 7px;
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
   border-radius: 50%;
   background-color: transparent;
 }
 
-.tray-flag.unread { background-color: var(--signal-text); }
+.tray-flag.unread {
+  background-color: var(--signal-text);
+  box-shadow: 0 0 6px var(--signal-text);
+}
 .tray-flag.read { background-color: transparent; }
 
 .tray-title {
   grid-column: 2;
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  color: var(--dim);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--paper);
   overflow-wrap: anywhere;
 }
 
@@ -1505,24 +1507,27 @@ select.control {
 
 .tray-text {
   grid-column: 2;
+  margin-top: 3px;
   font-size: var(--fs-sm);
-  color: var(--faint);
+  line-height: 1.45;
+  color: var(--paper);
+  opacity: 0.9;
   overflow-wrap: anywhere;
 }
 
 .tray-time {
   grid-column: 2;
-  margin-top: 2px;
+  margin-top: 6px;
   font-family: var(--mono);
-  font-size: var(--fs-micro);
-  color: var(--faint);
+  font-size: 0.75rem;
+  color: var(--dim);
 }
 
 .tray-empty {
-  padding: var(--s5) var(--s4);
+  padding: var(--s6) var(--s4);
   text-align: center;
-  font-size: var(--fs-sm);
-  color: var(--faint);
+  font-size: var(--fs-base);
+  color: var(--dim);
 }
 
 /* ------------------------------------------------------------- Calendar -- */

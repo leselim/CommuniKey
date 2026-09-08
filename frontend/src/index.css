@@ -1491,7 +1491,6 @@ select.control {
 
 .tray-flag.unread {
   background-color: var(--signal-text);
-  box-shadow: 0 0 6px var(--signal-text);
 }
 .tray-flag.read { background-color: transparent; }
 

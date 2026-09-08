@@ -126,7 +126,7 @@ function App() {
                 <Route
                   path="/events"
                   element={
-                    <ProtectedRoute allowedRoles={['Resident', 'Estate Administrator', 'Safety Volunteer']}>
+                    <ProtectedRoute allowedRoles={['Resident', 'Estate Administrator', 'Safety Volunteer', 'Security Guard']}>
                       <Events />
                     </ProtectedRoute>
                   }

@@ -26,6 +26,7 @@ const ROLE_NAV = {
     { to: '/volunteer/patrol', label: 'Patrol' },
     { to: '/insights', label: 'Reporting' },
     { to: '/announcements', label: 'Notices' },
+    { to: '/events', label: 'Events' },
     { to: '/directory', label: 'Directory' },
   ],
   'Estate Administrator': [
@@ -33,12 +34,14 @@ const ROLE_NAV = {
     { to: '/insights', label: 'Reporting' },
     { to: '/admin/incidents', label: 'Incidents' },
     { to: '/admin/announcements', label: 'Notices' },
+    { to: '/admin/events', label: 'Events' },
     { to: '/admin/moderation', label: 'Members' },
     { to: '/directory', label: 'Directory' },
   ],
   'Security Guard': [
     { to: '/', label: 'Gate' },
     { to: '/incidents', label: 'Incidents' },
+    { to: '/events', label: 'Events' },
     { to: '/directory', label: 'Directory' },
   ],
 };

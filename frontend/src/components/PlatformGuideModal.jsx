@@ -67,13 +67,13 @@ const LEGEND = [
 
 const ROLE_NOTES = {
   Resident:
-    'You can report incidents, issue visitor passes for your own address, and see estate notices.',
+    'You can report incidents, issue visitor passes for your own address, RSVP to community events, and see estate notices.',
   'Safety Volunteer':
-    'You receive SOS alerts, triage incoming incidents, and log patrol activity.',
+    'You receive SOS alerts, triage incoming incidents, log patrol activity, and view & RSVP to estate events.',
   'Estate Administrator':
-    'You verify new members, publish broadcasts, and see the full activity log.',
+    'You verify new members, publish broadcasts, manage events, and see the full activity log.',
   'Security Guard':
-    'You verify passes at the gate and log arrivals against the resident register.',
+    'You verify passes at the gate, view estate events, and log arrivals against the resident register.',
 };
 
 function PlatformGuideModal({ isOpen, onClose }) {

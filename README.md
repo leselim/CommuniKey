@@ -224,3 +224,10 @@ that keeps a resident out of an administrator's address.
 with the typeface embedded. Open it in a browser, with no install and no server,
 and every screen and flow works against the seeded sample data. It is there for
 demonstrating the interface on a machine that has nothing set up.
+
+---
+
+## Repository Verification
+
+Verification Code: WTC-59PV9ZVN
+

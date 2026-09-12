@@ -106,7 +106,7 @@ frontend/           React single-page app
     services/       API client and the fallback sample data
     index.css       the whole design system
 infrastructure/     Terraform for the cloud deployment
-docs/               vision, requirements, ERD, architecture, deployment
+docs/               vision, requirements, ERD, architecture, deployment, case study PDF
 ```
 
 ---
@@ -153,7 +153,7 @@ is in `infrastructure/terraform/`.
 ## Notes on the interface
 
 The interface was rebuilt in September 2026 on a single design system. What the
-product does did not change. How it reads did.
+product does did not change. How it reads did. See the complete design and rebuild case study in [docs/CommuniKey-case-study.pdf](docs/CommuniKey-case-study.pdf).
 
 **Layout.** A charcoal sidebar holds the sections that role can open, grouped
 and labelled. A white top bar carries the page title, the date, the

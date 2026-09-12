@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import Icon from '../components/Icon';
+import DataTable, { CellPlace, CellStack } from '../components/DataTable';
 import Modal from '../components/Modal';
-import StatusBadge from '../components/StatusBadge';
+import StatusBadge, { labelOf } from '../components/StatusBadge';
+import { Card, EmptyState, SearchField, SectionBar, Skeleton, Tabs, Toast } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
-import {
-  INCIDENT_STATUSES,
-  INCIDENT_TYPES,
-  incidents as demoIncidents,
-  profile,
-} from '../services/demoData';
+import { INCIDENT_STATUSES, INCIDENT_TYPES, incidents as demoIncidents, profile } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
 const FILTERS = ['All', ...INCIDENT_STATUSES];
@@ -20,15 +19,29 @@ const EMPTY_DRAFT = {
   image_url: '',
 };
 
+/* The stored value stays what the record has always held. What a person
+   reads is the one word that belongs to that state. */
+const STATUS_OPTIONS = [
+  { value: 'Reported', label: labelOf('Reported') },
+  { value: 'Under review', label: labelOf('Under review') },
+  { value: 'Dispatched', label: labelOf('Dispatched') },
+  { value: 'Resolved', label: labelOf('Resolved') },
+];
+
 function GeneralIncidentsHub() {
   const { userRole } = useAuth();
+  const location = useLocation();
   const { items, loading, create, update } = useCollection('/incidents', demoIncidents);
   const [filter, setFilter] = useState('All');
   const [query, setQuery] = useState('');
+  const [sort, setSort] = useState({ key: 'when', direction: 'desc' });
   const [formOpen, setFormOpen] = useState(false);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState('');
+
+  const canManage = userRole === 'Estate Administrator' || userRole === 'Safety Volunteer';
+  const isTriage = location.pathname.toLowerCase() === '/volunteer/triage';
 
   useEffect(() => {
     if (!receipt) return undefined;
@@ -75,7 +88,7 @@ function GeneralIncidentsHub() {
 
     setDraft(EMPTY_DRAFT);
     setFormOpen(false);
-    setReceipt('Report submitted. Track its status below.');
+    setReceipt('Report submitted. You can follow its status in the list.');
   };
 
   const counts = INCIDENT_STATUSES.reduce(
@@ -83,122 +96,135 @@ function GeneralIncidentsHub() {
     { All: items.length }
   );
 
+  const openForm = () => {
+    setError('');
+    setFormOpen(true);
+  };
+
   return (
-    <div className="stack">
-      <header className="masthead">
-        <div>
-          <h1>Incidents</h1>
-          <p className="masthead-meta" style={{ marginTop: 'var(--s1)' }}>
-            Report suspicious activity and follow the status of your reports.
-          </p>
-        </div>
-        <button type="button" className="btn btn-solid" onClick={() => setFormOpen(true)}>
+    <div className="page">
+      <SectionBar
+        icon={isTriage ? 'shield' : 'alert'}
+        title={isTriage ? 'Triage queue' : 'Incident log'}
+        stats={[
+          { label: `${labelOf('Reported')}:`, value: counts.Reported || 0 },
+          { label: `${labelOf('Under review')}:`, value: counts['Under review'] || 0 },
+          { label: `${labelOf('Resolved')}:`, value: counts.Resolved || 0 },
+        ]}
+      >
+        <button type="button" className="btn btn-primary" onClick={openForm}>
+          <Icon name="plus" />
           Report an incident
         </button>
-      </header>
+      </SectionBar>
 
-      {receipt ? <p className="notice">{receipt}</p> : null}
-
-      <section className="section">
-        <div className="section-head">
-          <div className="filter">
-            {FILTERS.map((status) => (
-              <button
-                key={status}
-                type="button"
-                className={`filter-item${filter === status ? ' on' : ''}`}
-                onClick={() => setFilter(status)}
-              >
-                {status}
-                <span className="mono"> {counts[status] || 0}</span>
-              </button>
-            ))}
-          </div>
-          <input
-            className="searchbar"
-            type="search"
-            placeholder="Search"
-            value={query}
-            aria-label="Search incidents"
-            onChange={(event) => setQuery(event.target.value)}
+      <Card flush>
+        <div className="toolbar">
+          <Tabs
+            label="Filter by status"
+            value={filter}
+            onChange={setFilter}
+            items={FILTERS.map((status) => ({
+              value: status,
+              label: status === 'All' ? 'All' : labelOf(status),
+              count: counts[status] || 0,
+            }))}
           />
+          <SearchField value={query} onChange={setQuery} placeholder="Search type, place or person" label="Search incidents" />
         </div>
 
-        {loading && items.length === 0 ? (
-          <div>
-            <div className="bar" />
-            <div className="bar" />
-            <div className="bar" />
+        {!canManage ? (
+          <div className="info-line">
+            <Icon name="info" />
+            Report suspicious activity and follow the status of your reports here.
           </div>
+        ) : null}
+
+        {loading && items.length === 0 ? (
+          <Skeleton rows={4} />
         ) : visible.length === 0 ? (
-          <p className="blank">No incidents match this view.</p>
+          <EmptyState
+            icon="search"
+            title="No incidents match this view"
+            text="Try another status or clear the search."
+            action={
+              filter !== 'All' || query ? (
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => {
+                    setFilter('All');
+                    setQuery('');
+                  }}
+                >
+                  Show all incidents
+                </button>
+              ) : null
+            }
+          />
         ) : (
-          <ul className="ledger">
-            {visible.map((item) => (
-              <li className="entry" key={item.id} style={{ display: 'block', padding: 'var(--s4) 0', borderBottom: '1px solid var(--line-hi)' }}>
-                <div className="cluster" style={{ justifyContent: 'space-between', marginBottom: 'var(--s2)', alignItems: 'center' }}>
-                  <h3 className="entry-title" style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--paper)' }}>
-                    {item.incident_type}
-                  </h3>
-                  {userRole === 'Estate Administrator' || userRole === 'Safety Volunteer' ? (
-                    <select
-                      className="control sm"
-                      value={item.status}
-                      onChange={(e) => update(item.id, { status: e.target.value })}
-                      style={{
-                        padding: '0.2rem 0.5rem',
-                        fontSize: '0.75rem',
-                        color: 'var(--paper)',
-                        backgroundColor: 'var(--panel-hi)',
-                        borderColor: 'var(--line-hi)',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <option value="Reported">Reported</option>
-                      <option value="Under review">Under Review</option>
-                      <option value="Dispatched">Dispatched</option>
-                      <option value="Resolved">Resolved</option>
-                    </select>
+          <DataTable
+            caption={isTriage ? 'Triage queue' : 'Incident log'}
+            columns={[
+              {
+                key: 'incident',
+                header: 'Incident',
+                stack: true,
+                cell: (item) => <CellStack title={item.incident_type} sub={item.description} clamp />,
+              },
+              {
+                key: 'location',
+                header: 'Location',
+                width: '150px',
+                cell: (item) => <CellPlace>{item.location || 'Not given'}</CellPlace>,
+              },
+              { key: 'by', header: 'Reported by', width: '140px', cell: (item) => item.reported_by || 'Unknown' },
+              {
+                key: 'when',
+                header: 'Reported',
+                width: '132px',
+                sortValue: (item) => new Date(item.date_reported).getTime(),
+                cell: (item) => (
+                  <span className="cell-time" title={formatStamp(item.date_reported)}>
+                    <Icon name="clock" />
+                    {formatRelative(item.date_reported)}
+                  </span>
+                ),
+              },
+              canManage
+                ? { key: 'assigned', header: 'Assigned', width: '140px', cell: (item) => item.assigned_contractor || 'Estate ops team' }
+                : null,
+              {
+                key: 'status',
+                header: 'Status',
+                width: canManage ? '176px' : '128px',
+                cell: (item) =>
+                  canManage ? (
+                    <span className="select select-status">
+                      <select
+                        value={item.status}
+                        aria-label={`Status of ${item.incident_type}`}
+                        onChange={(e) => update(item.id, { status: e.target.value })}
+                      >
+                        {STATUS_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Icon name="chevronDown" />
+                    </span>
                   ) : (
                     <StatusBadge status={item.status} />
-                  )}
-                </div>
-
-                <p className="entry-body" style={{ marginBottom: 'var(--s2)', fontSize: '0.82rem', color: 'var(--paper)' }}>
-                  {item.description}
-                </p>
-
-                <div className="cluster" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div className="cluster" style={{ gap: 'var(--s2)', fontSize: '0.75rem', color: 'var(--dim)', margin: 0 }}>
-                    <span title={formatStamp(item.date_reported)}>
-                      {formatRelative(item.date_reported)}
-                    </span>
-                    {item.location ? (
-                      <>
-                        <span style={{ color: 'var(--line-hi)' }}>·</span>
-                        <span>Location: {item.location}</span>
-                      </>
-                    ) : null}
-                    {item.reported_by ? (
-                      <>
-                        <span style={{ color: 'var(--line-hi)' }}>·</span>
-                        <span>Reported by {item.reported_by}</span>
-                      </>
-                    ) : null}
-                  </div>
-
-                  {userRole === 'Estate Administrator' || userRole === 'Safety Volunteer' ? (
-                    <span className="mono sm faint" style={{ color: 'var(--dim)', fontSize: '0.75rem' }}>
-                      Assigned: {item.assigned_contractor || 'Estate Ops Team'}
-                    </span>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
+                  ),
+              },
+            ]}
+            rows={visible}
+            sort={sort}
+            onSortChange={setSort}
+          />
         )}
-      </section>
+      </Card>
 
       {formOpen ? (
         <Modal
@@ -209,7 +235,7 @@ function GeneralIncidentsHub() {
               <button type="button" className="btn" onClick={() => setFormOpen(false)}>
                 Cancel
               </button>
-              <button type="submit" form="incident-form" className="btn btn-solid">
+              <button type="submit" form="incident-form" className="btn btn-primary">
                 Submit report
               </button>
             </>
@@ -218,14 +244,13 @@ function GeneralIncidentsHub() {
           <form id="incident-form" onSubmit={submit}>
             <div className="fields">
               <div className="field">
-                <label className="eyebrow" htmlFor="incident-type">
-                  Incident type
-                </label>
+                <label htmlFor="incident-type">Incident type</label>
                 <select
                   id="incident-type"
                   className="control"
                   value={draft.incident_type}
                   onChange={(event) => setDraft({ ...draft, incident_type: event.target.value })}
+                  data-autofocus
                 >
                   {INCIDENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -236,9 +261,7 @@ function GeneralIncidentsHub() {
               </div>
 
               <div className="field">
-                <label className="eyebrow" htmlFor="incident-location">
-                  Location
-                </label>
+                <label htmlFor="incident-location">Location</label>
                 <input
                   id="incident-location"
                   className="control"
@@ -249,22 +272,20 @@ function GeneralIncidentsHub() {
               </div>
 
               <div className="field field-wide">
-                <label className="eyebrow" htmlFor="incident-description">
-                  Description
-                </label>
+                <label htmlFor="incident-description">Description</label>
                 <textarea
                   id="incident-description"
                   className="control"
                   placeholder="What happened, when, and who was involved"
                   value={draft.description}
+                  aria-invalid={error ? 'true' : undefined}
                   onChange={(event) => setDraft({ ...draft, description: event.target.value })}
                 />
+                {error ? <span className="field-error">{error}</span> : <span className="hint">At least 10 characters.</span>}
               </div>
 
               <div className="field field-wide">
-                <label className="eyebrow" htmlFor="incident-image">
-                  Photo link
-                </label>
+                <label htmlFor="incident-image">Photo link</label>
                 <input
                   id="incident-image"
                   className="control"
@@ -272,16 +293,14 @@ function GeneralIncidentsHub() {
                   value={draft.image_url}
                   onChange={(event) => setDraft({ ...draft, image_url: event.target.value })}
                 />
-                <p className="hint">
-                  Direct upload arrives with the /uploads/images endpoint.
-                </p>
+                <span className="hint">Direct upload arrives with the /uploads/images endpoint.</span>
               </div>
             </div>
-
-            {error ? <p className="error">{error}</p> : null}
           </form>
         </Modal>
       ) : null}
+
+      <Toast message={receipt} />
     </div>
   );
 }

@@ -1,34 +1,39 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import Icon from './Icon';
 
 /*
- * Dialog. Rendered through a portal so it is never clipped by an ancestor's
- * overflow, closes on Escape or a click on the backdrop, and moves focus
- * into itself on open so keyboard users are not left behind on the page.
+ * Dialog. Rendered through a portal so it is never clipped, closes on Escape
+ * or a click on the backdrop, and moves focus into itself on open.
  */
 
 function Modal({ title, onClose, children, footer, wide = false }) {
   const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
     const previouslyFocused = document.activeElement;
 
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') closeRef.current();
     };
     document.addEventListener('keydown', onKeyDown);
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    if (dialogRef.current) dialogRef.current.focus();
+    if (dialogRef.current) {
+      const autofocus = dialogRef.current.querySelector('[autofocus], [data-autofocus]');
+      (autofocus || dialogRef.current).focus();
+    }
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousOverflow;
       if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
     };
-  }, [onClose]);
+  }, []);
 
   return ReactDOM.createPortal(
     <div
@@ -47,15 +52,8 @@ function Modal({ title, onClose, children, footer, wide = false }) {
       >
         <div className="dialog-head">
           <h2>{title}</h2>
-          <button type="button" className="dialog-close" onClick={onClose} aria-label="Close">
-            <svg viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-              <path
-                d="M2 2 L12 12 M12 2 L2 12"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-              />
-            </svg>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
+            <Icon name="x" />
           </button>
         </div>
         <div className="dialog-body">{children}</div>

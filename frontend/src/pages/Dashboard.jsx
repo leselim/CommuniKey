@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Icon from '../components/Icon';
+import DataTable, { CellStack, CellTime } from '../components/DataTable';
 import Modal from '../components/Modal';
 import SOSButton from '../components/SOSButton';
 import StatusBadge from '../components/StatusBadge';
 import PlatformGuideModal from '../components/PlatformGuideModal';
 import GuardhouseVerificationModal from '../components/GuardhouseVerificationModal';
+import { Card, DateBox, Details, EmptyState, MetaItem, SectionBar, Toast } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
 import {
@@ -51,8 +54,14 @@ const MY_REQUESTS = [
   },
 ];
 
-/* A fixed pattern standing in for a real encoded pass. Kept high-contrast
-   on white so a phone camera can actually read it off the screen. */
+const TYPE_LABELS = {
+  'Gate Pass': 'Gate pass',
+  Maintenance: 'Maintenance',
+  'Access Key': 'Access key',
+};
+
+/* A fixed pattern standing in for a real encoded pass. Kept high contrast
+   on white so a phone camera can read it off the screen. */
 const QR_CELLS = [
   [2, 2, 7, 7], [3, 3, 5, 5, true], [4, 4, 3, 3],
   [20, 2, 7, 7], [21, 3, 5, 5, true], [22, 4, 3, 3],
@@ -69,17 +78,10 @@ const QR_CELLS = [
 function PassCode() {
   return (
     <span className="pass-code">
-      <svg width="120" height="120" viewBox="0 0 29 29" aria-label="Gate pass code" role="img">
+      <svg width="132" height="132" viewBox="0 0 29 29" aria-label="Gate pass code" role="img">
         <rect width="29" height="29" fill="#ffffff" />
         {QR_CELLS.map((cell, i) => (
-          <rect
-            key={i}
-            x={cell[0]}
-            y={cell[1]}
-            width={cell[2]}
-            height={cell[3]}
-            fill={cell[4] ? '#ffffff' : '#000000'}
-          />
+          <rect key={i} x={cell[0]} y={cell[1]} width={cell[2]} height={cell[3]} fill={cell[4] ? '#ffffff' : '#17191e'} />
         ))}
       </svg>
     </span>
@@ -96,6 +98,33 @@ function firstNameOf(user) {
     if (word) return word.charAt(0).toUpperCase() + word.slice(1);
   }
   return 'there';
+}
+
+function ActionTile({ icon, title, text, onClick, to }) {
+  const body = (
+    <>
+      <span className="action-tile-icon">
+        <Icon name={icon} />
+      </span>
+      <span className="action-tile-text">
+        <strong>{title}</strong>
+        <span>{text}</span>
+      </span>
+      <Icon name="chevronRight" />
+    </>
+  );
+  if (to) {
+    return (
+      <Link to={to} className="action-tile">
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" className="action-tile" onClick={onClick}>
+      {body}
+    </button>
+  );
 }
 
 function Dashboard() {
@@ -126,13 +155,20 @@ function Dashboard() {
     .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
 
   const pinnedAnnouncements = announcements.items.slice(0, 2);
+  const activePasses = MY_REQUESTS.filter((r) => r.type === 'Gate Pass' && r.status === 'Active').length;
+  const openRequests = MY_REQUESTS.filter((r) => r.status !== 'Completed').length;
+
+  const flash = (message, ms = 4000) => {
+    setNotice(message);
+    setTimeout(() => setNotice((current) => (current === message ? '' : current)), ms);
+  };
 
   const handleGenerateVisitorPass = (e) => {
     e.preventDefault();
     if (!visitorName.trim()) return;
     const code = `CK-${Math.floor(100 + Math.random() * 900)}`;
     setGeneratedCode(code);
-    setNotice(`Pass ${code} created for ${visitorName}. The guardhouse has been notified.`);
+    flash(`Pass ${code} created for ${visitorName}. The guardhouse has been notified.`);
   };
 
   const closeVisitorModal = () => {
@@ -143,154 +179,165 @@ function Dashboard() {
   };
 
   const handleContactGuardhouse = () => {
-    setNotice('The officer on duty at the main gate has been notified.');
-    setTimeout(() => setNotice(''), 4000);
+    flash('The officer on duty at the main gate has been notified.');
   };
 
   const toggleRsvp = (eventId) => {
     const next = !rsvpState[eventId];
     setRsvpState((prev) => ({ ...prev, [eventId]: next }));
-    setNotice(next ? 'You are on the attendance list.' : 'You have been removed from the list.');
-    setTimeout(() => setNotice(''), 4000);
+    flash(next ? 'You are on the attendance list.' : 'You have been removed from the list.');
   };
 
   return (
-    <div className="stack" style={{ gap: 'var(--s6)' }}>
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">
-            {community.community_name} · {community.city}
-          </p>
-          <h1>Good to see you, {firstNameOf(currentUser)}</h1>
-          <p className="masthead-meta">
-            Everything happening at your address, and the gate tools you can use right now.
-          </p>
-        </div>
-
-        <div className="cluster" style={{ gap: 'var(--s2)' }}>
-          <button type="button" className="btn" onClick={() => setVisitorModal(true)}>
-            Visitor pass
-          </button>
-          <button type="button" className="btn" onClick={() => setGuardhouseModalOpen(true)}>
-            Verify a pass
-          </button>
-          <button type="button" className="btn" onClick={handleContactGuardhouse}>
-            Call the gate
-          </button>
-          <Link to="/incidents" className="btn btn-solid">
-            Report something
-          </Link>
-        </div>
-      </header>
-
-      {notice ? <p className="notice">{notice}</p> : null}
-
+    <div className="page">
       <SOSButton />
 
-      <section className="section">
-        <div className="section-head">
-          <h2>Notices from management</h2>
-          <Link to="/announcements" className="link">
-            All notices
-          </Link>
-        </div>
+      <SectionBar
+        icon="home"
+        title={`Good to see you, ${firstNameOf(currentUser)}`}
+        stats={[
+          { label: 'Active passes:', value: activePasses },
+          { label: 'Open requests:', value: openRequests },
+          { label: 'Upcoming events:', value: upcomingEvents.length },
+          { label: 'Notices:', value: announcements.items.length },
+        ]}
+      />
 
-        {pinnedAnnouncements.length === 0 ? (
-          <p className="blank">Nothing has been posted yet.</p>
-        ) : (
-          <div>
-            {pinnedAnnouncements.map((anc) => (
-              <article
-                className={`note-card${anc.priority === 'high' ? ' note-card-high' : ''}`}
-                key={anc.id}
-              >
-                <div className="note-head">
-                  <h3>{anc.title}</h3>
-                  {anc.priority === 'high' ? (
-                    <StatusBadge status="High priority" />
-                  ) : null}
-                </div>
-                <p className="note-body">{anc.content}</p>
-                <p className="note-foot">
-                  {formatRelative(anc.date_published)} · {anc.created_by}
-                </p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="grid grid-4">
+        <ActionTile icon="ticket" title="Visitor pass" text="Create a pass for a guest" onClick={() => setVisitorModal(true)} />
+        <ActionTile icon="key" title="Verify a pass" text="Check a code before entry" onClick={() => setGuardhouseModalOpen(true)} />
+        <ActionTile icon="phone" title="Call the gate" text="Notify the officer on duty" onClick={handleContactGuardhouse} />
+        <ActionTile icon="alert" title="Report something" text="Log an incident with security" to="/incidents" />
+      </div>
 
-      <div className="grid-2">
-        <section className="section">
-          <div className="section-head">
-            <h2>Your requests</h2>
-            <button type="button" className="link" onClick={() => setGuideModalOpen(true)}>
-              What do these mean?
-            </button>
-          </div>
-
-          <div className="row-list">
-            {MY_REQUESTS.map((req) => (
-              <button
-                type="button"
-                className="row-item"
-                key={req.id}
-                onClick={() => setSelectedRequest(req)}
-              >
-                <span className="row-main">
-                  <span className="row-title">{req.title}</span>
-                  <span className="row-meta">
-                    {req.id} · {req.time}
+      <div className="grid grid-3">
+        <Card
+          className="span-2"
+          title="Notices from management"
+          sub={`${community.community_name} estate office`}
+          flush
+          ruled
+          actions={
+            <Link to="/announcements" className="link">
+              All notices
+              <Icon name="chevronRight" />
+            </Link>
+          }
+        >
+          {pinnedAnnouncements.length === 0 ? (
+            <EmptyState icon="megaphone" title="Nothing posted yet" text="Notices from estate management will appear here." />
+          ) : (
+            pinnedAnnouncements.map((anc) => (
+              <div className="list-row" key={anc.id} style={{ alignItems: 'flex-start' }}>
+                <span className="list-main">
+                  <span className="list-title">{anc.title}</span>
+                  <span className="list-text">{anc.content}</span>
+                  <span className="list-meta" style={{ '--meta-col': '120px' }}>
+                    <MetaItem icon="clock">{formatRelative(anc.date_published)}</MetaItem>
+                    <MetaItem icon="user">{anc.created_by}</MetaItem>
                   </span>
                 </span>
-                <span className="row-end">
-                  <StatusBadge status={req.status} />
+                <span className="list-end" style={{ '--end-col': '90px' }}>
+                  {anc.priority === 'high' ? <StatusBadge status="High priority" /> : null}
                 </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="section-head">
-            <h2>What is coming up</h2>
-            <Link to="/events" className="link">
-              Full calendar
-            </Link>
-          </div>
-
-          {upcomingEvents.length === 0 ? (
-            <p className="blank">No events are scheduled.</p>
-          ) : (
-            <div className="row-list">
-              {upcomingEvents.map((evt) => {
-                const title = evt.title || evt.event_name;
-                const venue = evt.venue || evt.location || evt.event_location;
-                const attending = evt.attendees_count || 14;
-
-                return (
-                  <button
-                    type="button"
-                    className="row-item"
-                    key={evt.id}
-                    onClick={() => setSelectedEvent(evt)}
-                  >
-                    <span className="row-main">
-                      <span className="row-title">{title}</span>
-                      <span className="row-meta">
-                        {venue} · {attending} attending
-                      </span>
-                    </span>
-                    <span className="row-end">
-                      <span className="row-date">{formatDayDate(evt.event_date)}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+              </div>
+            ))
           )}
-        </section>
+        </Card>
+
+        <Card
+          title="Coming up"
+          sub="Events you can attend"
+          flush
+          ruled
+          actions={
+            <Link to="/events" className="link">
+              Calendar
+              <Icon name="chevronRight" />
+            </Link>
+          }
+        >
+          {upcomingEvents.length === 0 ? (
+            <EmptyState icon="calendar" title="No events scheduled" />
+          ) : (
+            upcomingEvents.map((evt) => {
+              const title = evt.title || evt.event_name;
+              const venue = evt.venue || evt.location || evt.event_location;
+              const attending = evt.attendees_count || 14;
+              return (
+                <button type="button" className="list-row" key={evt.id} onClick={() => setSelectedEvent(evt)}>
+                  <DateBox value={evt.event_date} />
+                  <span className="list-main">
+                    <span className="list-title">{title}</span>
+                    <span className="list-meta" style={{ marginTop: 2, '--meta-col': '150px' }}>
+                      <MetaItem icon="mapPin">{venue}</MetaItem>
+                      <MetaItem icon="users">{attending} attending</MetaItem>
+                    </span>
+                  </span>
+                  <span className="list-end">
+                    {rsvpState[evt.id] ? <span className="pill pill-plain">Going</span> : null}
+                    <Icon name="chevronRight" />
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </Card>
       </div>
+
+      <Card
+        title="Your requests"
+        sub="Passes, repairs and access changes linked to your address"
+        flush
+        actions={
+          <button type="button" className="link" onClick={() => setGuideModalOpen(true)}>
+            What do these statuses mean?
+          </button>
+        }
+      >
+        <DataTable
+          caption="Your requests"
+          columns={[
+            { key: 'ref', header: 'Reference', width: '110px', nowrap: true, cell: (r) => <span className="code">{r.id}</span> },
+            {
+              key: 'request',
+              header: 'Request',
+              stack: true,
+              cell: (r) => (
+                <CellStack
+                  title={
+                    <button
+                      type="button"
+                      className="row-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRequest(r);
+                      }}
+                    >
+                      {r.title}
+                    </button>
+                  }
+                  sub={r.details}
+                />
+              ),
+            },
+            { key: 'type', header: 'Type', width: '130px', cell: (r) => TYPE_LABELS[r.type] || r.type },
+            { key: 'update', header: 'Last update', width: '190px', cell: (r) => <CellTime>{r.time}</CellTime> },
+            { key: 'status', header: 'Status', width: '130px', cell: (r) => <StatusBadge status={r.status} /> },
+            {
+              key: 'go',
+              header: null,
+              srHeader: 'Open request',
+              align: 'end',
+              width: '44px',
+              cell: () => <Icon name="chevronRight" className="muted" />,
+            },
+          ]}
+          rows={MY_REQUESTS}
+          onRowClick={setSelectedRequest}
+          rowLabel={(r) => `Open ${r.title}`}
+        />
+      </Card>
 
       {selectedRequest ? (
         <Modal
@@ -302,61 +349,30 @@ function Dashboard() {
             </button>
           }
         >
-          <div className="spread" style={{ marginBottom: 'var(--s4)' }}>
-            <span className="mono">{selectedRequest.id}</span>
+          <div className="spread" style={{ marginBottom: 14 }}>
+            <span className="code">{selectedRequest.id}</span>
             <StatusBadge status={selectedRequest.status} />
           </div>
 
           {selectedRequest.type === 'Gate Pass' ? (
-            <div className="pass">
+            <div className="pass" style={{ marginBottom: 14 }}>
               <PassCode />
               <span className="pass-pin">{selectedRequest.pin}</span>
-              <span className="hint">
-                Show this at the gate, or type the number into the keypad.
-              </span>
+              <span className="hint">Show this at the gate, or type the number into the keypad.</span>
             </div>
           ) : null}
 
-          <div className="details" style={{ marginTop: 'var(--s4)' }}>
-            <div className="details-row">
-              <span className="details-label">Detail</span>
-              <span className="details-value">{selectedRequest.details}</span>
-            </div>
-            {selectedRequest.guestName ? (
-              <div className="details-row">
-                <span className="details-label">Guest</span>
-                <span className="details-value">{selectedRequest.guestName}</span>
-              </div>
-            ) : null}
-            {selectedRequest.vehicle ? (
-              <div className="details-row">
-                <span className="details-label">Vehicle</span>
-                <span className="details-value">{selectedRequest.vehicle}</span>
-              </div>
-            ) : null}
-            {selectedRequest.contractor ? (
-              <div className="details-row">
-                <span className="details-label">Assigned to</span>
-                <span className="details-value">{selectedRequest.contractor}</span>
-              </div>
-            ) : null}
-            {selectedRequest.repairNotes ? (
-              <div className="details-row">
-                <span className="details-label">Latest note</span>
-                <span className="details-value">{selectedRequest.repairNotes}</span>
-              </div>
-            ) : null}
-            {selectedRequest.notes ? (
-              <div className="details-row">
-                <span className="details-label">Note</span>
-                <span className="details-value">{selectedRequest.notes}</span>
-              </div>
-            ) : null}
-            <div className="details-row">
-              <span className="details-label">Updated</span>
-              <span className="details-value">{selectedRequest.time}</span>
-            </div>
-          </div>
+          <Details
+            rows={[
+              { label: 'Detail', value: selectedRequest.details },
+              selectedRequest.guestName ? { label: 'Guest', value: selectedRequest.guestName } : null,
+              selectedRequest.vehicle ? { label: 'Vehicle', value: selectedRequest.vehicle } : null,
+              selectedRequest.contractor ? { label: 'Assigned to', value: selectedRequest.contractor } : null,
+              selectedRequest.repairNotes ? { label: 'Latest note', value: selectedRequest.repairNotes } : null,
+              selectedRequest.notes ? { label: 'Note', value: selectedRequest.notes } : null,
+              { label: 'Updated', value: selectedRequest.time },
+            ]}
+          />
         </Modal>
       ) : null}
 
@@ -371,7 +387,7 @@ function Dashboard() {
               </button>
               <button
                 type="button"
-                className={rsvpState[selectedEvent.id] ? 'btn' : 'btn btn-solid'}
+                className={rsvpState[selectedEvent.id] ? 'btn' : 'btn btn-primary'}
                 onClick={() => toggleRsvp(selectedEvent.id)}
               >
                 {rsvpState[selectedEvent.id] ? 'Cancel my place' : 'Count me in'}
@@ -379,24 +395,19 @@ function Dashboard() {
             </>
           }
         >
-          <div className="details">
-            <div className="details-row">
-              <span className="details-label">When</span>
-              <span className="details-value">{formatDayDate(selectedEvent.event_date)}</span>
-            </div>
-            <div className="details-row">
-              <span className="details-label">Where</span>
-              <span className="details-value">
-                {selectedEvent.venue || selectedEvent.location || selectedEvent.event_location}
-              </span>
-            </div>
-            <div className="details-row">
-              <span className="details-label">Attending</span>
-              <span className="details-value nums">{selectedEvent.attendees_count || 14}</span>
-            </div>
-          </div>
+          <Details
+            rows={[
+              { label: 'When', value: formatDayDate(selectedEvent.event_date) },
+              {
+                label: 'Where',
+                value: selectedEvent.venue || selectedEvent.location || selectedEvent.event_location,
+              },
+              { label: 'Attending', value: selectedEvent.attendees_count || 14 },
+              rsvpState[selectedEvent.id] ? { label: 'Your place', value: 'You are on the attendance list' } : null,
+            ]}
+          />
           {selectedEvent.description ? (
-            <p className="sm dim" style={{ marginTop: 'var(--s4)' }}>
+            <p className="ink-2" style={{ marginTop: 12 }}>
               {selectedEvent.description}
             </p>
           ) : null}
@@ -409,7 +420,7 @@ function Dashboard() {
           onClose={closeVisitorModal}
           footer={
             generatedCode ? (
-              <button type="button" className="btn btn-solid" onClick={closeVisitorModal}>
+              <button type="button" className="btn btn-primary" onClick={closeVisitorModal}>
                 Done
               </button>
             ) : (
@@ -417,7 +428,7 @@ function Dashboard() {
                 <button type="button" className="btn" onClick={closeVisitorModal}>
                   Cancel
                 </button>
-                <button type="submit" form="visitor-form" className="btn btn-solid">
+                <button type="submit" form="visitor-form" className="btn btn-primary">
                   Create pass
                 </button>
               </>
@@ -428,9 +439,7 @@ function Dashboard() {
             <div className="pass">
               <PassCode />
               <span className="pass-pin">{generatedCode}</span>
-              <span className="hint">
-                Sent to {visitorName}. The guardhouse can see it immediately.
-              </span>
+              <span className="hint">Sent to {visitorName}. The guardhouse can see it immediately.</span>
             </div>
           ) : (
             <form id="visitor-form" onSubmit={handleGenerateVisitorPass} className="fields">
@@ -442,6 +451,7 @@ function Dashboard() {
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   placeholder="Johan Smith"
+                  data-autofocus
                   required
                 />
               </div>
@@ -466,11 +476,10 @@ function Dashboard() {
       <GuardhouseVerificationModal
         isOpen={guardhouseModalOpen}
         onClose={() => setGuardhouseModalOpen(false)}
-        onLogEntry={(msg) => {
-          setNotice(msg);
-          setTimeout(() => setNotice(''), 6000);
-        }}
+        onLogEntry={(msg) => flash(msg, 6000)}
       />
+
+      <Toast message={notice} />
     </div>
   );
 }

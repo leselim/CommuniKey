@@ -3,25 +3,54 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b0d0d" />
+    <meta name="theme-color" content="#1b1d23" />
     <meta
       name="description"
-      content="CommuniKey - community safety, access control and engagement for residential estates."
+      content="CommuniKey. Community safety, access control and engagement for residential estates."
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preload" as="font" type="font/ttf" href="%PUBLIC_URL%/fonts/InstrumentSans-Regular.ttf" crossorigin />
+    <link rel="preload" as="font" type="font/ttf" href="%PUBLIC_URL%/fonts/InstrumentSans-Bold.ttf" crossorigin />
+    <style>
+      /* Instrument Sans, served by the application itself. Nothing is fetched
+         from a third party, so the interface renders the same on an estate
+         guardhouse terminal with no outside connection. */
+      @font-face {
+        font-family: 'Instrument Sans Local';
+        src: url('%PUBLIC_URL%/fonts/InstrumentSans-Regular.ttf') format('truetype');
+        font-weight: 400 500;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Instrument Sans Local';
+        src: url('%PUBLIC_URL%/fonts/InstrumentSans-Bold.ttf') format('truetype');
+        font-weight: 600 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Instrument Sans Local';
+        src: url('%PUBLIC_URL%/fonts/InstrumentSans-Italic.ttf') format('truetype');
+        font-weight: 400 500;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Instrument Sans Local';
+        src: url('%PUBLIC_URL%/fonts/InstrumentSans-BoldItalic.ttf') format('truetype');
+        font-weight: 600 700;
+        font-style: italic;
+        font-display: swap;
+      }
+    </style>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0d0d'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='17' font-weight='600' letter-spacing='-1' fill='%23e9ecea' text-anchor='middle'%3EC%3Ctspan fill='%2385aeda'%3EK%3C/tspan%3E%3C/text%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='6.5' fill='%23BE1E2D'/%3E%3Ccircle cx='13' cy='10.6' r='3.3' fill='%23fff'/%3E%3Cpath d='M11.3 12.4h3.4l.9 6.1h-5.2z' fill='%23fff'/%3E%3C/svg%3E"
     />
     <title>CommuniKey</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>You need to enable JavaScript to run CommuniKey.</noscript>
     <div id="root"></div>
   </body>
 </html>

@@ -101,7 +101,7 @@ backend/            Django + DRF API
     incidents/      incident reports and triage
 frontend/           React single-page app
   src/
-    components/     Chart, Avatar, StatusBadge, Modal, Navbar...
+    components/     AppShell, DataTable, Chart, ui primitives, Icon, Modal...
     pages/          one file per screen, split by role
     services/       API client and the fallback sample data
     index.css       the whole design system
@@ -152,25 +152,75 @@ is in `infrastructure/terraform/`.
 
 ## Notes on the interface
 
-Colour means one thing throughout, and only one:
+The interface was rebuilt in September 2026 on a single design system. What the
+product does did not change. How it reads did.
 
-- **Estate blue**, live active items or selected navigation
-- **Emerald green**, verified member profile or confirmed address
-- **Electric sky cyan**, authorised gate access or entry clearance
-- **Neon lime**, active neighbourhood watch or security patrol on duty
-- **Seafoam mint**, zone or perimeter check logged as clear
-- **Violet**, newly reported incident or issue
-- **Teal**, work actively under way / in progress
-- **Fuchsia magenta**, volunteer standing by or awaiting responder dispatch
-- **Luminous amber**, high priority notice or important broadcast
-- **Soft rose**, pending document or household verification check
-- **Ochre**, waiting on a person to decide
-- **Brick**, danger, emergencies, destructive actions
-- **Grey**, settled and closed, deliberately quiet
+**Layout.** A charcoal sidebar holds the sections that role can open, grouped
+and labelled. A white top bar carries the page title, the date, the
+notification tray and the account menu. Each section of a page opens with a
+header bar that states its own figures inline, so the summary lives in the
+header instead of competing with the work below it.
 
-Charts label every axis, start every scale at zero, and never identify a series
-by colour alone. Values are read on demand in the strip under the plot rather
-than being printed over every bar.
+**Colour is a signal, not decoration.** The interface is charcoal, white and
+grey. Red is the brand and one thing in the data: work that is still open.
+There are seven states, and each one has exactly one word and one colour
+everywhere in the product, so a colour never carries two meanings:
 
-Figures, timestamps and reference codes are set in IBM Plex Mono so digits line
-up in columns; everything else is Inter.
+| Label | Colour | Meaning |
+|---|---|---|
+| Urgent | red | Needs someone now |
+| Waiting | amber | A decision or a response is outstanding |
+| New | purple | Logged, not yet picked up |
+| Active | blue | Happening right now |
+| Cleared | teal | Checked and allowed |
+| Complete | green | Finished |
+| Closed | grey | Settled, refused or run out |
+
+Records keep their own status values, because the API and the history depend
+on them. `components/StatusBadge.jsx` is the one place those values are turned
+into something a person reads, so no screen can invent an eighth word. The
+legend is in the product too, one click from the top bar on every screen.
+
+**Alignment.** Every table is declared as columns and rows through
+`components/DataTable.jsx` rather than written out as markup, so a column
+cannot drift out of line with the same column on another screen. A column
+states its width and its alignment once, and the header and every cell below
+it take it together. Each cell's first line is a box of a fixed height with
+its content centred inside it, so a word, a status pill, a timestamp and a
+28px avatar all sit on the same line whether or not the row wraps to two
+lines. Figures sit to the right, and any column can be made sortable by
+giving it a sort value.
+
+**Devices.** Below a threshold that depends on how many columns it has, a
+table stops being a table: each row becomes a card, with the first column as
+the heading, the rest as labelled facts in a two column grid, and the row's
+buttons at the foot. Above that threshold the columns tighten as the window
+narrows, so a table never scrolls sideways and a row's buttons never wrap onto
+a second line. The sidebar becomes a drawer that closes itself once a section
+is chosen. Checked at every width from 360 to 2560.
+
+**Behaviour.** Confirmations appear at the foot of the screen rather than
+pushing content down, dialogs place the cursor once and leave it there, and
+status changes settle in place. Every list has a written empty state with a way
+out of it.
+
+---
+
+## Tests
+
+```bash
+cd frontend
+npm test
+```
+
+Covers the sign-in screen, the role based shell and the permission redirect
+that keeps a resident out of an administrator's address.
+
+---
+
+## Offline preview
+
+`CommuniKey-preview.html` in this folder is the whole application in one file,
+with the typeface embedded. Open it in a browser, with no install and no server,
+and every screen and flow works against the seeded sample data. It is there for
+demonstrating the interface on a machine that has nothing set up.

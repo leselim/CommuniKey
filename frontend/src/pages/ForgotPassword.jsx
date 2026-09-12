@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AuthLayout from '../components/AuthLayout';
+import Icon from '../components/Icon';
 
 function ForgotPassword() {
   const { resetPassword } = useAuth();
@@ -11,74 +13,58 @@ function ForgotPassword() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-
     const result = resetPassword(email);
     setMessage(result.message);
     setSubmitted(true);
   };
 
   return (
-    <div className="stack" style={{ maxWidth: '520px', margin: '0 auto' }}>
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">
-            Account Recovery
-          </p>
+    <AuthLayout>
+      <div className="auth-card">
+        <header className="auth-head">
           <h1>Reset your password</h1>
-          <p className="masthead-meta">
-            Enter your registered email address to receive password recovery instructions.
-          </p>
-        </div>
-      </header>
+          <p>Enter the email address you registered with and we will send recovery instructions.</p>
+        </header>
 
-      {submitted ? (
-        <div className="panel stack" style={{ padding: 'var(--s5)', gap: 'var(--s4)' }}>
-          <p className="notice">
-            {message}
-          </p>
-          <p className="sm faint">
-            If an account exists for <strong>{email}</strong>, password reset links have been generated cleanly.
-          </p>
-          <div className="cluster" style={{ justifyContent: 'center' }}>
-            <Link to="/signin" className="btn btn-solid" style={{ padding: '0.5rem 1rem' }}>
-              Return to Sign In
+        {submitted ? (
+          <div className="auth-form">
+            <div className="alert alert-ok" role="status">
+              <Icon name="mail" />
+              <span>{message}</span>
+            </div>
+            <p className="hint">
+              If an account exists for <strong>{email}</strong>, a reset link is on its way. It can take a few minutes to arrive.
+            </p>
+            <Link to="/signin" className="btn btn-primary btn-lg btn-block">
+              Back to sign in
             </Link>
           </div>
-        </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="panel stack"
-          style={{ padding: 'var(--s5)', gap: 'var(--s4)' }}
-        >
-          <div className="field">
-            <label className="eyebrow" htmlFor="reset-email">
-              Registered Email Address
-            </label>
-            <input
-              id="reset-email"
-              type="email"
-              className="control"
-              placeholder="thabo@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="field">
+              <label htmlFor="reset-email">Email address</label>
+              <input
+                id="reset-email"
+                type="email"
+                className="control"
+                placeholder="thabo@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-          <button type="submit" className="btn btn-solid" style={{ width: '100%', padding: '0.6rem' }}>
-            Send Reset Instructions
-          </button>
+            <button type="submit" className="btn btn-primary btn-lg btn-block">
+              Send reset instructions
+            </button>
+          </form>
+        )}
 
-          <p className="sm faint" style={{ textAlign: 'center', marginTop: 'var(--s2)' }}>
-            Remembered your password?{' '}
-            <Link to="/signin" className="link" style={{ color: 'var(--paper)', fontWeight: 600 }}>
-              Return to Sign In
-            </Link>
-          </p>
-        </form>
-      )}
-    </div>
+        <p className="auth-foot">
+          Remembered it? <Link to="/signin">Sign in</Link>
+        </p>
+      </div>
+    </AuthLayout>
   );
 }
 

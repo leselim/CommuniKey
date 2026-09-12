@@ -1,28 +1,22 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import Modal from './Modal';
 import Avatar from './Avatar';
+import Icon from './Icon';
 import StatusBadge from './StatusBadge';
+import { Details } from './ui';
 
 /*
  * Resident profile.
  *
  * What a viewer sees depends on who they are. Another resident sees a
- * neighbour's name and street, with contact details partly masked; an
- * administrator sees the full record. The masking is shown honestly - a
- * masked value is styled as data, not hidden away, so the viewer knows
- * there is something there they cannot see.
+ * neighbour's name and street with contact details partly masked. An
+ * administrator sees the full record. A masked value is still shown as
+ * data, so the viewer knows something is there that they cannot see.
  */
 
 function ResidentProfileModal({ member, onClose, onStartChat }) {
   const { currentUser, userRole } = useAuth();
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
 
   if (!member) return null;
 
@@ -33,24 +27,12 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
   const isVolunteer = userRole === 'Safety Volunteer';
   const isPeerResident = !isAdmin && !isVolunteer && !isSelf;
 
-  const isManagement =
-    member.role === 'Community Administrator' || member.role === 'Estate Administrator';
+  const isManagement = member.role === 'Community Administrator' || member.role === 'Estate Administrator';
   const isSecurity = member.role === 'Security Guard' || member.role === 'Security Patrol';
 
-  const modalTitle = isManagement
-    ? 'Estate management'
-    : isSecurity
-    ? 'Estate staff'
-    : 'Resident';
-
-  const accountTypeLabel = isManagement
-    ? 'Verified management'
-    : isSecurity
-    ? 'Verified security'
-    : 'Verified resident';
-
-  const assignedArea =
-    member.address || (isManagement ? '1 Clubhouse Way, Section A' : 'Section A, Riverside Estate');
+  const modalTitle = isManagement ? 'Estate management' : isSecurity ? 'Estate staff' : 'Resident';
+  const accountTypeLabel = isManagement ? 'Verified management' : isSecurity ? 'Verified security' : 'Verified resident';
+  const assignedArea = member.address || (isManagement ? '1 Clubhouse Way, Section A' : 'Section A, Riverside Estate');
 
   const maskedEmail = member.email
     ? `${member.email[0]}\u2022\u2022\u2022\u2022\u2022@${member.email.split('@')[1] || 'riverside.co.za'}`
@@ -66,7 +48,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
   let footerAction = null;
   if (isAdmin && !isSelf) {
     footerAction = (
-      <button type="button" className="btn btn-solid" onClick={onClose}>
+      <button type="button" className="btn btn-primary" onClick={onClose}>
         Manage account
       </button>
     );
@@ -74,7 +56,7 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
     footerAction = (
       <button
         type="button"
-        className="btn btn-solid"
+        className="btn btn-primary"
         onClick={() => {
           onClose();
           onStartChat(member);
@@ -86,66 +68,57 @@ function ResidentProfileModal({ member, onClose, onStartChat }) {
   }
 
   return (
-    <Modal title={modalTitle} onClose={onClose} footer={footerAction}>
-      <div className="profile-head">
-        <Avatar name={fullName} size="xl" ring />
-        <div className="profile-id">
+    <Modal
+      title={modalTitle}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="btn" onClick={onClose}>
+            Close
+          </button>
+          {footerAction}
+        </>
+      }
+    >
+      <div className="profile-head" style={{ paddingBottom: 14, borderBottom: '1px solid var(--line-soft)' }}>
+        <Avatar name={fullName} size="xl" />
+        <div>
           <span className="profile-name">{fullName}</span>
           <div className="profile-tags">
             <StatusBadge status="Verified" />
-            <span className="chip chip-plain">{member.role || 'Resident'}</span>
+            <span className="pill pill-plain">{member.role || 'Resident'}</span>
           </div>
         </div>
       </div>
 
-      <div className="details" style={{ marginTop: 'var(--s4)' }}>
-        <div className="details-row">
-          <span className="details-label">Account type</span>
-          <span className="details-value">{accountTypeLabel}</span>
-        </div>
-        <div className="details-row">
-          <span className="details-label">Address</span>
-          <span className="details-value">{assignedArea}</span>
-        </div>
-        <div className="details-row">
-          <span className="details-label">Member since</span>
-          <span className="details-value">{member.joined_date || 'January 2024'}</span>
-        </div>
-        <div className="details-row">
-          <span className="details-label">Email</span>
-          <span className={`details-value${isPeerResident ? ' masked' : ''}`}>{emailValue}</span>
-        </div>
-        <div className="details-row">
-          <span className="details-label">Phone</span>
-          <span className={`details-value${isPeerResident ? ' masked' : ''}`}>{phoneValue}</span>
-        </div>
-
-        {!isPeerResident && member.household_vehicle ? (
-          <div className="details-row">
-            <span className="details-label">Registered vehicle</span>
-            <span className="details-value">{member.household_vehicle}</span>
-          </div>
-        ) : null}
-
-        {isAdmin && member.gate_access_code ? (
-          <div className="details-row">
-            <span className="details-label">Gate keycard</span>
-            <span className="details-value masked">{member.gate_access_code}</span>
-          </div>
-        ) : null}
-      </div>
+      <Details
+        rows={[
+          { label: 'Account type', value: accountTypeLabel },
+          { label: 'Address', value: assignedArea },
+          { label: 'Member since', value: member.joined_date || 'January 2024' },
+          { label: 'Email', value: emailValue, masked: isPeerResident },
+          { label: 'Phone', value: phoneValue, masked: isPeerResident },
+          !isPeerResident && member.household_vehicle
+            ? { label: 'Registered vehicle', value: member.household_vehicle }
+            : null,
+          isAdmin && member.gate_access_code ? { label: 'Gate keycard', value: member.gate_access_code, masked: true } : null,
+        ]}
+      />
 
       {isPeerResident ? (
-        <p className="hint" style={{ marginTop: 'var(--s4)' }}>
-          Contact details are partly hidden from other residents. Estate management can see the
-          full record.
-        </p>
+        <div className="alert alert-info" style={{ marginTop: 12 }}>
+          <Icon name="lock" />
+          <span>Contact details are partly hidden from other residents. Estate management can see the full record.</span>
+        </div>
       ) : null}
 
       {isAdmin && member.emergency_notes ? (
-        <div className="notice" style={{ marginTop: 'var(--s4)' }}>
-          <strong style={{ display: 'block', marginBottom: '2px' }}>Emergency access notes</strong>
-          {member.emergency_notes}
+        <div className="alert alert-info" style={{ marginTop: 12 }}>
+          <Icon name="info" />
+          <span>
+            <strong style={{ display: 'block', color: 'var(--ink)' }}>Emergency access notes</strong>
+            {member.emergency_notes}
+          </span>
         </div>
       ) : null}
     </Modal>

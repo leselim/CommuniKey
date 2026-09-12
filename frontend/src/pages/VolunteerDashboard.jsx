@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Avatar from '../components/Avatar';
+import Icon from '../components/Icon';
+import DataTable, { CellStack, CellTime } from '../components/DataTable';
 import StatusBadge from '../components/StatusBadge';
 import PlatformGuideModal from '../components/PlatformGuideModal';
-import Avatar from '../components/Avatar';
+import { Card, EmptyState, MetaItem, SectionBar, Toast } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import useCollection from '../hooks/useCollection';
-import { community, incidents as demoIncidents } from '../services/demoData';
+import { incidents as demoIncidents } from '../services/demoData';
 import { formatRelative, formatStamp } from '../utils/format';
 
 const VOLUNTEER_TEAM = [
@@ -40,59 +43,46 @@ function VolunteerDashboard() {
   const stageIndex = STAGES.findIndex((s) => s.key === stage);
   const isResolved = stage === 'Resolved';
 
+  const flash = (message) => {
+    setNotice(message);
+    setTimeout(() => setNotice((current) => (current === message ? '' : current)), 4000);
+  };
+
   const advanceTo = (key) => {
     setStage(key);
-    setNotice(
-      key === 'Resolved'
-        ? 'Incident closed. The estate office has been notified.'
-        : `Your status is now ${key.toLowerCase()}. Dispatch can see it.`
-    );
-    setTimeout(() => setNotice(''), 4000);
+    flash(key === 'Resolved' ? 'Incident closed. The estate office has been notified.' : `Your status is now ${key.toLowerCase()}. Dispatch can see it.`);
   };
 
   const handleIncidentStatus = async (id, status) => {
     await updateIncident(id, { status });
-    setNotice(`Incident moved to ${status.toLowerCase()}.`);
-    setTimeout(() => setNotice(''), 4000);
+    flash(`Incident moved to ${status.toLowerCase()}.`);
   };
 
-  const responderName = currentUser
-    ? `${currentUser.first_name} ${currentUser.last_name}`
-    : 'Safety volunteer';
+  const responderName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : 'Safety volunteer';
+  const count = (status) => incidentList.filter((i) => String(i.status).toLowerCase() === status).length;
+  const onDuty = VOLUNTEER_TEAM.filter((v) => v.duty === 'on').length;
 
   return (
-    <div className="stack" style={{ gap: 'var(--s6)' }}>
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">
-            {responderName} · {community.community_name}
-          </p>
-          <h1>Dispatch and triage</h1>
-          <p className="masthead-meta">
-            Live alerts, incoming reports and who is out on patrol right now.
-          </p>
-        </div>
-        <div className="cluster">
-          <Link to="/insights" className="btn btn-solid">
-            View reporting
-          </Link>
-        </div>
-      </header>
-
-      {notice ? <p className="notice">{notice}</p> : null}
-
+    <div className="page">
       <section className={`callout${isResolved ? ' callout-settled' : ''}`} aria-live="polite">
-        <div className="callout-head">
-          <h2>SOS at 14 Riverside Drive, Section A</h2>
-          <StatusBadge status={isResolved ? 'Resolved' : 'Active'} />
+        <div className="card-head">
+          <div className="row" style={{ gap: 12 }}>
+            <span className="badge-icon" style={isResolved ? { background: '#22a052' } : undefined}>
+              <Icon name={isResolved ? 'check' : 'siren'} />
+            </span>
+            <div>
+              <h2 style={{ fontSize: 'var(--fs-15)' }}>SOS at 14 Riverside Drive, Section A</h2>
+              <p className="card-sub">
+                {isResolved
+                  ? 'Closed by the responder team. The area has been cleared and secured.'
+                  : `Raised from a resident phone. Sipho Dlamini has been notified. Responding as ${responderName}.`}
+              </p>
+            </div>
+          </div>
+          <StatusBadge status={isResolved ? 'Resolved' : 'SOS alert'} />
         </div>
-        <p className="sm dim">
-          {isResolved
-            ? 'Closed by the responder team. The area has been cleared and secured.'
-            : 'Raised from a resident phone. Sipho Dlamini has been notified.'}
-        </p>
 
-        <div className="steps" style={{ marginTop: 'var(--s4)' }} role="group" aria-label="Response stage">
+        <div className="steps" role="group" aria-label="Response stage">
           {STAGES.map((s, i) => {
             const done = i < stageIndex;
             const current = i === stageIndex;
@@ -113,111 +103,147 @@ function VolunteerDashboard() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-head">
-          <h2>Incoming reports</h2>
-          <div className="cluster" style={{ gap: 'var(--s4)' }}>
+      <SectionBar
+        icon="shield"
+        title="Incoming reports"
+        stats={[
+          { label: 'Reported:', value: count('reported') },
+          { label: 'Under review:', value: count('under review') },
+          { label: 'Resolved:', value: count('resolved') },
+          { label: 'On duty:', value: onDuty },
+        ]}
+      >
+        <Link to="/insights" className="btn btn-primary">
+          <Icon name="chart" />
+          View reporting
+        </Link>
+      </SectionBar>
+
+      <Card
+        title="Waiting for dispatch"
+        sub="Newest first. Take a look to move a report under review."
+        flush
+        actions={
+          <>
             <button type="button" className="link" onClick={() => setGuideModalOpen(true)}>
               What do these mean?
             </button>
             <Link to="/incidents" className="link">
               Full ledger
+              <Icon name="chevronRight" />
             </Link>
-          </div>
-        </div>
-
+          </>
+        }
+      >
         {incidentList.length === 0 ? (
-          <p className="blank">Nothing is waiting for dispatch.</p>
+          <EmptyState icon="checkCircle" title="Nothing is waiting for dispatch" />
         ) : (
-          <div>
-            {incidentList.map((item) => (
-              <article className="case" key={item.id}>
-                <div className="case-head">
-                  <div>
-                    <h3 className="case-title">{item.incident_type}</h3>
-                    <p className="case-where">
-                      {item.location || 'General estate'} · reported by {item.reported_by}
-                    </p>
-                  </div>
-                  <StatusBadge status={item.status} />
-                </div>
-
-                <p className="case-body">{item.description}</p>
-
-                <div className="case-foot">
-                  <span className="case-time">
-                    {formatRelative(item.date_reported)} · {formatStamp(item.date_reported)}
-                  </span>
-                  <div className="case-actions">
-                    <button
-                      type="button"
-                      className="btn btn-sm"
-                      onClick={() => handleIncidentStatus(item.id, 'Under review')}
-                    >
+          <DataTable
+            caption="Incoming reports"
+            columns={[
+              {
+                key: 'report',
+                header: 'Report',
+                stack: true,
+                cell: (item) => <CellStack title={item.incident_type} sub={item.description} clamp />,
+              },
+              {
+                key: 'location',
+                header: 'Location',
+                width: '160px',
+                stack: true,
+                cell: (item) => <CellStack title={item.location || 'General estate'} sub={`By ${item.reported_by}`} />,
+              },
+              {
+                key: 'when',
+                header: 'Reported',
+                width: '150px',
+                stack: true,
+                cell: (item) => (
+                  <>
+                    <span className="cell">
+                      <span className="cell-time" title={formatStamp(item.date_reported)}>
+                        <Icon name="clock" />
+                        {formatRelative(item.date_reported)}
+                      </span>
+                    </span>
+                    <span className="cell-sub">{formatStamp(item.date_reported)}</span>
+                  </>
+                ),
+              },
+              { key: 'status', header: 'Status', width: '128px', cell: (item) => <StatusBadge status={item.status} /> },
+              {
+                key: 'actions',
+                header: 'Actions',
+                align: 'end',
+                width: '232px',
+                cell: (item) => (
+                  <>
+                    <button type="button" className="btn btn-sm" onClick={() => handleIncidentStatus(item.id, 'Under review')}>
                       Take a look
                     </button>
                     <button
                       type="button"
-                      className="btn btn-sm btn-solid"
+                      className="btn btn-sm btn-primary"
+                      disabled={String(item.status).toLowerCase() === 'resolved'}
                       onClick={() => handleIncidentStatus(item.id, 'Resolved')}
                     >
                       Mark resolved
                     </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                  </>
+                ),
+              },
+            ]}
+            rows={incidentList}
+          />
         )}
-      </section>
+      </Card>
 
-      <div className="grid-2">
-        <section className="section">
-          <div className="section-head">
-            <h2>Patrol routes</h2>
-          </div>
-          <ul className="ledger">
-            {PATROL_ROUTES.map((p) => (
-              <li className="entry" key={p.id}>
-                <div>
-                  <h3 className="entry-title">{p.route}</h3>
-                  <p className="entry-meta">{p.time}</p>
-                </div>
-                <span className="entry-aside">
-                  <StatusBadge status={p.status} />
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <div className="grid grid-2">
+        <Card
+          title="Patrol routes"
+          flush
+          actions={
+            <Link to="/volunteer/patrol" className="link">
+              Patrol
+              <Icon name="chevronRight" />
+            </Link>
+          }
+        >
+          <DataTable
+            caption="Patrol routes"
+            columns={[
+              { key: 'route', header: 'Route', cell: (p) => <span className="cell-title">{p.route}</span> },
+              { key: 'activity', header: 'Last activity', width: '190px', cell: (p) => <CellTime>{p.time}</CellTime> },
+              { key: 'status', header: 'Status', width: '140px', cell: (p) => <StatusBadge status={p.status} /> },
+            ]}
+            rows={PATROL_ROUTES}
+          />
+        </Card>
 
-        <section className="section">
-          <div className="section-head">
-            <h2>Who is on duty</h2>
-          </div>
-          <ul className="ledger">
-            {VOLUNTEER_TEAM.map((v) => (
-              <li className="entry" key={v.id}>
-                <div className="identity">
-                  <Avatar name={v.name} size="lg" presence={v.duty} />
-                  <div className="identity-text">
-                    <h3 className="entry-title">{v.name}</h3>
-                    <span className="sm faint">{v.role}</span>
-                    <a href={`tel:${v.phone.replace(/[^0-9+]/g, '')}`} className="link sm">
+        <Card title="Who is on duty" flush ruled>
+          {VOLUNTEER_TEAM.map((v) => (
+            <div className="list-row" key={v.id}>
+              <Avatar name={v.name} size="md" presence={v.duty} />
+              <span className="list-main">
+                <span className="list-title">{v.name}</span>
+                <span className="list-meta" style={{ marginTop: 1, '--meta-col': '180px' }}>
+                  <span>{v.role}</span>
+                  <MetaItem icon="phone">
+                    <a href={`tel:${v.phone.replace(/[^0-9+]/g, '')}`} className="link" style={{ fontWeight: 500 }}>
                       {v.phone}
                     </a>
-                  </div>
-                </div>
-                <span className="entry-aside">
-                  <StatusBadge status={v.status} />
+                  </MetaItem>
                 </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+              </span>
+              <StatusBadge status={v.status} />
+            </div>
+          ))}
+        </Card>
       </div>
 
       <PlatformGuideModal isOpen={guideModalOpen} onClose={() => setGuideModalOpen(false)} />
+      <Toast message={notice} />
     </div>
   );
 }

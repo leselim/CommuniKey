@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from 'react';
+import Icon from '../components/Icon';
+import { Card, DateBox, EmptyState, MetaItem, SectionBar, Skeleton } from '../components/ui';
 import useCollection from '../hooks/useCollection';
 import { events as demoEvents } from '../services/demoData';
 import { formatRelative, formatStamp, isSameDay } from '../utils/format';
@@ -23,22 +25,23 @@ function Calendar({ month, events, onStep }) {
   const label = `${month.toLocaleDateString('en-GB', { month: 'long' })} ${year}`;
 
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>{label}</h2>
-        <span className="cluster">
-          <button type="button" className="link" onClick={() => onStep(-1)}>
-            Previous
+    <Card
+      title={label}
+      sub={`${marked.size} ${marked.size === 1 ? 'day' : 'days'} with events`}
+      actions={
+        <span className="row" style={{ gap: 4 }}>
+          <button type="button" className="btn btn-sm" aria-label="Previous month" onClick={() => onStep(-1)}>
+            <Icon name="chevronLeft" />
           </button>
-          <button type="button" className="link" onClick={() => onStep(1)}>
-            Next
+          <button type="button" className="btn btn-sm" aria-label="Next month" onClick={() => onStep(1)}>
+            <Icon name="chevronRight" />
           </button>
         </span>
-      </div>
-
+      }
+    >
       <div className="calendar">
         {WEEKDAYS.map((day) => (
-          <div className="calendar-dow eyebrow" key={day}>
+          <div className="calendar-dow" key={day}>
             {day}
           </div>
         ))}
@@ -62,7 +65,17 @@ function Calendar({ month, events, onStep }) {
           <div className="calendar-day" key={`trail-${i}`} />
         ))}
       </div>
-    </div>
+      <div className="calendar-key">
+        <span className="row" style={{ gap: 6 }}>
+          <span className="dot" style={{ background: 'var(--sidebar)' }} />
+          Today
+        </span>
+        <span className="row" style={{ gap: 6 }}>
+          <span className="dot" style={{ background: 'var(--brand)' }} />
+          Event
+        </span>
+      </div>
+    </Card>
   );
 }
 
@@ -83,66 +96,62 @@ function Events() {
 
   const attending = upcoming.filter((item) => item.attending).length;
 
-  const step = (offset) =>
-    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+  const step = (offset) => setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
 
   return (
-    <div className="stack">
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">Community life</p>
-          <h1>Events</h1>
-          <p className="masthead-meta">
-            Upcoming gatherings, meetings and workshops. RSVP so organisers can plan.
-          </p>
-        </div>
-        <p className="mono">
-          {upcoming.length} upcoming / {attending} attending
-        </p>
-      </header>
+    <div className="page">
+      <SectionBar
+        icon="calendar"
+        title="Community calendar"
+        stats={[
+          { label: 'Upcoming:', value: upcoming.length },
+          { label: 'You are attending:', value: attending },
+        ]}
+      />
 
-      <Calendar month={month} events={items} onStep={step} />
+      <div className="grid grid-3" style={{ alignItems: 'start' }}>
+        <Calendar month={month} events={items} onStep={step} />
 
-      <section className="section">
-        <div className="section-head">
-          <p className="eyebrow">Schedule</p>
-          <span className="mono">Next {upcoming.length}</span>
-        </div>
-
-        {loading && items.length === 0 ? (
-          <div>
-            <div className="bar" />
-            <div className="bar" />
-          </div>
-        ) : upcoming.length === 0 ? (
-          <p className="blank">No events scheduled.</p>
-        ) : (
-          <ul className="ledger">
-            {upcoming.map((item) => (
-              <li className="entry" key={item.id}>
-                <h3 className="entry-title">{item.event_name}</h3>
-                <span className="entry-aside">
-                  <button
-                    type="button"
-                    className={`btn${item.attending ? ' btn-affirm' : ' btn-solid'}`}
-                    aria-pressed={Boolean(item.attending)}
-                    onClick={() => update(item.id, { attending: !item.attending })}
-                  >
-                    {item.attending ? 'Attending' : 'RSVP'}
-                  </button>
+        <Card className="span-2" title="Schedule" sub="Gatherings, meetings and workshops. RSVP so organisers can plan." flush ruled>
+          {loading && items.length === 0 ? (
+            <Skeleton rows={3} />
+          ) : upcoming.length === 0 ? (
+            <EmptyState icon="calendar" title="No events scheduled" text="New events from the estate will appear here." />
+          ) : (
+            upcoming.map((item) => (
+              <article className="list-row" key={item.id} style={{ alignItems: 'flex-start', padding: 14 }}>
+                <DateBox value={item.event_date} />
+                <span className="list-main">
+                  <h3 className="list-title">{item.event_name || item.title}</h3>
+                  <p className="list-text">{item.description}</p>
+                  <span className="list-meta" style={{ '--meta-col': '180px' }}>
+                    <MetaItem icon="clock">{formatStamp(item.event_date)}</MetaItem>
+                    {item.event_location ? <MetaItem icon="mapPin">{item.event_location}</MetaItem> : null}
+                    {item.max_attendees ? <MetaItem icon="users">{item.max_attendees} places</MetaItem> : null}
+                    <span>{formatRelative(item.event_date)}</span>
+                  </span>
                 </span>
-                <p className="entry-body">{item.description}</p>
-                <div className="entry-meta">
-                  <span>{formatStamp(item.event_date)}</span>
-                  {item.event_location ? <span>{item.event_location}</span> : null}
-                  {item.max_attendees ? <span>{item.max_attendees} places</span> : null}
-                  <span>{formatRelative(item.event_date)}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+                <button
+                  type="button"
+                  className={`btn${item.attending ? ' btn-affirm' : ' btn-primary'}`}
+                  aria-pressed={Boolean(item.attending)}
+                  onClick={() => update(item.id, { attending: !item.attending })}
+                  style={{ minWidth: 96 }}
+                >
+                  {item.attending ? (
+                    <>
+                      <Icon name="check" />
+                      Attending
+                    </>
+                  ) : (
+                    'RSVP'
+                  )}
+                </button>
+              </article>
+            ))
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

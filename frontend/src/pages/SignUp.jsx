@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AuthLayout from '../components/AuthLayout';
 
 /*
  * Household registration.
  *
- * Errors are reported per field rather than as a single line at the top,
- * so a person can see which box to go back to. Validation runs on submit
- * and then re-checks a field as it is corrected.
+ * Errors are reported per field rather than as one line at the top, so a
+ * person can see which box to go back to. Validation runs on submit and then
+ * re-checks a field as it is corrected.
  */
 
 const MIN_PASSWORD = 8;
@@ -83,22 +84,14 @@ function SignUp() {
     }
   };
 
-  const fieldError = (key) =>
-    errors[key] ? (
-      <span className="hint" style={{ color: 'var(--alert)' }}>
-        {errors[key]}
-      </span>
-    ) : null;
+  const fieldError = (key) => (errors[key] ? <span className="field-error">{errors[key]}</span> : null);
 
   return (
-    <div className="auth">
+    <AuthLayout>
       <div className="auth-card auth-card-wide">
         <header className="auth-head">
           <h1>Register your household</h1>
-          <p>
-            Estate management verifies every application against the resident register before
-            granting access.
-          </p>
+          <p>Estate management checks every application against the resident register before granting access.</p>
         </header>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -147,7 +140,9 @@ function SignUp() {
             </div>
 
             <div className="field">
-              <label htmlFor="signup-phone-number">Phone number</label>
+              <label htmlFor="signup-phone-number">
+                Phone number <span className="muted" style={{ fontWeight: 400 }}>(optional)</span>
+              </label>
               <input
                 id="signup-phone-number"
                 name="phone_number"
@@ -172,19 +167,13 @@ function SignUp() {
                 onChange={handleChange}
                 aria-invalid={errors.address ? 'true' : undefined}
               />
-              {fieldError('address') || (
-                <span className="hint">Used to route patrols and emergency response.</span>
-              )}
+              {fieldError('address') || <span className="hint">Used to route patrols and emergency response.</span>}
             </div>
 
             <div className="field">
-              <div className="spread" style={{ gap: 'var(--s2)' }}>
+              <div className="label-row">
                 <label htmlFor="signup-password">Password</label>
-                <button
-                  type="button"
-                  className="btn btn-quiet btn-sm"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
+                <button type="button" className="text-btn" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
@@ -198,9 +187,7 @@ function SignUp() {
                 onChange={handleChange}
                 aria-invalid={errors.password ? 'true' : undefined}
               />
-              {fieldError('password') || (
-                <span className="hint">At least {MIN_PASSWORD} characters.</span>
-              )}
+              {fieldError('password') || <span className="hint">At least {MIN_PASSWORD} characters.</span>}
             </div>
 
             <div className="field">
@@ -219,7 +206,7 @@ function SignUp() {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-solid btn-block" style={{ marginTop: 'var(--s5)' }}>
+          <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ marginTop: 20 }}>
             Create account
           </button>
         </form>
@@ -228,7 +215,7 @@ function SignUp() {
           Already registered? <Link to="/signin">Sign in</Link>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 

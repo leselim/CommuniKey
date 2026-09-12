@@ -1,13 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import {
-  GroupedBarChart,
-  Legend,
-  ProportionBar,
-  RankedBars,
-  TrendChart,
-} from '../components/Chart';
+import { Gauge, GroupedBarChart, RankedBars, TrendChart } from '../components/Chart';
+import { Card, Delta, SectionBar, Select } from '../components/ui';
 import useCollection from '../hooks/useCollection';
-import { community, gateHistory, incidentHistory } from '../services/demoData';
+import { gateHistory, incidentHistory } from '../services/demoData';
 import {
   RANGES,
   closureByType,
@@ -26,19 +21,19 @@ import {
  * Estate reporting.
  *
  * Nothing on this page is a fixed figure. Every total, rate and series is
- * derived from the incident and gate records by the aggregation layer in
- * utils/analytics.js, so changing the underlying data changes the page.
+ * derived from the incident and gate records by utils/analytics.js, so
+ * changing the underlying data changes the page.
  */
 
 const REPORT_SERIES = [
-  { key: 'resolved', label: 'Closed', tone: 'signal' },
-  { key: 'outstanding', label: 'Still open', tone: 'caution' },
+  { key: 'resolved', label: 'Closed', tone: 'ink' },
+  { key: 'outstanding', label: 'Still open', tone: 'brand' },
 ];
 
 const GATE_SERIES = [
-  { key: 'residents', label: 'Residents', tone: 'signal' },
-  { key: 'visitors', label: 'Visitors', tone: 'caution' },
-  { key: 'deliveries', label: 'Deliveries', tone: 'neutral' },
+  { key: 'residents', label: 'Residents', tone: 'ink' },
+  { key: 'visitors', label: 'Visitors', tone: 'brand' },
+  { key: 'deliveries', label: 'Deliveries', tone: 'grey' },
 ];
 
 function Insights() {
@@ -56,165 +51,82 @@ function Insights() {
   const gateSum = useMemo(() => gateTotals(gateHistory, days), [days]);
 
   const outcomes = [
-    { label: 'Closed', value: stats.resolved, tone: 'signal' },
-    { label: 'Under review', value: stats.review, tone: 'caution' },
-    { label: 'Still open', value: stats.open, tone: 'neutral' },
+    { label: 'Complete', value: stats.resolved, tone: 'ink' },
+    { label: 'Waiting', value: stats.review, tone: 'grey' },
+    { label: 'Still open', value: stats.open, tone: 'brand' },
   ];
 
-  const busiestHour = hourly.reduce(
-    (best, row) => (row.value > best.value ? row : best),
-    { value: -1, fullLabel: '' }
-  );
+  const busiestHour = hourly.reduce((best, row) => (row.value > best.value ? row : best), { value: -1, fullLabel: '' });
 
   return (
-    <div className="stack">
-      <header className="masthead">
-        <div>
-          <p className="eyebrow">{community.community_name}</p>
-          <h1>Reporting</h1>
-          <p className="masthead-meta">
-            What residents reported, how quickly it was closed, and what moved through the gate.
-          </p>
-        </div>
+    <div className="page">
+      <SectionBar
+        icon="alert"
+        title="Incidents"
+        stats={[
+          { label: 'Reports received:', value: stats.total, after: <Delta change={stats.reportedChange} /> },
+          { label: 'Closed:', value: stats.resolutionRate, unit: '%' },
+          {
+            label: 'Typical time to close:',
+            value: stats.medianHoursToClose === null ? '0' : Math.round(stats.medianHoursToClose),
+            unit: 'hours',
+          },
+        ]}
+      >
+        <Select
+          label="Reporting period"
+          value={range}
+          onChange={setRange}
+          options={RANGES.map((r) => ({ value: r.key, label: `Last ${r.label}` }))}
+        />
+      </SectionBar>
 
-        <div className="filter" role="group" aria-label="Reporting period">
-          {RANGES.map((r) => (
-            <button
-              key={r.key}
-              type="button"
-              className="filter-item"
-              aria-pressed={range === r.key}
-              onClick={() => setRange(r.key)}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-      </header>
-
-      <div className="metric-strip">
-        <div className="metric">
-          <span className="metric-label">Reports received</span>
-          <span className="metric-row">
-            <span className="metric-value">{stats.total}</span>
-            {stats.reportedChange !== 0 ? (
-              <span className={`metric-delta ${stats.reportedChange > 0 ? 'down' : 'up'}`}>
-                {stats.reportedChange > 0 ? '+' : ''}
-                {stats.reportedChange}%
-              </span>
-            ) : null}
-          </span>
-          <span className="metric-note">Against the previous {days} days</span>
-        </div>
-
-        <div className="metric">
-          <span className="metric-label">Closed</span>
-          <span className="metric-row">
-            <span className="metric-value">{stats.resolutionRate}</span>
-            <span className="metric-unit">%</span>
-          </span>
-          <span className="metric-note">
-            {stats.resolved} of {stats.total} reports
-          </span>
-        </div>
-
-        <div className="metric">
-          <span className="metric-label">Typical time to close</span>
-          <span className="metric-row">
-            <span className="metric-value">
-              {stats.medianHoursToClose === null ? '0' : Math.round(stats.medianHoursToClose)}
-            </span>
-            <span className="metric-unit">hours</span>
-          </span>
-          <span className="metric-note">Median, not average</span>
-        </div>
-
-        <div className="metric">
-          <span className="metric-label">Gate movements</span>
-          <span className="metric-row">
-            <span className="metric-value">{gateSum.total.toLocaleString()}</span>
-          </span>
-          <span className="metric-note">{gateSum.dailyAverage} on an average day</span>
-        </div>
+      <div className="grid grid-4">
+        <Card
+          className="span-3"
+          title="Reports over time"
+          sub={`${days > 31 ? 'Grouped by week' : 'Grouped by day'}, split by whether the report is closed. Change is against the previous ${days} days.`}
+        >
+          <GroupedBarChart data={series} series={REPORT_SERIES} height={250} yLabel="Reports" />
+        </Card>
+        <Card title="Outcomes" sub={`${stats.total} reports`}>
+          <Gauge parts={outcomes} label="closed" />
+        </Card>
       </div>
 
-      <section className="section">
-        <div className="section-head">
-          <div>
-            <h2>Reports over time</h2>
-            <p className="panel-sub">
-              {days > 31 ? 'Grouped by week' : 'Grouped by day'}, split by whether the report is closed
-            </p>
-          </div>
-          <Legend series={REPORT_SERIES} />
-        </div>
-        <GroupedBarChart data={series} series={REPORT_SERIES} height={250} yLabel="Reports" />
-      </section>
-
-      <div className="grid-2">
-        <section className="section">
-          <div className="section-head">
-            <h2>What gets reported</h2>
-          </div>
+      <div className="grid grid-3">
+        <Card title="What gets reported" sub="Reports by type">
           <RankedBars items={byType} />
-        </section>
-
-        <section className="section">
-          <div className="section-head">
-            <h2>Where it happens</h2>
-          </div>
+        </Card>
+        <Card title="Where it happens" sub="Reports by location">
           <RankedBars items={byPlace} />
-        </section>
+        </Card>
+        <Card title="How long each type takes" sub="Median time from report to close">
+          <RankedBars items={closure} tone="ink" valueFormatter={(v) => humanHours(v)} />
+        </Card>
       </div>
 
-      <div className="grid-2">
-        <section className="section">
-          <div className="section-head">
-            <h2>Outcomes</h2>
-            <span className="mono">{stats.total} reports</span>
-          </div>
-          <ProportionBar parts={outcomes} />
-        </section>
-
-        <section className="section">
-          <div className="section-head">
-            <div>
-              <h2>How long each type takes</h2>
-              <p className="panel-sub">Median hours from report to close</p>
-            </div>
-          </div>
-          {closure.length === 0 ? (
-            <p className="blank">Nothing has been closed in this period yet.</p>
-          ) : (
-            <RankedBars items={closure} valueFormatter={(v) => humanHours(v)} />
-          )}
-        </section>
-      </div>
-
-      <section className="section">
-        <div className="section-head">
-          <div>
-            <h2>When reports come in</h2>
-            <p className="panel-sub">
-              {busiestHour.value > 0
-                ? `Busiest around ${busiestHour.fullLabel}`
-                : 'By hour of the day'}
-            </p>
-          </div>
-        </div>
+      <Card
+        title="When reports come in"
+        sub={busiestHour.value > 0 ? `By hour of the day. Busiest from ${busiestHour.fullLabel}.` : 'By hour of the day'}
+      >
         <TrendChart data={hourly} valueKey="value" height={190} label="Reports" yLabel="Reports" />
-      </section>
+      </Card>
 
-      <section className="section">
-        <div className="section-head">
-          <div>
-            <h2>Gate movements</h2>
-            <p className="panel-sub">Everyone who passed the boom, by category</p>
-          </div>
-          <Legend series={GATE_SERIES} />
-        </div>
-        <GroupedBarChart data={gate} series={GATE_SERIES} height={240} yLabel="Movements" />
-      </section>
+      <SectionBar
+        icon="gate"
+        title="Gate movements"
+        stats={[
+          { label: 'Residents:', value: gateSum.residents.toLocaleString() },
+          { label: 'Visitors:', value: gateSum.visitors.toLocaleString() },
+          { label: 'Deliveries:', value: gateSum.deliveries.toLocaleString() },
+          { label: 'Daily average:', value: gateSum.dailyAverage },
+        ]}
+      />
+
+      <Card title="Everyone who passed the boom" sub={`${gateSum.total.toLocaleString()} movements, by category`}>
+        <GroupedBarChart data={gate} series={GATE_SERIES} height={250} yLabel="Movements" />
+      </Card>
     </div>
   );
 }

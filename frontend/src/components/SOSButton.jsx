@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Modal from './Modal';
+import Icon from './Icon';
 import { save } from '../services/api';
 import { formatClock } from '../utils/format';
 
@@ -8,14 +9,11 @@ const COUNTDOWN_SECONDS = 5;
 /*
  * Emergency SOS.
  *
- * Idle, this is a single anchored button in the corner - nothing more.
- * The explanation and the location choice live in a dialog, so no body
- * copy is ever floating over the page behind it.
- *
- * Once an alert is live it stops being a floating element entirely and
- * renders as a banner in the normal flow of the page, because an active
- * emergency is the most important thing on screen and must not be able to
- * hide anything or be scrolled out from under.
+ * Idle, it is a single strip at the top of the resident's home with one red
+ * button. The explanation and location choice live in a dialog. Once an
+ * alert is live the strip becomes a solid red banner in the normal flow of
+ * the page, because an active emergency is the most important thing on the
+ * screen and must never be hidden or scrolled out from under.
  */
 
 /** Resolves to coordinates, or null if unavailable or declined (US-011). */
@@ -89,39 +87,44 @@ function SOSButton() {
   if (phase === 'live') {
     return (
       <section className="sos-live" aria-live="assertive">
-        <div>
+        <div className="sos-live-text">
           <p className="sos-live-title">
             <span className="sos-live-dot" aria-hidden="true" />
-            SOS alert is live
+            Your SOS alert is live
           </p>
-          <p className="sos-copy" style={{ marginTop: 'var(--s2)' }}>
-            Safety volunteers, patrol officers and estate management have been notified.
-          </p>
-          <p className="sos-note" style={{ marginTop: 'var(--s2)' }}>
-            {alert && alert.time_activated
-              ? `Sent at ${formatClock(alert.time_activated)}`
-              : 'Sending'}
+          <p>Safety volunteers, patrol officers and estate management have been notified.</p>
+          <p>
+            {alert && alert.time_activated ? `Sent at ${formatClock(alert.time_activated)}. ` : 'Sending. '}
             {alert && alert.latitude
-              ? ` · location ${alert.latitude}, ${alert.longitude}`
-              : ' · location not shared'}
+              ? `Location shared: ${alert.latitude}, ${alert.longitude}.`
+              : 'Location not shared.'}
           </p>
         </div>
-        <div className="sos-action">
-          <button type="button" className="btn btn-solid" onClick={resolve}>
-            I am safe now
-          </button>
-        </div>
+        <button type="button" className="btn btn-lg" onClick={resolve}>
+          <Icon name="check" />I am safe now
+        </button>
       </section>
     );
   }
 
   return (
     <>
-      <div className="sos">
-        <button type="button" className="sos-trigger" onClick={() => setPhase('confirm')}>
-          Emergency SOS
+      <section className="sos-strip" aria-label="Emergency">
+        <span className="badge-icon">
+          <Icon name="siren" />
+        </span>
+        <div className="sos-strip-text">
+          <strong>Emergency SOS</strong>
+          <span>
+            {resolvedAt
+              ? `Your last alert was closed at ${formatClock(resolvedAt)}.`
+              : 'Alerts safety volunteers, patrol and estate management at once.'}
+          </span>
+        </div>
+        <button type="button" className="btn btn-danger" onClick={() => setPhase('confirm')}>
+          Send SOS
         </button>
-      </div>
+      </section>
 
       {phase === 'confirm' ? (
         <Modal
@@ -138,25 +141,15 @@ function SOSButton() {
             </>
           }
         >
-          <p className="sos-copy">
-            Nearby members, safety volunteers and estate management are notified straight away.
-            You will have {COUNTDOWN_SECONDS} seconds to stop it before it goes out.
+          <p className="ink-2">
+            Nearby members, safety volunteers and estate management are notified straight away. You will have{' '}
+            {COUNTDOWN_SECONDS} seconds to stop it before it goes out.
           </p>
 
-          <label className="sos-opt">
-            <input
-              type="checkbox"
-              checked={shareLocation}
-              onChange={(event) => setShareLocation(event.target.checked)}
-            />
+          <label className="checkbox" style={{ marginTop: 14 }}>
+            <input type="checkbox" checked={shareLocation} onChange={(event) => setShareLocation(event.target.checked)} />
             Share my location with responders
           </label>
-
-          {resolvedAt ? (
-            <p className="sos-note" style={{ marginTop: 'var(--s4)' }}>
-              Your last alert was closed at {formatClock(resolvedAt)}.
-            </p>
-          ) : null}
         </Modal>
       ) : null}
 
@@ -165,15 +158,17 @@ function SOSButton() {
           title="Sending in a moment"
           onClose={cancel}
           footer={
-            <button type="button" className="btn btn-danger btn-block" onClick={cancel}>
+            <button type="button" className="btn btn-lg btn-block" onClick={cancel}>
               Stop, this was a mistake
             </button>
           }
         >
-          <p className="sos-count" aria-live="assertive">
-            {seconds}
-          </p>
-          <p className="sos-copy" style={{ marginTop: 'var(--s4)', textAlign: 'center' }}>
+          <div className="sos-count-ring">
+            <p className="sos-count" aria-live="assertive">
+              {seconds}
+            </p>
+          </div>
+          <p className="ink-2" style={{ marginTop: 14, textAlign: 'center' }}>
             The alert goes out when this reaches zero.
           </p>
         </Modal>

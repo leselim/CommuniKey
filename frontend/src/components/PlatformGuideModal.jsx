@@ -1,77 +1,33 @@
 import React from 'react';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
+import DataTable from './DataTable';
 import { useAuth } from '../context/AuthContext';
 
 /*
- * Legend for the status system. Colour carries one meaning throughout the
- * application, so this is the single place that meaning is written down.
- * The examples are real StatusBadge components rather than copies, so the
- * legend cannot drift away from what the interface actually renders.
+ * Legend for the status system. There are seven states, each with one word
+ * and one colour, and this is the single place their meanings are written
+ * down. The pills are real StatusBadge components, so the legend cannot
+ * drift away from what the rest of the interface renders.
  */
 
-const LEGEND = [
-  {
-    status: 'Active',
-    meaning: 'Live right now. A valid gate pass or active community notice.',
-  },
-  {
-    status: 'Verified',
-    meaning: 'Authenticated member profile or confirmed household address.',
-  },
-  {
-    status: 'Authorised',
-    meaning: 'Valid gate pass code or vehicle entry cleared at security checkpoint.',
-  },
-  {
-    status: 'Patrolling',
-    meaning: 'Active safety volunteer or security team performing neighbourhood watch patrol.',
-  },
-  {
-    status: 'Reported',
-    meaning: 'Newly logged incident or issue awaiting initial response or assignment.',
-  },
-  {
-    status: 'In progress',
-    meaning: 'Work actively under way. Maintenance dispatched, a repair in motion, or an incident being handled.',
-  },
-  {
-    status: 'Awaiting',
-    meaning: 'Volunteer or safety responder standing by for patrol duty or dispatch.',
-  },
-  {
-    status: 'Clear',
-    meaning: 'Perimeter check or zone inspection completed with no active incidents found.',
-  },
-  {
-    status: 'High priority',
-    meaning: 'Time-sensitive estate broadcast or important community notice.',
-  },
-  {
-    status: 'Under Review',
-    meaning: 'Waiting on a person to make a decision, usually estate management.',
-  },
-  {
-    status: 'Pending verification',
-    meaning: 'Submitted document or household registration undergoing identity verification.',
-  },
-  {
-    status: 'Resolved',
-    meaning: 'Settled and closed. Deliberately grey so finished work stops competing for attention.',
-  },
-  {
-    status: 'Critical',
-    meaning: 'Needs someone now. Emergency broadcasts and SOS alerts.',
-  },
+const STATE_GUIDE = [
+  { state: 'urgent', meaning: 'Needs someone now. Emergency broadcasts, SOS alerts and notices you should read today.' },
+  { state: 'waiting', meaning: 'A decision or a response is outstanding, usually from estate management or a responder.' },
+  { state: 'new', meaning: 'Logged and not yet picked up by anyone.' },
+  { state: 'active', meaning: 'Happening right now. A pass in use, work under way, or a patrol on its round.' },
+  { state: 'cleared', meaning: 'Checked and allowed. A verified household, a pass cleared at the gate, a zone with nothing found.' },
+  { state: 'complete', meaning: 'Finished. Nothing more to do.' },
+  { state: 'closed', meaning: 'Settled, refused, or run out of time.' },
 ];
 
 const ROLE_NOTES = {
   Resident:
-    'You can report incidents, issue visitor passes for your own address, RSVP to community events, and see estate notices.',
+    'You can report incidents, issue visitor passes for your own address, RSVP to community events, and read estate notices.',
   'Safety Volunteer':
-    'You receive SOS alerts, triage incoming incidents, log patrol activity, and view & RSVP to estate events.',
+    'You receive SOS alerts, triage incoming incidents, log patrol activity, and can view and RSVP to estate events.',
   'Estate Administrator':
-    'You verify new members, publish broadcasts, manage events, and see the full activity log.',
+    'You verify new members, publish notices, manage events, and see the full activity record.',
   'Security Guard':
     'You verify passes at the gate, view estate events, and log arrivals against the resident register.',
 };
@@ -85,47 +41,42 @@ function PlatformGuideModal({ isOpen, onClose }) {
   return (
     <Modal
       title="How this platform works"
+      wide
       onClose={onClose}
       footer={
-        <button type="button" className="btn btn-solid" onClick={onClose}>
+        <button type="button" className="btn btn-primary" onClick={onClose}>
           Got it
         </button>
       }
     >
-      <section className="section">
-        <div className="section-head">
-          <h3>You are signed in as</h3>
-          <span className="chip chip-live">{activeRole}</span>
+      <div className="alert alert-info" style={{ marginBottom: 18 }}>
+        <div>
+          <p className="strong" style={{ color: 'var(--ink)' }}>
+            You are signed in as {activeRole}
+          </p>
+          <p style={{ marginTop: 2 }}>{ROLE_NOTES[activeRole] || ROLE_NOTES.Resident}</p>
         </div>
-        <p className="sm dim">{ROLE_NOTES[activeRole] || ROLE_NOTES.Resident}</p>
-      </section>
+      </div>
 
-      <section className="section" style={{ marginTop: 'var(--s5)' }}>
-        <div className="section-head">
-          <h3>What the labels mean</h3>
-        </div>
-
+      <h3 style={{ fontSize: 'var(--fs-13)', marginBottom: 8 }}>What the labels mean</h3>
+      <div className="card">
         <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Label</th>
-                <th scope="col">Meaning</th>
-              </tr>
-            </thead>
-            <tbody>
-              {LEGEND.map((row) => (
-                <tr key={row.status}>
-                  <td>
-                    <StatusBadge status={row.status} />
-                  </td>
-                  <td>{row.meaning}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            caption="What the status labels mean"
+            columns={[
+              {
+                key: 'label',
+                header: 'Label',
+                width: '120px',
+                cell: (row) => <StatusBadge status={row.state} />,
+              },
+              { key: 'meaning', header: 'What it means', cell: (row) => row.meaning },
+            ]}
+            rows={STATE_GUIDE}
+            getKey={(row) => row.state}
+          />
         </div>
-      </section>
+      </div>
     </Modal>
   );
 }

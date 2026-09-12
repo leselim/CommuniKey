@@ -5,13 +5,13 @@ import useCollection from '../hooks/useCollection';
 import { notifications as demoNotifications } from '../services/demoData';
 import { save } from '../services/api';
 import { formatRelative } from '../utils/format';
+import Icon from './Icon';
 
 /*
  * Notification tray.
  *
- * Unread status is indicated by a signal dot in the left gutter and full
- * contrast typography. Clicking any notification marks it read, closes the tray,
- * and navigates directly to the relevant platform view.
+ * Unread items carry a red dot and full weight type. Opening an item marks it
+ * read, closes the tray and takes you to the screen it is about.
  */
 
 function Notifications() {
@@ -59,63 +59,49 @@ function Notifications() {
     const title = (item.title || '').toLowerCase();
 
     if (type === 'incident' || title.includes('incident') || title.includes('suspicious')) {
-      if (userRole === 'Safety Volunteer') {
-        navigate('/volunteer/triage');
-      } else if (userRole === 'Estate Administrator') {
-        navigate('/admin/incidents');
-      } else {
-        navigate('/incidents');
-      }
+      if (userRole === 'Safety Volunteer') navigate('/volunteer/triage');
+      else if (userRole === 'Estate Administrator') navigate('/admin/incidents');
+      else navigate('/incidents');
     } else if (type === 'announcement' || title.includes('announcement') || title.includes('meeting') || title.includes('notice')) {
-      if (userRole === 'Estate Administrator') {
-        navigate('/admin/announcements');
-      } else {
-        navigate('/announcements');
-      }
+      if (userRole === 'Estate Administrator') navigate('/admin/announcements');
+      else navigate('/announcements');
     } else if (type === 'event' || title.includes('event') || title.includes('reminder') || title.includes('clean-up')) {
       navigate('/events');
     } else if (type === 'member' || title.includes('member') || title.includes('verification')) {
-      if (userRole === 'Estate Administrator') {
-        navigate('/admin/moderation');
-      } else {
-        navigate('/profile');
-      }
+      if (userRole === 'Estate Administrator') navigate('/admin/moderation');
+      else navigate('/profile');
     } else {
       navigate('/');
     }
   };
 
   return (
-    <div className="notify" ref={wrapper}>
+    <div className="account" ref={wrapper}>
       <button
         type="button"
-        className="notify-btn"
+        className="icon-btn"
         aria-expanded={open}
         aria-haspopup="true"
-        aria-label={
-          unread.length > 0
-            ? `Notifications, ${unread.length} unread`
-            : 'Notifications, none unread'
-        }
+        aria-label={unread.length > 0 ? `Notifications, ${unread.length} unread` : 'Notifications, none unread'}
         onClick={() => setOpen((value) => !value)}
       >
-        Notifications
-        {unread.length > 0 ? <span className="notify-count">{unread.length}</span> : null}
+        <Icon name="bell" />
+        {unread.length > 0 ? <span className="count">{unread.length}</span> : null}
       </button>
 
       {open ? (
-        <div className="tray">
+        <div className="popover tray">
           <div className="tray-head">
             <h2>Notifications</h2>
             {unread.length > 0 ? (
-              <button type="button" className="link" onClick={markAllRead}>
-                Mark all read
+              <button type="button" className="text-btn" onClick={markAllRead}>
+                Mark all as read
               </button>
             ) : null}
           </div>
 
           {items.length === 0 ? (
-            <p className="tray-empty">Nothing new.</p>
+            <p className="tray-empty">You are all caught up.</p>
           ) : (
             items.map((item) => (
               <button
@@ -124,13 +110,10 @@ function Notifications() {
                 className={`tray-item${item.read_status ? '' : ' new'}`}
                 onClick={() => handleNotificationClick(item)}
               >
-                <span
-                  className={`tray-flag${item.read_status ? ' read' : ' unread'}`}
-                  aria-hidden="true"
-                />
+                <span className="tray-flag" aria-hidden="true" />
                 <span className="tray-title">{item.title}</span>
-                <span className="tray-text">{item.message}</span>
                 <span className="tray-time">{formatRelative(item.date_sent)}</span>
+                <span className="tray-text">{item.message}</span>
               </button>
             ))
           )}
